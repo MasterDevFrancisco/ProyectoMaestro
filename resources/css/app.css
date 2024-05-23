@@ -1,0 +1,11 @@
+.close-button-red {
+    color: red;
+    background-color: transparent; /* Para mantener el fondo transparente */
+    border: none; /* Elimina cualquier borde */
+    font-size: 1.5rem; /* Ajusta el tamaño del icono */
+    opacity: 1; /* Asegúrate de que no sea translúcido */
+}
+
+.close-button-red:hover {
+    color: darkred; /* Cambia el color al pasar el mouse */
+}
