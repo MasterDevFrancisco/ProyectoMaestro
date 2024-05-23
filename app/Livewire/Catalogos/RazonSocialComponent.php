@@ -53,7 +53,11 @@ class RazonSocialComponent extends Component
         
          // Update total rows count
          $this->totalRows = RazonSocial::count();
+         
+         //Cierra modal y muestra mensaje de alerta
         $this->dispatch('close-modal','modalRazon');
+        $this->dispatch('msg','Registro creado correctamente');
+
 
     }
 
