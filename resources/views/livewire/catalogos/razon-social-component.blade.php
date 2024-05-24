@@ -2,9 +2,15 @@
     {{-- <x-card cardTitle="Catalogo de Razon Social ({{ $totalRows }})"> --}}
     <x-card>
         <x-slot:cardTools>
-            <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#modalRazon">
-                <i class="fas fa-plus-circle"></i>
-            </a>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex justify-content-center flex-grow-1">
+                    <input type="text" wire:model.live='search' class="form-control" placeholder="Buscar Razon Social - Nombre Corto" style="width: 250px;">
+                </div>
+                
+                <a href="#" class="btn btn-success ml-3" data-toggle="modal" data-target="#modalRazon">
+                    <i class="fas fa-plus-circle"></i>
+                </a>
+            </div>
         </x-slot>
 
         <x-table>

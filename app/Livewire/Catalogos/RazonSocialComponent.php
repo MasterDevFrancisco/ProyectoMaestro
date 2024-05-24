@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire\Catalogos;
 
 use App\Models\RazonSocial;
@@ -13,6 +14,8 @@ class RazonSocialComponent extends Component
     use WithPagination;
     // Propiedad para contar el número total de registros
     public $totalRows = 0;
+    public $paginationTheme = 'bootstrap';
+    public $search = '';
 
     // Propiedades del modelo que se vinculan a los campos del formulario
     public $nombre_corto = "";
@@ -21,8 +24,16 @@ class RazonSocialComponent extends Component
     // Método que renderiza la vista del componente
     public function render()
     {
+        if($this->search!='')
+        {
+            $this->resetPage();
+        }
         // Obtiene todas las razones sociales ordenadas por id en orden ascendente
-        $razones = RazonSocial::orderBy('id', 'asc')->paginate(5);
+        $razones = RazonSocial::where('nombre_corto', 'like', '%' . $this->search . '%')
+            ->orWhere('razon_social', 'like', '%' . $this->search . '%')
+            ->orderBy('id', 'asc')
+            ->paginate(5);
+
 
         // Retorna la vista del componente con los datos de razones sociales
         return view('livewire.catalogos.razon-social-component', [
