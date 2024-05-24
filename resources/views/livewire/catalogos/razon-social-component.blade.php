@@ -4,10 +4,10 @@
         <x-slot:cardTools>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="d-flex justify-content-center flex-grow-1">
-                    <input type="text" wire:model.live='search' class="form-control" placeholder="Buscar Razon Social - Nombre Corto" style="width: 250px;">
+                    <input type="text" wire:model.live='search' class="form-control" placeholder="Razon Social / Nombre Corto" style="width: 250px;">
                 </div>
                 
-                <a href="#" class="btn btn-success ml-3" data-toggle="modal" data-target="#modalRazon">
+                <a href="#" class="btn btn-success ml-3" wire:click='create'>
                     <i class="fas fa-plus-circle"></i>
                 </a>
             </div>
@@ -27,7 +27,7 @@
                     <td>{{ $razon->id }}</td>
                     <td>{{ $razon->razon_social }}</td>
                     <td>{{ $razon->nombre_corto }}</td>
-                    <td><a href="#" title="Editar" class="btn btn-primary btn-xs"><i class="fas fa-pen"></i></a>
+                    <td><a href="#" wire:click='editar({{$razon->id}})' title="Editar" class="btn btn-primary btn-xs"><i class="fas fa-pen"></i></a>
                     </td>
                     <td><a href="#" title="Borrar" class="btn btn-danger btn-xs"><i class="fas fa-trash"></i></a>
                     </td>
@@ -50,7 +50,7 @@
     </x-card>
 
     <x-modal modalId='modalRazon' modalTitle='Razon Social' modalSize='modal-md'>
-        <form wire:submit.prevent="store">
+        <form wire:submit.prevent="{{$ID=0 ? "store" : "update($Id)"}}">
             <div class="row">
                 <div class="col">
                     <input wire:model="nombre_corto" type="text" class="form-control" placeholder="Nombre Corto">
@@ -72,7 +72,7 @@
             </div>
             <br>
             <center>
-                <button class="btn btn-primary">Guardar</button>
+                <button class="btn btn-primary">{{$Id==0 ? 'Guardar' : 'Editar'}}</button>
             </center>
         </form>
     </x-modal>

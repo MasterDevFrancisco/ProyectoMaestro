@@ -20,6 +20,7 @@ class RazonSocialComponent extends Component
     // Propiedades del modelo que se vinculan a los campos del formulario
     public $nombre_corto = "";
     public $razon_social = "";
+    public $Id;
 
     // Método que renderiza la vista del componente
     public function render()
@@ -46,6 +47,14 @@ class RazonSocialComponent extends Component
     {
         // Cuenta el número total de registros en la tabla de razones sociales
         $this->totalRows = RazonSocial::count();
+    }
+    
+    public function create()
+    {
+        $this->Id=0;
+        $this->reset(['razon_social','nombre_corto']);
+        $this->resetErrorBag();
+        $this->dispatch('open-modal','modalRazon');
     }
 
     // Método para almacenar una nueva razón social
@@ -76,8 +85,7 @@ class RazonSocialComponent extends Component
         $razon->razon_social = $this->razon_social;
         $razon->save();
 
-        // Restablece los campos del formulario después de guardar
-        $this->reset(['nombre_corto', 'razon_social']);
+        
 
         // Actualiza el conteo total de registros
         $this->totalRows = RazonSocial::count();
@@ -85,5 +93,49 @@ class RazonSocialComponent extends Component
         // Cierra el modal y muestra un mensaje de alerta
         $this->dispatch('close-modal', 'modalRazon');
         $this->dispatch('msg', 'Registro creado correctamente');
+        // Restablece los campos del formulario después de guardar
+
+        $this->reset(['nombre_corto', 'razon_social']);
+    }
+
+    public function editar(RazonSocial $razon){
+        $this->Id=$razon->id;
+        $this-> razon_social=$razon->razon_social;
+        $this-> nombre_corto= $razon->nombre_corto;
+
+        $this->dispatch('open-modal', 'modalRazon');
+    }
+
+    public function update(RazonSocial $razon)
+    {
+        $rules = [
+            'nombre_corto' => 'required|max:255|unique:razon_socials,id,'.$this->Id,
+            'razon_social' => 'required|max:255|unique:razon_socials,id,'.$this->Id
+        ];
+
+        // Mensajes personalizados de error para la validación
+        $messages = [
+            'nombre_corto.required' => 'El nombre es requerido',
+            'nombre_corto.max' => 'El nombre no puede exceder los 255 caracteres',
+            'nombre_corto.unique' => 'Esta razón social ya existe',
+            'razon_social.required' => 'La razón social es requerida',
+            'razon_social.max' => 'La razón social no puede exceder los 255 caracteres',
+            'razon_social.unique' => 'Esta razón social ya existe',
+        ];
+
+        // Ejecuta la validación
+        $this->validate($rules, $messages);
+
+        $razon->razon_social=$this->razon_social;
+        $razon->nombre_corto=$this->nombre_corto;
+
+        $razon->update();
+
+        // Cierra el modal y muestra un mensaje de alerta
+        $this->dispatch('close-modal', 'modalRazon');
+        $this->dispatch('msg', 'Registro editado correctamente');
+        // Restablece los campos del formulario después de guardar
+
+        $this->reset(['nombre_corto', 'razon_social']);
     }
 }
