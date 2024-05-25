@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('campos');
             $table->foreignId('servicios_id')->constrained();
+            $table->integer('eliminado');
             $table->timestamps();
         });
     }

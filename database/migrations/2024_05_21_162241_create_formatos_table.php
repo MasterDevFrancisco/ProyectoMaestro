@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->string('ruta');
+            $table->integer('eliminado');
             $table->foreignId('elementos_id')->constrained();
             $table->timestamps();
         });

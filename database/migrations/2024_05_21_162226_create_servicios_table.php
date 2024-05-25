@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');//->nullable() Con eso poner campos opcionales
             $table->foreignId('razon_social_id')->constrained();
+            $table->integer('eliminado');
             $table->timestamps();
         });
     }

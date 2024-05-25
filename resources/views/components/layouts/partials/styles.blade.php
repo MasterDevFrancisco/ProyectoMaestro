@@ -10,3 +10,16 @@
 <link rel="stylesheet" href="{{asset('plugins/sweetalert2/sweetalert2.css')}}">
 
 
+<style>
+    /* Ocultar la barra de desplazamiento pero permitir el desplazamiento */
+    /* Ocultar barra de desplazamiento pero permitir scroll */
+    body {
+        overflow-y: scroll;
+    }
+
+    ::-webkit-scrollbar {
+        width: 0;
+        background: transparent;
+        /* opcional, hace que la barra sea invisible */
+    }
+</style>
