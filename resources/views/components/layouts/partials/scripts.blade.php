@@ -6,3 +6,6 @@
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.js"></script>
 
+<!-- SweetAlert2 -->
+<script src="{{asset('plugins/sweetalert2/sweetalert2.js') }}"></script>
+

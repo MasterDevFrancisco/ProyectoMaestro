@@ -1,5 +1,4 @@
 <div>
-    {{-- <x-card cardTitle="Catalogo de Razon Social ({{ $totalRows }})"> --}}
     <x-card>
         <x-slot:cardTools>
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -27,44 +26,44 @@
                     <td>{{ $razon->id }}</td>
                     <td>{{ $razon->razon_social }}</td>
                     <td>{{ $razon->nombre_corto }}</td>
-                    <td><a href="#" wire:click='editar({{$razon->id}})' title="Editar" class="btn btn-primary btn-xs"><i class="fas fa-pen"></i></a>
+                    <td>
+                        <a href="#" wire:click='editar({{ $razon->id }})' title="Editar" class="btn btn-primary btn-xs">
+                            <i class="fas fa-pen"></i>
+                        </a>
                     </td>
-                    <td><a href="#" title="Borrar" class="btn btn-danger btn-xs"><i class="fas fa-trash"></i></a>
+                    <td>
+                        <a href="#" wire:click="$dispatch('delete', {id: {{ $razon->id }}, eventName: 'destroyRazon'})" title="Marcar como eliminado" class="btn btn-danger btn-xs">
+                            <i class="fas fa-trash"></i>
+                        </a>
                     </td>
                 </tr>
-
             @empty
-
                 <tr class="text-center">
                     <td colspan="5">Sin Registros</td>
                 </tr>
             @endforelse
-
         </x-table>
         <x-slot:cardFooter>
             <div class="d-flex justify-content-center">
                 {{ $razones->links('vendor.pagination.bootstrap-5') }}
             </div>
         </x-slot>
-
     </x-card>
 
     <x-modal modalId='modalRazon' modalTitle='Razon Social' modalSize='modal-md'>
-        <form wire:submit.prevent="{{$ID=0 ? "store" : "update($Id)"}}">
+        <form wire:submit.prevent="{{ $Id == 0 ? 'store' : 'update' }}">
             <div class="row">
                 <div class="col">
                     <input wire:model="nombre_corto" type="text" class="form-control" placeholder="Nombre Corto">
                     @error('nombre_corto')
-                        <div class="alert alert-danger w-100 mt-1 p-1 text-center"
-                            style="font-size: 0.875rem; line-height: 1.25;">
+                        <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
                         </div>
                     @enderror
                     <br>
                     <input wire:model="razon_social" type="text" class="form-control" placeholder="Razon Social">
                     @error('razon_social')
-                        <div class="alert alert-danger w-100 mt-1 p-1 text-center"
-                            style="font-size: 0.875rem; line-height: 1.25;">
+                        <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
                         </div>
                     @enderror
@@ -72,7 +71,7 @@
             </div>
             <br>
             <center>
-                <button class="btn btn-primary">{{$Id==0 ? 'Guardar' : 'Editar'}}</button>
+                <button class="btn btn-primary">{{ $Id == 0 ? 'Guardar' : 'Actualizar' }}</button>
             </center>
         </form>
     </x-modal>

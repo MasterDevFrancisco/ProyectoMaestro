@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('razon_social');
             $table->string('nombre_corto');
+            $table->integer('eliminado');
             $table->timestamps();
         });
     }
