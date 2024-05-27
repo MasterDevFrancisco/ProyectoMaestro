@@ -42,7 +42,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('razon-social') }}" class="nav-link">
+                        <a href="{{ route('elementos') }}" class="nav-link">
                             <i class="nav-icon fas fa-cube"></i>
                             <p>Elementos</p>
                         </a>

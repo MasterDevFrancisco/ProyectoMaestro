@@ -22,4 +22,20 @@
         background: transparent;
         /* opcional, hace que la barra sea invisible */
     }
+    .delete-button {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .draggable-item {
+        position: relative;
+        padding-right: 30px; /* Espacio para el botón */
+    }
+
+    .editable-input {
+        display: inline-block;
+        width: calc(100% - 40px);
+    }
 </style>
