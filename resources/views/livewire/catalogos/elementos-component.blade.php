@@ -64,6 +64,18 @@
                 {{ $message }}
             </div>
         @enderror
+        <label class="w-100 text-center mt-3">Servicio</label>
+            <select wire:model="servicios_id" class="form-control">
+                <option value="">Seleccione un servicio</option>
+                @foreach($servicios as $servicio)
+                    <option value="{{ $servicio->id }}">{{ $servicio->nombre }}</option>
+                @endforeach
+            </select>
+            @error('servicios_id')
+                <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
+                    {{ $message }}
+                </div>
+            @enderror
         <br>
         <div class="container">
             <div class="row">
@@ -80,7 +92,7 @@
                         @endforeach
                     </div>
                 </div>
-
+        
                 <!-- Lado derecho (destino de los elementos) -->
                 <div class="col-6">
                     <div class="bg-light p-3 position-relative" id="dropzone" ondrop="drop(event)"
@@ -89,7 +101,9 @@
                     </div>
                 </div>
             </div>
+            
             <center><button class="btn btn-primary mt-3" onclick="sendData()">Enviar</button></center>
         </div>
+        
     </x-modal>
 </div>
