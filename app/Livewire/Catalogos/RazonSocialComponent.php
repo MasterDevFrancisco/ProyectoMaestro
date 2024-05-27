@@ -8,7 +8,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 // Define el título del componente usando un atributo
-#[Title('Razon SocialTitulo')]
+#[Title('Razon Social')]
 class RazonSocialComponent extends Component
 {
     use WithPagination;
