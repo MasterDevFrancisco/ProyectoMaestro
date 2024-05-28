@@ -9,6 +9,8 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+use function Laravel\Prompts\alert;
+
 #[Title('Elementos')]
 class ElementosComponent extends Component
 {
@@ -22,8 +24,9 @@ class ElementosComponent extends Component
     public $campos = "";
     public $servicios_id = "";
     public $Id = 0;
+    public $draggedElements = ""; 
 
-    protected $listeners = ['storeElemento'];
+    protected $listeners = ['storeElemento', 'prepareAndStoreData'];
 
     public function render()
     {
@@ -98,7 +101,32 @@ class ElementosComponent extends Component
         // Restablece los campos del formulario después de guardar
         $this->reset(['nombre', 'campos', 'servicios_id']);
     }
-    
+
+    public function storeDraggedElements()
+    {
+        
+        // Recibe los datos JSON del front-end
+        $draggedData = $this->draggedElements;
+        echo $draggedData;
+
+        // Crear una nueva instancia de Elementos y guardar los datos
+        $elemento = new Elementos();
+        $elemento->nombre = $this->nombre;
+        $elemento->campos = $draggedData; // Aquí se guardan los datos arrastrados en formato JSON
+        $elemento->servicios_id = $this->servicios_id;
+        $elemento->eliminado = 0; // Asegúrate de que el nuevo registro no esté marcado como eliminado
+        $elemento->save();
+
+        // Actualiza el conteo total de registros
+        $this->totalRows = Elementos::where('eliminado', 0)->count();
+
+        // Cierra el modal y muestra un mensaje de alerta
+        $this->dispatch('close-modal', 'modalElemento');
+        $this->dispatch('msg', 'Registro creado correctamente');
+
+        // Restablece los campos del formulario después de guardar
+        $this->reset(['nombre', 'campos', 'servicios_id']);
+    }
 
     public function editar($id)
     {

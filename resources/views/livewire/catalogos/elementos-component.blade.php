@@ -79,31 +79,32 @@
         <br>
         <div class="container">
             <div class="row">
-                <!-- Lado izquierdo (fuente de los elementos) -->
-                <div class="col-6">
-                    <div class="bg-light p-3">
-                        <h4>Elementos (Arrastrar desde aquí)</h4>
-                        @foreach (['nombre', 'fecha', 'telefono'] as $item)
-                            <div class="p-2 mb-1 bg-primary text-white" draggable="true"
-                                ondragstart="event.dataTransfer.setData('text', event.target.id);"
-                                id="{{ $item }}">
-                                {{ ucfirst($item) }}
-                            </div>
-                        @endforeach
+                <form wire:submit.prevent="storeDraggedElements">
+                    <!-- Lado izquierdo (fuente de los elementos) -->
+                    <div class="col-6">
+                        <div class="bg-light p-3">
+                            <h4>Elementos (Arrastrar desde aquí)</h4>
+                            @foreach (['nombre', 'fecha', 'telefono'] as $item)
+                                <div class="p-2 mb-1 bg-primary text-white" draggable="true"
+                                    ondragstart="event.dataTransfer.setData('text', event.target.id);"
+                                    id="{{ $item }}">
+                                    {{ ucfirst($item) }}
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
-        
-                <!-- Lado derecho (destino de los elementos) -->
-                <div class="col-6">
-                    <div class="bg-light p-3 position-relative" id="dropzone" ondrop="drop(event)"
-                        ondragover="allowDrop(event)">
-                        <h4>Elementos seleccionados (Soltar aquí)</h4>
+
+                    <!-- Lado derecho (destino de los elementos) -->
+                    <div class="col-6">
+                        <div class="bg-light p-3 position-relative" id="dropzone" ondrop="drop(event)"
+                            ondragover="allowDrop(event)">
+                            <h4>Elementos seleccionados (Soltar aquí)</h4>
+                        </div>
                     </div>
-                </div>
+
+                    <center><button type="submit" class="btn btn-primary mt-3">Enviar</button></center>
+                </form>
             </div>
-            
-            <center><button class="btn btn-primary mt-3" onclick="sendData()">Enviar</button></center>
         </div>
-        
     </x-modal>
 </div>
