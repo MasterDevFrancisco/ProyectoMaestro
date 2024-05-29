@@ -4,12 +4,10 @@ namespace App\Livewire\Catalogos;
 
 use App\Models\Elementos;
 use App\Models\Servicios;
-use Livewire\Attributes\On;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-
-use function Laravel\Prompts\alert;
+use Livewire\Attributes\Title;
+use Livewire\Attributes\On;
 
 #[Title('Elementos')]
 class ElementosComponent extends Component
@@ -24,9 +22,8 @@ class ElementosComponent extends Component
     public $campos = "";
     public $servicios_id = "";
     public $Id = 0;
-    public $draggedElements = ""; 
 
-    protected $listeners = ['storeElemento', 'prepareAndStoreData'];
+    protected $listeners = ['storeElemento'];
 
     public function render()
     {
@@ -61,7 +58,8 @@ class ElementosComponent extends Component
         $this->resetErrorBag();
         $this->dispatch('open-modal', 'modalElemento');
     }
-    public function storeElemento()
+
+    public function storeElemento($nombre, $servicios_id, $campos)
     {
         // Reglas de validación para los campos del formulario
         $rules = [
@@ -69,7 +67,7 @@ class ElementosComponent extends Component
             'campos' => 'required|json', // Verifica que 'campos' sea un JSON válido
             'servicios_id' => 'required|exists:servicios,id'
         ];
-    
+
         $messages = [
             'nombre.required' => 'El nombre es requerido',
             'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
@@ -79,41 +77,19 @@ class ElementosComponent extends Component
             'servicios_id.required' => 'El servicio es requerido',
             'servicios_id.exists' => 'El servicio seleccionado no es válido'
         ];
-    
+
         // Ejecuta la validación
-        $this->validate($rules, $messages);
-    
-        // Crear una nueva instancia de Elementos y guardar los datos
-        $elemento = new Elementos();
-        $elemento->nombre = $this->nombre;
-        $elemento->campos = $this->campos;
-        $elemento->servicios_id = $this->servicios_id;
-        $elemento->eliminado = 0; // Asegúrate de que el nuevo registro no esté marcado como eliminado
-        $elemento->save();
-    
-        // Actualiza el conteo total de registros
-        $this->totalRows = Elementos::where('eliminado', 0)->count();
-    
-        // Cierra el modal y muestra un mensaje de alerta
-        $this->dispatch('close-modal', 'modalElemento');
-        $this->dispatch('msg', 'Registro creado correctamente');
-    
-        // Restablece los campos del formulario después de guardar
-        $this->reset(['nombre', 'campos', 'servicios_id']);
-    }
-
-    public function storeDraggedElements()
-    {
-        
-        // Recibe los datos JSON del front-end
-        $draggedData = $this->draggedElements;
-        echo $draggedData;
+        $this->validate([
+            'nombre' => $nombre,
+            'campos' => $campos,
+            'servicios_id' => $servicios_id
+        ], $rules, $messages);
 
         // Crear una nueva instancia de Elementos y guardar los datos
         $elemento = new Elementos();
-        $elemento->nombre = $this->nombre;
-        $elemento->campos = $draggedData; // Aquí se guardan los datos arrastrados en formato JSON
-        $elemento->servicios_id = $this->servicios_id;
+        $elemento->nombre = $nombre;
+        $elemento->campos = $campos;
+        $elemento->servicios_id = $servicios_id;
         $elemento->eliminado = 0; // Asegúrate de que el nuevo registro no esté marcado como eliminado
         $elemento->save();
 
@@ -143,7 +119,7 @@ class ElementosComponent extends Component
     {
         $this->validate([
             'nombre' => 'required|max:255|unique:elementos,nombre,' . $this->Id,
-            'campos' => 'required|max:255|unique:elementos,campos,' . $this->Id,
+            'campos' => 'required|json|unique:elementos,campos,' . $this->Id,
             'servicios_id' => 'required|exists:servicios,id'
         ]);
 
@@ -170,3 +146,4 @@ class ElementosComponent extends Component
         $this->dispatch('msg', 'Registro eliminado correctamente');
     }
 }
+?>

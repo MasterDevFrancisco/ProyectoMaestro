@@ -131,15 +131,9 @@
         }
 
         // Convert the data object to a JSON string
-        // Variable to store the JSON string
         const jsonString = JSON.stringify(data);
 
-        // Show the JSON string in an alert
-        Swal.fire({
-            title: 'Datos Enviados',
-            html: `<p><strong>Nombre:</strong> ${nombre}</p><p><strong>Servicio:</strong> ${servicioId}</p><pre>${jsonString}</pre>`,
-            icon: 'success',
-            customClass: 'animated tada'
-        });
+        // Send the data to Livewire
+        Livewire.dispatch('storeElemento', { nombre, servicios_id: servicioId, campos: jsonString });
     }
 </script>
