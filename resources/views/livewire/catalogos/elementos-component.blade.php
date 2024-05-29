@@ -57,54 +57,23 @@
     </x-card>
 
     <x-modal modalId='modalElemento' modalTitle='Elemento' modalSize='modal-md'>
-        <label class="w-100 text-center">Nombre</label>
-        <input wire:model="nombre" type="text" class="form-control">
-        @error('nombre')
-            <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
-                {{ $message }}
-            </div>
-        @enderror
-        <label class="w-100 text-center mt-3">Servicio</label>
-            <select wire:model="servicios_id" class="form-control">
-                <option value="">Seleccione un servicio</option>
-                @foreach($servicios as $servicio)
-                    <option value="{{ $servicio->id }}">{{ $servicio->nombre }}</option>
-                @endforeach
-            </select>
-            @error('servicios_id')
-                <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
-                    {{ $message }}
+        <div class="d-flex">
+            <div class="left-panel" style="width: 30%; padding: 10px; border-right: 1px solid #ccc;">
+                <div class="draggable-field" draggable="true" data-type="numerico">
+                    <button class="btn btn-info btn-block">Numérico</button>
                 </div>
-            @enderror
-        <br>
-        <div class="container">
-            <div class="row">
-                <form wire:submit.prevent="storeDraggedElements">
-                    <!-- Lado izquierdo (fuente de los elementos) -->
-                    <div class="col-6">
-                        <div class="bg-light p-3">
-                            <h4>Elementos (Arrastrar desde aquí)</h4>
-                            @foreach (['nombre', 'fecha', 'telefono'] as $item)
-                                <div class="p-2 mb-1 bg-primary text-white" draggable="true"
-                                    ondragstart="event.dataTransfer.setData('text', event.target.id);"
-                                    id="{{ $item }}">
-                                    {{ ucfirst($item) }}
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- Lado derecho (destino de los elementos) -->
-                    <div class="col-6">
-                        <div class="bg-light p-3 position-relative" id="dropzone" ondrop="drop(event)"
-                            ondragover="allowDrop(event)">
-                            <h4>Elementos seleccionados (Soltar aquí)</h4>
-                        </div>
-                    </div>
-
-                    <center><button type="submit" class="btn btn-primary mt-3">Enviar</button></center>
-                </form>
+                <div class="draggable-field" draggable="true" data-type="texto">
+                    <button class="btn btn-info btn-block">Texto</button>
+                </div>
+                <div class="draggable-field" draggable="true" data-type="fecha">
+                    <button class="btn btn-info btn-block">Fecha</button>
+                </div>
+            </div>
+            <div class="right-panel" style="width: 70%; padding: 10px;" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <!-- Campos arrastrados aparecerán aquí -->
             </div>
         </div>
     </x-modal>
 </div>
+
+
