@@ -57,24 +57,30 @@
     </x-card>
 
     <x-modal modalId='modalElemento' modalTitle='Elemento' modalSize='modal-md'>
-        <div class="d-flex">
-            <div class="left-panel" style="width: 30%; padding: 10px; border-right: 1px solid #ccc;">
-                <div class="draggable-field" draggable="true" data-type="numerico" ondblclick="addField('numerico')">
-                    <button class="btn btn-info btn-block">Numérico</button>
+        <div>
+            <div class="form-group">
+                <center><label for="nombre">Nombre</label></center>
+                <input type="text" id="nombre" class="form-control mb-3">
+            </div>
+            <div class="d-flex">
+                <div class="left-panel" style="width: 30%; padding: 10px; border-right: 1px solid #ccc;">
+                    <div class="draggable-field" draggable="true" data-type="numerico" ondblclick="addField('numerico')">
+                        <button class="btn btn-info btn-block">Numérico</button>
+                    </div>
+                    <div class="draggable-field" draggable="true" data-type="texto" ondblclick="addField('texto')">
+                        <button class="btn btn-info btn-block">Texto</button>
+                    </div>
+                    <div class="draggable-field" draggable="true" data-type="fecha" ondblclick="addField('fecha')">
+                        <button class="btn btn-info btn-block">Fecha</button>
+                    </div>
                 </div>
-                <div class="draggable-field" draggable="true" data-type="texto" ondblclick="addField('texto')">
-                    <button class="btn btn-info btn-block">Texto</button>
-                </div>
-                <div class="draggable-field" draggable="true" data-type="fecha" ondblclick="addField('fecha')">
-                    <button class="btn btn-info btn-block">Fecha</button>
+                <div class="right-panel" style="width: 70%; padding: 10px;" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <!-- Campos arrastrados aparecerán aquí -->
                 </div>
             </div>
-            <div class="right-panel" style="width: 70%; padding: 10px;" ondrop="drop(event)" ondragover="allowDrop(event)">
-                <!-- Campos arrastrados aparecerán aquí -->
+            <div class="d-flex justify-content-end mt-3">
+                <button class="btn btn-success" onclick="submitFields()">Enviar</button>
             </div>
-        </div>
-        <div class="d-flex justify-content-end mt-3">
-            <button class="btn btn-success" onclick="submitFields()">Enviar</button>
         </div>
     </x-modal>
 </div>

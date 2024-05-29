@@ -10,6 +10,7 @@
 <script src="{{ asset('plugins/sweetalert2/sweetalert2.js') }}"></script>
 
 <!-- Modal Drag and Drop -->
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const draggables = document.querySelectorAll('.draggable-field');
@@ -65,6 +66,17 @@
     }
 
     function submitFields() {
+        const nombre = document.getElementById('nombre').value.trim();
+        if (nombre === '') {
+            Swal.fire({
+                title: 'Error',
+                text: 'El campo de nombre no puede estar vacío.',
+                icon: 'error',
+                customClass: 'animated tada'
+            });
+            return;
+        }
+
         const rightPanel = document.querySelector('.right-panel');
         const fields = rightPanel.querySelectorAll('.form-control');
         let data = {
@@ -77,11 +89,21 @@
         for (const field of fields) {
             const fieldName = field.value.trim();
             if (fieldName === '') {
-                alert('Todos los campos deben tener un nombre.');
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Todos los campos deben tener un nombre.',
+                    icon: 'error',
+                    customClass: 'animated tada'
+                });
                 return;
             }
             if (fieldNames.has(fieldName)) {
-                alert('No pueden haber campos con el mismo nombre.');
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No pueden haber campos con el mismo nombre.',
+                    icon: 'error',
+                    customClass: 'animated tada'
+                });
                 return;
             }
             fieldNames.add(fieldName);
@@ -99,8 +121,13 @@
         // Convert the data object to a JSON string
         // Variable to store the JSON string
         const jsonString = JSON.stringify(data);
-        
+
         // Show the JSON string in an alert
-        alert(jsonString);
+        Swal.fire({
+            title: 'Datos Enviados',
+            html: `<p><strong>Nombre:</strong> ${nombre}</p><pre>${jsonString}</pre>`,
+            icon: 'success',
+            customClass: 'animated tada'
+        });
     }
 </script>
