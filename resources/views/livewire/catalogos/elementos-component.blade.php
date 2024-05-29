@@ -59,8 +59,17 @@
     <x-modal modalId='modalElemento' modalTitle='Elemento' modalSize='modal-md'>
         <div>
             <div class="form-group">
-                <center><label for="nombre">Nombre</label></center>
+                <label for="nombre">Nombre:</label>
                 <input type="text" id="nombre" class="form-control mb-3">
+            </div>
+            <div class="form-group">
+                <label for="servicios_id">Servicio:</label>
+                <select id="servicios_id" class="form-control mb-3">
+                    <option value="">Seleccione un servicio</option>
+                    @foreach($servicios as $servicio)
+                        <option value="{{ $servicio->id }}">{{ $servicio->nombre }}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="d-flex">
                 <div class="left-panel" style="width: 30%; padding: 10px; border-right: 1px solid #ccc;">

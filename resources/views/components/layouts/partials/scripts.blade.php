@@ -67,10 +67,22 @@
 
     function submitFields() {
         const nombre = document.getElementById('nombre').value.trim();
+        const servicioId = document.getElementById('servicios_id').value;
+
         if (nombre === '') {
             Swal.fire({
                 title: 'Error',
                 text: 'El campo de nombre no puede estar vacío.',
+                icon: 'error',
+                customClass: 'animated tada'
+            });
+            return;
+        }
+
+        if (servicioId === '') {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe seleccionar un servicio.',
                 icon: 'error',
                 customClass: 'animated tada'
             });
@@ -125,7 +137,7 @@
         // Show the JSON string in an alert
         Swal.fire({
             title: 'Datos Enviados',
-            html: `<p><strong>Nombre:</strong> ${nombre}</p><pre>${jsonString}</pre>`,
+            html: `<p><strong>Nombre:</strong> ${nombre}</p><p><strong>Servicio:</strong> ${servicioId}</p><pre>${jsonString}</pre>`,
             icon: 'success',
             customClass: 'animated tada'
         });
