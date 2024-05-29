@@ -59,15 +59,13 @@
     <x-modal modalId='modalElemento' modalTitle='Elemento' modalSize='modal-md'>
         <div class="d-flex">
             <div class="left-panel" style="width: 30%; padding: 10px; border-right: 1px solid #ccc;">
-                <div class="draggable-field" draggable="true" data-type="numerico">
+                <div class="draggable-field" draggable="true" data-type="numerico" ondblclick="addField('numerico')">
                     <button class="btn btn-info btn-block">Numérico</button>
                 </div>
-                <br>
-                <div class="draggable-field" draggable="true" data-type="texto">
+                <div class="draggable-field" draggable="true" data-type="texto" ondblclick="addField('texto')">
                     <button class="btn btn-info btn-block">Texto</button>
                 </div>
-                <br>
-                <div class="draggable-field" draggable="true" data-type="fecha">
+                <div class="draggable-field" draggable="true" data-type="fecha" ondblclick="addField('fecha')">
                     <button class="btn btn-info btn-block">Fecha</button>
                 </div>
             </div>
@@ -75,7 +73,8 @@
                 <!-- Campos arrastrados aparecerán aquí -->
             </div>
         </div>
+        <div class="d-flex justify-content-end mt-3">
+            <button class="btn btn-success" onclick="submitFields()">Enviar</button>
+        </div>
     </x-modal>
 </div>
-
-
