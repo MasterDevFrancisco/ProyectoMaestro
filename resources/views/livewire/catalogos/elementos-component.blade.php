@@ -62,9 +62,11 @@
                 <div class="draggable-field" draggable="true" data-type="numerico">
                     <button class="btn btn-info btn-block">Numérico</button>
                 </div>
+                <br>
                 <div class="draggable-field" draggable="true" data-type="texto">
                     <button class="btn btn-info btn-block">Texto</button>
                 </div>
+                <br>
                 <div class="draggable-field" draggable="true" data-type="fecha">
                     <button class="btn btn-info btn-block">Fecha</button>
                 </div>
