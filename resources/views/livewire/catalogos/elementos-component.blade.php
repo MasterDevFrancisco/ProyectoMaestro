@@ -59,11 +59,11 @@
     <x-modal modalId='modalElemento' modalTitle='Elemento' modalSize='modal-md'>
         <div>
             <div class="form-group">
-                <label for="nombre">Nombre:</label>
+                <center><label for="nombre">Nombre</label></center>
                 <input type="text" id="nombre" class="form-control mb-3">
             </div>
             <div class="form-group">
-                <label for="servicios_id">Servicio:</label>
+                <center><label for="servicios_id">Servicio</label></center>
                 <select id="servicios_id" class="form-control mb-3">
                     <option value="">Seleccione un servicio</option>
                     @foreach($servicios as $servicio)
@@ -76,9 +76,11 @@
                     <div class="draggable-field" draggable="true" data-type="numerico" ondblclick="addField('numerico')">
                         <button class="btn btn-info btn-block">Numérico</button>
                     </div>
+                    <br>
                     <div class="draggable-field" draggable="true" data-type="texto" ondblclick="addField('texto')">
                         <button class="btn btn-info btn-block">Texto</button>
                     </div>
+                    <br>
                     <div class="draggable-field" draggable="true" data-type="fecha" ondblclick="addField('fecha')">
                         <button class="btn btn-info btn-block">Fecha</button>
                     </div>
