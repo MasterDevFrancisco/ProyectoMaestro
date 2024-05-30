@@ -6,6 +6,10 @@ use App\Livewire\Home\Inicio;
 use App\Livewire\Catalogos\RazonSocialComponent;
 use App\Livewire\Catalogos\ServiciosComponent;
 
+use App\Http\Controllers\ElementosController;
+
+
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -18,3 +22,6 @@ Route::get('/inicio',Inicio::class)->name('inicio');
 Route::get('/razon-social',RazonSocialComponent::class)->name('razon-social');
 Route::get('/servicios',ServiciosComponent::class)->name('servicios');
 Route::get('/elementos',ElementosComponent::class)->name('elementos');
+
+
+Route::get('/api/check-nombre', [ElementosController::class, 'checkNombre']);

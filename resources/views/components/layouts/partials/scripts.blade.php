@@ -65,7 +65,13 @@
         button.parentElement.remove();
     }
 
-    function submitFields() {
+    async function isNombreDuplicated(nombre) {
+        const response = await fetch(`/api/check-nombre?nombre=${nombre}`);
+        const result = await response.json();
+        return result.exists;
+    }
+
+    async function submitFields() {
         const nombre = document.getElementById('nombre').value.trim();
         const servicioId = document.getElementById('servicios_id').value;
 
@@ -73,6 +79,17 @@
             Swal.fire({
                 title: 'Error',
                 text: 'El campo de nombre no puede estar vacío.',
+                icon: 'error',
+                customClass: 'animated tada'
+            });
+            return;
+        }
+
+        const isDuplicated = await isNombreDuplicated(nombre);
+        if (isDuplicated) {
+            Swal.fire({
+                title: 'Error',
+                text: 'El nombre ya existe. Por favor, elija un nombre diferente.',
                 icon: 'error',
                 customClass: 'animated tada'
             });
