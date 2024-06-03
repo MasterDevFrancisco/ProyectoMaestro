@@ -154,3 +154,14 @@
         Livewire.dispatch('storeElemento', { nombre, servicios_id: servicioId, campos: jsonString });
     }
 </script>
+
+
+<!--Scripts para formatos -->
+<script>
+    window.addEventListener('open-modal', event => {
+        $('#modalFormato').modal('show');
+    });
+</script>
+
+<!-- Carga de documentos-->
+
