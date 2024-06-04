@@ -9,11 +9,13 @@ use Livewire\WithPagination;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Elementos;
+use Livewire\WithFileUploads;
 
 #[Title('Formatos')]
 class FormatosComponent extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     public $paginationTheme = 'bootstrap';
     public $search = '';
@@ -21,7 +23,7 @@ class FormatosComponent extends Component
     public $Id = 0;
     public $nombre = '';
     public $ruta = '';
-    public $documento = '';
+    public $documento;
     public $elementos;
     public $totalRows;
     public $elementos_id;
@@ -54,18 +56,19 @@ class FormatosComponent extends Component
     {
         $rules = [
             'nombre' => 'required|max:255|unique:formatos,nombre',
-            'elementos_id' => 'required|exists:elementos,id'
+            'elementos_id' => 'required|exists:elementos,id',
+            'documento' => 'required|max:2048'
         ];
 
-        $messages = [
-            'nombre.required' => 'El nombre es requerido',
-            'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
-            'nombre.unique' => 'Esta razón social ya existe',
-            'elementos_id.required' => 'El elemento es requerido',
-            'elementos_id.exists' => 'El elemento seleccionado no es válido'
-        ];
 
-        $this->validate($rules, $messages);
+        $this->validate($rules);
+
+        if($this->documento)
+        {
+            $nombreDoc = 'formatos/'.uniqid().'.'.$this->documento->extension();
+            $this->documento->storeAs('public',$nombreDoc);
+        }
+
 
         // Depuración: Verificar el valor de elementos_id
         //dd($this->elementos_id); // Esto debería mostrar el valor de elementos_id y detener la ejecución

@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Formatos extends Model
+class Documento extends Model
 {
     use HasFactory;
-    public function documento ()
+    public function documentable()
     {
-        return $this ->morphOne('App\Models\Documento','documentable');
+        return $this->morphTo();
     }
 }

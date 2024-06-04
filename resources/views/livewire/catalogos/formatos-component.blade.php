@@ -76,8 +76,9 @@
                         </div>
                     @enderror
                     <br>
-                    <label class="w-100 text-center">Archivo PDF</label>
-                    <input type="file" name="documento" class="form-control" accept="application/pdf">
+
+                    <label for="documento" class="w-100 text-center">Archivo PDF</label>
+                    <input wire:model='documento' type="file" id="documento" accept="image/">
                     @error('documento')
                         <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
