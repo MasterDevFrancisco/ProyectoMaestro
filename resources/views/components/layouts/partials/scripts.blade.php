@@ -70,7 +70,14 @@
         const result = await response.json();
         return result.exists;
     }
-
+    function mostrarAlerta() {
+        Swal.fire({
+            title: 'Próximamente',
+            text: 'Esta función esta en desarrollo',
+            icon: 'info',
+            confirmButtonText: 'Aceptar'
+        });
+    }
     async function submitFields() {
         const nombre = document.getElementById('nombre').value.trim();
         const servicioId = document.getElementById('servicios_id').value;

@@ -79,8 +79,8 @@
                     <br>
                     <label for="documento" class="w-100 text-center">Archivo PDF</label>
                     <input wire:model='documento' type="file" id="documento" accept="application/pdf">
-                    @if ($ruta)
-                        <p>Archivo actual: {{ basename($ruta) }}</p>
+                    @if ($ruta_pdf)
+                        <p>Archivo actual: {{ basename($ruta_pdf) }}</p>
                     @endif
                     @error('documento')
                         <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
@@ -91,9 +91,11 @@
             </div>
             <br>
             <center>
-                <button type="submit" class="btn btn-primary">{{ $Id == 0 ? 'Guardar' : 'Actualizar' }}</button>
+                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="loading" wire:loading.class="opacity-25">
+                    <span wire:loading.remove>{{ $Id == 0 ? 'Guardar' : 'Actualizar' }}</span>
+                    <span wire:loading>Procesando...</span>
+                </button>
             </center>
         </form>
     </x-modal>
-    
 </div>

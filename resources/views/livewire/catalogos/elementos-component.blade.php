@@ -29,9 +29,15 @@
                     <td>{{ $elemento->nombre }}</td>
                     <td>{{ $elemento->campos }}</td>
                     <td>{{ $elemento->servicio ? $elemento->servicio->nombre : 'No asignado' }}</td>
-                    <td>
+                    {{--Desbloquear cuando el campo editar ya abra los campos en la vista previa  
+                        <td>
                         <a href="#" wire:click='editar({{ $elemento->id }})' title="Editar"
                             class="btn btn-primary btn-xs">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                    </td> --}}
+                    <td>
+                        <a href="#" onclick="mostrarAlerta()" title="Editar" class="btn btn-primary btn-xs">
                             <i class="fas fa-pen"></i>
                         </a>
                     </td>

@@ -25,7 +25,7 @@ class FormatosComponent extends Component
 
     public $Id = 0;
     public $nombre = '';
-    public $ruta = '';
+    public $ruta_pdf = '';
     public $documento;
     public $elementos;
     public $totalRows;
@@ -70,16 +70,20 @@ class FormatosComponent extends Component
             $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
             $this->documento->storeAs('public', $nombreDoc);
 
-            // Guardar la ruta del documento en la variable ruta
-            $this->ruta = $nombreDoc;
+            // Guardar la ruta_pdf del documento en la variable ruta_pdf
+            $this->ruta_pdf = $nombreDoc;
         }
 
         // Crear un nuevo registro en la tabla Formatos
         $formatosInsert = new Formatos();
         $formatosInsert->nombre = $this->nombre;
-        $formatosInsert->ruta = $this->ruta; // Aquí guardamos la ruta del archivo
+        $formatosInsert->ruta_pdf = $this->ruta_pdf; // Aquí guardamos la ruta_pdf del archivo
         $formatosInsert->elementos_id = $this->elementos_id;
         $formatosInsert->eliminado = 0;
+        $formatosInsert->convertio_id = 666;
+        $formatosInsert->ruta_html = "ruta/test";
+
+        
         $formatosInsert->save();
 
         // Actualizar el total de filas
@@ -90,7 +94,7 @@ class FormatosComponent extends Component
         $this->dispatch('msg', 'Registro creado correctamente');
 
         // Resetear los campos del formulario
-        $this->reset(['nombre', 'ruta', 'elementos_id', 'documento']);
+        $this->reset(['nombre', 'ruta_pdf', 'elementos_id', 'documento']);
     }
 
 
@@ -116,29 +120,31 @@ class FormatosComponent extends Component
     $formatosInsert->nombre = $this->nombre;
     $formatosInsert->elementos_id = $this->elementos_id;
     $formatosInsert->eliminado = 0;
+    $formatosInsert->convertio_id = 666;
+    $formatosInsert->ruta_html = "ruta/test";
 
-    // Si se ha subido un nuevo documento, se actualiza la ruta
+    // Si se ha subido un nuevo documento, se actualiza la ruta_pdf
     if ($this->documento) {
         // Eliminar el archivo anterior si existe
-        if ($formatosInsert->ruta && Storage::exists('public/' . $formatosInsert->ruta)) {
-            Storage::delete('public/' . $formatosInsert->ruta);
+        if ($formatosInsert->ruta_pdf && Storage::exists('public/' . $formatosInsert->ruta_pdf)) {
+            Storage::delete('public/' . $formatosInsert->ruta_pdf);
         }
 
         // Generar el nombre del archivo basado en el nombre proporcionado por el usuario
         $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
         $this->documento->storeAs('public', $nombreDoc);
 
-        // Guardar la ruta del documento en la variable ruta
-        $formatosInsert->ruta = $nombreDoc;
+        // Guardar la ruta_pdf del documento en la variable ruta_pdf
+        $formatosInsert->ruta_pdf = $nombreDoc;
     } else {
         // Renombrar el archivo existente si el nombre ha cambiado
-        $extension = pathinfo($formatosInsert->ruta, PATHINFO_EXTENSION);
+        $extension = pathinfo($formatosInsert->ruta_pdf, PATHINFO_EXTENSION);
         $nuevoNombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $extension;
 
-        if ($nuevoNombreDoc !== $formatosInsert->ruta) {
+        if ($nuevoNombreDoc !== $formatosInsert->ruta_pdf) {
             // Renombrar el archivo en el sistema de archivos
-            Storage::move('public/' . $formatosInsert->ruta, 'public/' . $nuevoNombreDoc);
-            $formatosInsert->ruta = $nuevoNombreDoc;
+            Storage::move('public/' . $formatosInsert->ruta_pdf, 'public/' . $nuevoNombreDoc);
+            $formatosInsert->ruta_pdf = $nuevoNombreDoc;
         }
     }
 
@@ -149,7 +155,7 @@ class FormatosComponent extends Component
     $this->dispatch('close-modal', 'modalFormato');
     $this->dispatch('msg', 'Registro actualizado correctamente');
 
-    $this->reset(['nombre', 'ruta', 'elementos_id', 'documento']);
+    $this->reset(['nombre', 'ruta_pdf', 'elementos_id', 'documento']);
 }
 
 
@@ -160,7 +166,7 @@ class FormatosComponent extends Component
         $formato = Formatos::findOrFail($id);
         $this->Id = $formato->id;
         $this->nombre = $formato->nombre;
-        $this->ruta = $formato->ruta;
+        $this->ruta_pdf = $formato->ruta_pdf;
         $this->elementos_id = $formato->elementos_id;
 
         $this->dispatch('open-modal');
@@ -171,7 +177,7 @@ class FormatosComponent extends Component
     {
         $this->Id = 0;
         $this->nombre = '';
-        $this->ruta = '';
+        $this->ruta_pdf = '';
         $this->documento = '';
     }
 
