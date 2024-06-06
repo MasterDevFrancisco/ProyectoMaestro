@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Elementos;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\On;
+use GuzzleHttp\Client;
+
 
 #[Title('Formatos')]
 class FormatosComponent extends Component
@@ -60,65 +63,96 @@ class FormatosComponent extends Component
             'documento' => 'required|max:2048'
         ];
 
-
         $this->validate($rules);
 
-        if($this->documento)
-        {
-            $nombreDoc = 'formatos/'.uniqid().'.'.$this->documento->extension();
-            $this->documento->storeAs('public',$nombreDoc);
+        if ($this->documento) {
+            // Generar el nombre del archivo basado en el nombre proporcionado por el usuario
+            $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
+            $this->documento->storeAs('public', $nombreDoc);
+
+            // Guardar la ruta del documento en la variable ruta
+            $this->ruta = $nombreDoc;
         }
 
-
-        // Depuración: Verificar el valor de elementos_id
-        //dd($this->elementos_id); // Esto debería mostrar el valor de elementos_id y detener la ejecución
-
+        // Crear un nuevo registro en la tabla Formatos
         $formatosInsert = new Formatos();
         $formatosInsert->nombre = $this->nombre;
-        $formatosInsert->ruta = $this->ruta;
+        $formatosInsert->ruta = $this->ruta; // Aquí guardamos la ruta del archivo
         $formatosInsert->elementos_id = $this->elementos_id;
         $formatosInsert->eliminado = 0;
         $formatosInsert->save();
 
+        // Actualizar el total de filas
         $this->totalRows = Formatos::where('eliminado', 0)->count();
 
+        // Cerrar el modal y mostrar un mensaje de éxito
         $this->dispatch('close-modal', 'modalFormato');
         $this->dispatch('msg', 'Registro creado correctamente');
 
-        $this->reset(['nombre', 'ruta', 'elementos_id']);
+        // Resetear los campos del formulario
+        $this->reset(['nombre', 'ruta', 'elementos_id', 'documento']);
     }
+
+
     public function update()
-    {
-        $rules = [
-            'nombre' => 'required|max:255|unique:formatos,nombre',
-            'elementos_id' => 'required|exists:elementos,id'
-        ];
+{
+    $rules = [
+        'nombre' => 'required|max:255|unique:formatos,nombre,' . $this->Id,
+        'elementos_id' => 'required|exists:elementos,id',
+        'documento' => 'nullable|max:2048' // El documento es opcional en la actualización
+    ];
 
-        $messages = [
-            'nombre.required' => 'El nombre es requerido',
-            'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
-            'nombre.unique' => 'Esta razón social ya existe',
-            'elementos_id.required' => 'El elemento es requerido',
-            'elementos_id.exists' => 'El elemento seleccionado no es válido'
-        ];
+    $messages = [
+        'nombre.required' => 'El nombre es requerido',
+        'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
+        'nombre.unique' => 'Esta razón social ya existe',
+        'elementos_id.required' => 'El elemento es requerido',
+        'elementos_id.exists' => 'El elemento seleccionado no es válido'
+    ];
 
-        $this->validate($rules, $messages);
+    $this->validate($rules, $messages);
 
+    $formatosInsert = Formatos::findOrFail($this->Id);
+    $formatosInsert->nombre = $this->nombre;
+    $formatosInsert->elementos_id = $this->elementos_id;
+    $formatosInsert->eliminado = 0;
 
-        $formatosInsert = Formatos::findOrFail($this->Id);
-        $formatosInsert->nombre = $this->nombre;
-        $formatosInsert->ruta = $this->ruta;
-        $formatosInsert->elementos_id = $this->elementos_id;
-        $formatosInsert->eliminado = 0;
-        $formatosInsert->save();
+    // Si se ha subido un nuevo documento, se actualiza la ruta
+    if ($this->documento) {
+        // Eliminar el archivo anterior si existe
+        if ($formatosInsert->ruta && Storage::exists('public/' . $formatosInsert->ruta)) {
+            Storage::delete('public/' . $formatosInsert->ruta);
+        }
 
-        $this->totalRows = Formatos::where('eliminado', 0)->count();
+        // Generar el nombre del archivo basado en el nombre proporcionado por el usuario
+        $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
+        $this->documento->storeAs('public', $nombreDoc);
 
-        $this->dispatch('close-modal', 'modalFormato');
-        $this->dispatch('msg', 'Registro creado correctamente');
+        // Guardar la ruta del documento en la variable ruta
+        $formatosInsert->ruta = $nombreDoc;
+    } else {
+        // Renombrar el archivo existente si el nombre ha cambiado
+        $extension = pathinfo($formatosInsert->ruta, PATHINFO_EXTENSION);
+        $nuevoNombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $extension;
 
-        $this->reset(['nombre', 'ruta', 'elementos_id']);
+        if ($nuevoNombreDoc !== $formatosInsert->ruta) {
+            // Renombrar el archivo en el sistema de archivos
+            Storage::move('public/' . $formatosInsert->ruta, 'public/' . $nuevoNombreDoc);
+            $formatosInsert->ruta = $nuevoNombreDoc;
+        }
     }
+
+    $formatosInsert->save();
+
+    $this->totalRows = Formatos::where('eliminado', 0)->count();
+
+    $this->dispatch('close-modal', 'modalFormato');
+    $this->dispatch('msg', 'Registro actualizado correctamente');
+
+    $this->reset(['nombre', 'ruta', 'elementos_id', 'documento']);
+}
+
+
 
 
     public function editar($id)
@@ -127,9 +161,11 @@ class FormatosComponent extends Component
         $this->Id = $formato->id;
         $this->nombre = $formato->nombre;
         $this->ruta = $formato->ruta;
+        $this->elementos_id = $formato->elementos_id;
 
         $this->dispatch('open-modal');
     }
+
 
     private function resetForm()
     {
@@ -137,5 +173,24 @@ class FormatosComponent extends Component
         $this->nombre = '';
         $this->ruta = '';
         $this->documento = '';
+    }
+
+    public function closeModal()
+    {
+        $this->resetForm();
+        $this->dispatch('close-modal', 'modalFormato');
+    }
+    #[On('destroyRazon')]
+    public function destroy($id)
+    {
+        $razon = Formatos::findOrFail($id);
+        $razon->eliminado = 1;
+        $razon->save();
+
+        // Actualiza el conteo total de registros
+        $this->totalRows = Formatos::where('eliminado', 0)->count();
+
+        // Envía una alerta para confirmar que el registro ha sido eliminado
+        $this->dispatch('msg', 'Registro eliminado correctamente');
     }
 }

@@ -26,6 +26,7 @@
                     <td>{{ $formato->id }}</td>
                     <td>{{ $formato->nombre }}</td>
                     <td>{{ $formato->ruta }}</td>
+                    
                     <td>
                         <a href="#" wire:click='editar({{ $formato->id }})' title="Editar" class="btn btn-primary btn-xs">
                             <i class="fas fa-pen"></i>
@@ -50,7 +51,7 @@
         </x-slot>
     </x-card>
 
-    <x-modal modalId='modalFormato' modalTitle='Formato' modalSize='modal-md'>
+    <x-modal modalId='modalFormato' modalTitle='Formato' modalSize='modal-md' wire:closed="closeModal">
         <form wire:submit.prevent="{{ $Id == 0 ? 'store' : 'update' }}" enctype="multipart/form-data">
             @csrf
             <div class="row">
@@ -70,15 +71,17 @@
                             <option value="{{ $el->id }}">{{ $el->nombre }}</option>
                         @endforeach
                     </select>
-                    @error('elemento')
+                    @error('elementos_id')
                         <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
                         </div>
                     @enderror
                     <br>
-
                     <label for="documento" class="w-100 text-center">Archivo PDF</label>
-                    <input wire:model='documento' type="file" id="documento" accept="image/">
+                    <input wire:model='documento' type="file" id="documento" accept="application/pdf">
+                    @if ($ruta)
+                        <p>Archivo actual: {{ basename($ruta) }}</p>
+                    @endif
                     @error('documento')
                         <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
@@ -92,4 +95,5 @@
             </center>
         </form>
     </x-modal>
+    
 </div>
