@@ -30,6 +30,7 @@ class FormatosComponent extends Component
     public $elementos;
     public $totalRows;
     public $elementos_id;
+    public $documentoUrl;
 
     public function mount()
     {
@@ -83,7 +84,7 @@ class FormatosComponent extends Component
         $formatosInsert->convertio_id = 666;
         $formatosInsert->ruta_html = "ruta/test";
 
-        
+
         $formatosInsert->save();
 
         // Actualizar el total de filas
@@ -99,67 +100,64 @@ class FormatosComponent extends Component
 
 
     public function update()
-{
-    $rules = [
-        'nombre' => 'required|max:255|unique:formatos,nombre,' . $this->Id,
-        'elementos_id' => 'required|exists:elementos,id',
-        'documento' => 'nullable|max:2048' // El documento es opcional en la actualización
-    ];
+    {
+        $rules = [
+            'nombre' => 'required|max:255|unique:formatos,nombre,' . $this->Id,
+            'elementos_id' => 'required|exists:elementos,id',
+            'documento' => 'nullable|max:2048' // El documento es opcional en la actualización
+        ];
 
-    $messages = [
-        'nombre.required' => 'El nombre es requerido',
-        'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
-        'nombre.unique' => 'Esta razón social ya existe',
-        'elementos_id.required' => 'El elemento es requerido',
-        'elementos_id.exists' => 'El elemento seleccionado no es válido'
-    ];
+        $messages = [
+            'nombre.required' => 'El nombre es requerido',
+            'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
+            'nombre.unique' => 'Esta razón social ya existe',
+            'elementos_id.required' => 'El elemento es requerido',
+            'elementos_id.exists' => 'El elemento seleccionado no es válido'
+        ];
 
-    $this->validate($rules, $messages);
+        $this->validate($rules, $messages);
 
-    $formatosInsert = Formatos::findOrFail($this->Id);
-    $formatosInsert->nombre = $this->nombre;
-    $formatosInsert->elementos_id = $this->elementos_id;
-    $formatosInsert->eliminado = 0;
-    $formatosInsert->convertio_id = 666;
-    $formatosInsert->ruta_html = "ruta/test";
+        $formatosInsert = Formatos::findOrFail($this->Id);
+        $formatosInsert->nombre = $this->nombre;
+        $formatosInsert->elementos_id = $this->elementos_id;
+        $formatosInsert->eliminado = 0;
+        $formatosInsert->convertio_id = 666;
+        $formatosInsert->ruta_html = "ruta/test";
 
-    // Si se ha subido un nuevo documento, se actualiza la ruta_pdf
-    if ($this->documento) {
-        // Eliminar el archivo anterior si existe
-        if ($formatosInsert->ruta_pdf && Storage::exists('public/' . $formatosInsert->ruta_pdf)) {
-            Storage::delete('public/' . $formatosInsert->ruta_pdf);
+        // Si se ha subido un nuevo documento, se actualiza la ruta_pdf
+        if ($this->documento) {
+            // Eliminar el archivo anterior si existe
+            if ($formatosInsert->ruta_pdf && Storage::exists('public/' . $formatosInsert->ruta_pdf)) {
+                Storage::delete('public/' . $formatosInsert->ruta_pdf);
+            }
+
+            // Generar el nombre del archivo basado en el nombre proporcionado por el usuario
+            $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
+            $this->documento->storeAs('public', $nombreDoc);
+
+            // Guardar la ruta_pdf del documento en la variable ruta_pdf
+            $formatosInsert->ruta_pdf = $nombreDoc;
+        } else {
+            // Renombrar el archivo existente si el nombre ha cambiado
+            $extension = pathinfo($formatosInsert->ruta_pdf, PATHINFO_EXTENSION);
+            $nuevoNombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $extension;
+
+            if ($nuevoNombreDoc !== $formatosInsert->ruta_pdf) {
+                // Renombrar el archivo en el sistema de archivos
+                Storage::move('public/' . $formatosInsert->ruta_pdf, 'public/' . $nuevoNombreDoc);
+                $formatosInsert->ruta_pdf = $nuevoNombreDoc;
+            }
         }
 
-        // Generar el nombre del archivo basado en el nombre proporcionado por el usuario
-        $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
-        $this->documento->storeAs('public', $nombreDoc);
+        $formatosInsert->save();
 
-        // Guardar la ruta_pdf del documento en la variable ruta_pdf
-        $formatosInsert->ruta_pdf = $nombreDoc;
-    } else {
-        // Renombrar el archivo existente si el nombre ha cambiado
-        $extension = pathinfo($formatosInsert->ruta_pdf, PATHINFO_EXTENSION);
-        $nuevoNombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $extension;
+        $this->totalRows = Formatos::where('eliminado', 0)->count();
 
-        if ($nuevoNombreDoc !== $formatosInsert->ruta_pdf) {
-            // Renombrar el archivo en el sistema de archivos
-            Storage::move('public/' . $formatosInsert->ruta_pdf, 'public/' . $nuevoNombreDoc);
-            $formatosInsert->ruta_pdf = $nuevoNombreDoc;
-        }
+        $this->dispatch('close-modal', 'modalFormato');
+        $this->dispatch('msg', 'Registro actualizado correctamente');
+
+        $this->reset(['nombre', 'ruta_pdf', 'elementos_id', 'documento']);
     }
-
-    $formatosInsert->save();
-
-    $this->totalRows = Formatos::where('eliminado', 0)->count();
-
-    $this->dispatch('close-modal', 'modalFormato');
-    $this->dispatch('msg', 'Registro actualizado correctamente');
-
-    $this->reset(['nombre', 'ruta_pdf', 'elementos_id', 'documento']);
-}
-
-
-
 
     public function editar($id)
     {
@@ -170,6 +168,14 @@ class FormatosComponent extends Component
         $this->elementos_id = $formato->elementos_id;
 
         $this->dispatch('open-modal');
+    }
+
+    public function viewDocument($id)
+    {
+        $formato = Formatos::findOrFail($id);
+        $this->documentoUrl = asset('storage/public/' . $formato->ruta_pdf);
+
+        $this->dispatch('open-modal', 'viewDocumentModal');
     }
 
 
@@ -186,6 +192,7 @@ class FormatosComponent extends Component
         $this->resetForm();
         $this->dispatch('close-modal', 'modalFormato');
     }
+
     #[On('destroyRazon')]
     public function destroy($id)
     {

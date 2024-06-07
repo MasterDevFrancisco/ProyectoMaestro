@@ -12,7 +12,7 @@
 <!-- Modal Drag and Drop -->
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const draggables = document.querySelectorAll('.draggable-field');
         draggables.forEach(draggable => {
             draggable.addEventListener('dragstart', drag);
@@ -40,19 +40,22 @@
             case 'numerico':
                 newElement = document.createElement('div');
                 newElement.classList.add('position-relative');
-                newElement.innerHTML = '<input type="text" class="form-control mb-2" placeholder="Numérico" data-type="numerico">' +
+                newElement.innerHTML =
+                    '<input type="text" class="form-control mb-2" placeholder="Numérico" data-type="numerico">' +
                     '<button class="btn btn-danger btn-xs position-absolute" style="top: 20%; right: 2%;" onclick="removeField(this)">X</button>';
                 break;
             case 'texto':
                 newElement = document.createElement('div');
                 newElement.classList.add('position-relative');
-                newElement.innerHTML = '<input type="text" class="form-control mb-2" placeholder="Texto" data-type="texto">' +
+                newElement.innerHTML =
+                    '<input type="text" class="form-control mb-2" placeholder="Texto" data-type="texto">' +
                     '<button class="btn btn-danger btn-xs position-absolute" style="top: 20%; right: 2%;" onclick="removeField(this)">X</button>';
                 break;
             case 'fecha':
                 newElement = document.createElement('div');
                 newElement.classList.add('position-relative');
-                newElement.innerHTML = '<input type="text" class="form-control mb-2" placeholder="Fecha" data-type="fecha">' +
+                newElement.innerHTML =
+                    '<input type="text" class="form-control mb-2" placeholder="Fecha" data-type="fecha">' +
                     '<button class="btn btn-danger btn-xs position-absolute" style="top: 20%; right: 2%;" onclick="removeField(this)">X</button>';
                 break;
         }
@@ -70,6 +73,7 @@
         const result = await response.json();
         return result.exists;
     }
+
     function mostrarAlerta() {
         Swal.fire({
             title: 'Próximamente',
@@ -158,7 +162,11 @@
         const jsonString = JSON.stringify(data);
 
         // Send the data to Livewire
-        Livewire.dispatch('storeElemento', { nombre, servicios_id: servicioId, campos: jsonString });
+        Livewire.dispatch('storeElemento', {
+            nombre,
+            servicios_id: servicioId,
+            campos: jsonString
+        });
     }
 </script>
 
@@ -171,4 +179,17 @@
 </script>
 
 <!-- Carga de documentos-->
+<script>
+    document.addEventListener('livewire:load', function () {
+    Livewire.on('open-modal', modalId => {
+        const modal = new bootstrap.Modal(document.getElementById(modalId));
+        modal.show();
+    });
 
+    Livewire.on('close-modal', modalId => {
+        const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+        if (modal) modal.hide();
+    });
+});
+
+</script>
