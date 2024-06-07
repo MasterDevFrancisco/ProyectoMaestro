@@ -115,20 +115,13 @@
     </x-modal>
 
    <!-- Modal para ver el documento -->
-<div wire:ignore.self class="modal fade" id="viewDocumentModal" tabindex="-1" aria-labelledby="viewDocumentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="viewDocumentModalLabel">Ver Documento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @if ($documentoUrl)
-                    <iframe src="{{ $documentoUrl }}" frameborder="0" style="width: 100%; height: 500px;"></iframe>
-                @endif
-            </div>
-        </div>
+   <x-modal modalId='viewDocumentModal' modalTitle="{{ basename($documentoUrl) }}" modalSize='modal-lg' wire:closed="closeModal" backdrop="static" keyboard="false">
+    <div class="modal-body text-center">
+        @if ($documentoUrl)
+            <iframe src="{{ $documentoUrl }}" frameborder="0" style="width: 100%; height: 500px;"></iframe>
+        @endif
     </div>
-</div>
+</x-modal>
+
 
 </div>

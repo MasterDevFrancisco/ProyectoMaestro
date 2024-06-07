@@ -171,25 +171,22 @@
 </script>
 
 
+
 <!--Scripts para formatos -->
 <script>
-    window.addEventListener('open-modal', event => {
+    window.addEventListener('open-modal-formato', event => {
         $('#modalFormato').modal('show');
     });
+
+    window.addEventListener('open-modal-documento', event => {
+        $('#viewDocumentModal').modal('show');
+    });
+
+    window.addEventListener('close-modal', event => {
+        $('#modalFormato').modal('hide');
+        $('#viewDocumentModal').modal('hide');
+    });
 </script>
+
 
 <!-- Carga de documentos-->
-<script>
-    document.addEventListener('livewire:load', function () {
-    Livewire.on('open-modal', modalId => {
-        const modal = new bootstrap.Modal(document.getElementById(modalId));
-        modal.show();
-    });
-
-    Livewire.on('close-modal', modalId => {
-        const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
-        if (modal) modal.hide();
-    });
-});
-
-</script>

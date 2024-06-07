@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire\Catalogos;
 
 use App\Models\Formatos;
@@ -12,7 +11,6 @@ use App\Models\Elementos;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
 use GuzzleHttp\Client;
-
 
 #[Title('Formatos')]
 class FormatosComponent extends Component
@@ -36,6 +34,7 @@ class FormatosComponent extends Component
     {
         $this->elementos = Elementos::where('eliminado', 0)->get();
     }
+
     public function render()
     {
         $formatos = Formatos::where(function ($query) {
@@ -53,7 +52,7 @@ class FormatosComponent extends Component
     public function create()
     {
         $this->resetForm();
-        $this->dispatch('open-modal');
+        $this->dispatch('open-modal-formato');
     }
 
     public function store(Request $request)
@@ -84,7 +83,6 @@ class FormatosComponent extends Component
         $formatosInsert->convertio_id = 666;
         $formatosInsert->ruta_html = "ruta/test";
 
-
         $formatosInsert->save();
 
         // Actualizar el total de filas
@@ -97,7 +95,6 @@ class FormatosComponent extends Component
         // Resetear los campos del formulario
         $this->reset(['nombre', 'ruta_pdf', 'elementos_id', 'documento']);
     }
-
 
     public function update()
     {
@@ -167,7 +164,7 @@ class FormatosComponent extends Component
         $this->ruta_pdf = $formato->ruta_pdf;
         $this->elementos_id = $formato->elementos_id;
 
-        $this->dispatch('open-modal');
+        $this->dispatch('open-modal-formato');
     }
 
     public function viewDocument($id)
@@ -175,9 +172,8 @@ class FormatosComponent extends Component
         $formato = Formatos::findOrFail($id);
         $this->documentoUrl = asset('storage/public/' . $formato->ruta_pdf);
 
-        $this->dispatch('open-modal', 'viewDocumentModal');
+        $this->dispatch('open-modal-documento');
     }
-
 
     private function resetForm()
     {
@@ -190,7 +186,7 @@ class FormatosComponent extends Component
     public function closeModal()
     {
         $this->resetForm();
-        $this->dispatch('close-modal', 'modalFormato');
+        $this->dispatch('close-modal');
     }
 
     #[On('destroyRazon')]
