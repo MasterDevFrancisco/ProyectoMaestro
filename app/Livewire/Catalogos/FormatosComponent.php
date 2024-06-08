@@ -62,18 +62,18 @@ class FormatosComponent extends Component
             'elementos_id' => 'required|exists:elementos,id',
             'documento' => 'required|max:2048'
         ];
-
+    
         $this->validate($rules);
-
+    
         if ($this->documento) {
             // Generar el nombre del archivo basado en el nombre proporcionado por el usuario
             $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
             $this->documento->storeAs('public', $nombreDoc);
-
+    
             // Guardar la ruta_pdf del documento en la variable ruta_pdf
             $this->ruta_pdf = $nombreDoc;
         }
-
+    
         // Crear un nuevo registro en la tabla Formatos
         $formatosInsert = new Formatos();
         $formatosInsert->nombre = $this->nombre;
@@ -82,20 +82,26 @@ class FormatosComponent extends Component
         $formatosInsert->eliminado = 0;
         $formatosInsert->convertio_id = 666;
         $formatosInsert->ruta_html = "ruta/test";
-
+    
         $formatosInsert->save();
-
+    
+        // Llamar a la función convertToHtml después de guardar el registro
+        $conversionResult = $this->convertToHtml($formatosInsert->id);
+    
+        // Mostrar una alerta con el resultado de la API
+        dd($conversionResult);
+    
         // Actualizar el total de filas
         $this->totalRows = Formatos::where('eliminado', 0)->count();
-
+    
         // Cerrar el modal y mostrar un mensaje de éxito
         $this->dispatch('close-modal', 'modalFormato');
         $this->dispatch('msg', 'Registro creado correctamente');
-
+    
         // Resetear los campos del formulario
         $this->reset(['nombre', 'ruta_pdf', 'elementos_id', 'documento']);
     }
-
+    
     public function update()
     {
         $rules = [
@@ -202,4 +208,51 @@ class FormatosComponent extends Component
         // Envía una alerta para confirmar que el registro ha sido eliminado
         $this->dispatch('msg', 'Registro eliminado correctamente');
     }
+
+    /* public function convertToHtml($id)
+    {
+        $formato = Formatos::findOrFail($id);
+    
+        // Ruta completa del archivo PDF
+        $filePath = public_path('storage/public/formatos/' . basename($formato->ruta_pdf));
+    
+        // Leer el contenido del archivo y convertirlo a base64
+        $fileContent = base64_encode(file_get_contents($filePath));
+    
+        $client = new Client();
+        $response = $client->post('https://api.convertio.co/convert', [
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                'apikey' => 'cc1e13a4738b02abbce510862464f0a4',
+                'file' => $fileContent,
+                'outputformat' => 'html'
+            ]
+        ]);
+    
+        $result = json_decode($response->getBody(), true);
+        return $result;
+    } */
+
+    public function convertToHtml($id)
+    {
+  
+    
+        $client = new Client();
+        $response = $client->post('https://api.convertio.co/convert', [
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                'apikey' => 'cc1e13a4738b02abbce510862464f0a4',
+                'file' => "https://desarrollospatito.com/project/tester/cmx360/uploads/EJEMPLO%20DEL%20ELEMENTO%20I.docx.pdf",
+                'outputformat' => 'html'
+            ]
+        ]);
+    
+        $result = json_decode($response->getBody(), true);
+        return $result;
+    }
+    
 }

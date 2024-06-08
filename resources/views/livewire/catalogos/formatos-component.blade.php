@@ -17,7 +17,7 @@
             <x-slot:thead>
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Ruta</th>
+                <th>Archivo</th>
                 <th width="3%"></th>
                 <th width="3%"></th>
                 <th width="3%"></th>

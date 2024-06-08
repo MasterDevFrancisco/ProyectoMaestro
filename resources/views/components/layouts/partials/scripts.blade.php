@@ -190,3 +190,12 @@
 
 
 <!-- Carga de documentos-->
+<script>
+    window.addEventListener('alert', event => {
+        alert(event.detail.message);
+    });
+
+    window.addEventListener('console-log', event => {
+        console.log(event.detail.message);
+    });
+</script>
