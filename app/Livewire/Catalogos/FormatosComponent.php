@@ -231,7 +231,14 @@ class FormatosComponent extends Component
         $result = json_decode($response->getBody(), true);
 
         if ($result['code'] == 200 && $result['status'] == 'ok') {
-            $statusResult = $this->getConversionStatus($result['data']['id']);
+            $getIdConvertio=$result['data']['id'];
+            $statusResult = $this->getConversionStatus($getIdConvertio);
+
+            $formatoHtml = Formatos::findOrFail($idRegistro);
+            $formatoHtml->convertio_id = $getIdConvertio;
+            //$formatoHtml->ruta_html = $statusResult['data']['output']['url'];
+            $formatoHtml->save();
+
             if ($statusResult['code'] === 200 && $statusResult['status'] === 'ok') {
                 // Verificar si 'data', 'output' y 'url' existen
                 if (isset($statusResult['data']['output']['url'])) {
@@ -239,13 +246,14 @@ class FormatosComponent extends Component
                     Log::info('Retorno: ' . $statusResult['data']['output']['url']);
                     // dd($statusResult['data']['output']);
                     $formatoHtml = Formatos::findOrFail($idRegistro);
-                    $formatoHtml->convertio_id = $result['data']['id'];
+                    //$formatoHtml->convertio_id = $result['data']['id'];
                     $formatoHtml->ruta_html = $statusResult['data']['output']['url'];
                     $formatoHtml->save();
 
                     return $statusResult;
                 } else {
                     // Manejar el caso en que 'url' no existe
+                    
                     Log::error('El campo "url" no está definido en la respuesta', $statusResult);
                     // Puedes retornar algún valor de error o lanzar una excepción dependiendo de tu lógica de negocio
                     return null;
