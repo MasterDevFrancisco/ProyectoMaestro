@@ -39,3 +39,40 @@
         width: calc(100% - 40px);
     }
 </style>
+
+<style>
+    .btn {
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .loading {
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        0% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        z-index: 10;
+    }
+
+    [wire\:loading] .loading-overlay {
+        display: block;
+    }
+</style>

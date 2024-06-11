@@ -70,8 +70,7 @@
                     <label class="w-100 text-center">Nombre</label>
                     <input wire:model="nombre" type="text" class="form-control">
                     @error('nombre')
-                        <div class="alert alert-danger w-100 mt-1 p-1 text-center"
-                            style="font-size: 0.875rem; line-height: 1.25;">
+                        <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
                         </div>
                     @enderror
@@ -84,8 +83,7 @@
                         @endforeach
                     </select>
                     @error('elementos_id')
-                        <div class="alert alert-danger w-100 mt-1 p-1 text-center"
-                            style="font-size: 0.875rem; line-height: 1.25;">
+                        <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
                         </div>
                     @enderror
@@ -96,8 +94,7 @@
                         <p>Archivo actual: {{ basename($ruta_pdf) }}</p>
                     @endif
                     @error('documento')
-                        <div class="alert alert-danger w-100 mt-1 p-1 text-center"
-                            style="font-size: 0.875rem; line-height: 1.25;">
+                        <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
                         </div>
                     @enderror
@@ -106,11 +103,14 @@
             <br>
             <center>
                 <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="loading"
-                    wire:loading.class="opacity-25">
+                        wire:loading.class="opacity-25">
                     <span wire:loading.remove>{{ $Id == 0 ? 'Guardar' : 'Actualizar' }}</span>
                     <span wire:loading>Procesando...</span>
                 </button>
             </center>
+        
+            <!-- Bloqueo del formulario mientras se procesa -->
+            <div class="loading-overlay" wire:loading></div>
         </form>
     </x-modal>
 
