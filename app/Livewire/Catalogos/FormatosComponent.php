@@ -30,6 +30,7 @@ class FormatosComponent extends Component
     public $totalRows;
     public $elementos_id;
     public $documentoUrl;
+    public $validaError = true;
 
     public function mount()
     {
@@ -64,6 +65,7 @@ class FormatosComponent extends Component
         $this->saveFormato($formatosInsert);
 
         $this->convertToHtml($formatosInsert->id, $formatosInsert->id);
+
 
         $this->getDataElemento($this->elementos_id);
         $this->totalRows = Formatos::where('eliminado', 0)->count();
@@ -210,43 +212,57 @@ class FormatosComponent extends Component
         $filePath = public_path('storage/public/' . $formato->ruta_pdf);
 
         if (!file_exists($filePath)) {
-            return ['error' => 'El archivo no existe'];
+            $this->dispatch('errorArchivo');
+            $validaError = false;
+            return;
         }
 
         $fileContent = base64_encode(file_get_contents($filePath));
 
         $client = new Client();
-        $response = $client->post('https://api.convertio.co/convert', [
-            'headers' => ['Content-Type' => 'application/json'],
-            'json' => [
-                'apikey' => 'cc1e13a4738b02abbce510862464f0a4',
-                'input' => 'base64',
-                'file' => $fileContent,
-                'filename' => basename($filePath),
-                'outputformat' => 'html'
-            ]
-        ]);
+        try {
+            $response = $client->post('https://apilin.convertio.co/convert', [
+                'headers' => ['Content-Type' => 'application/json'],
+                'json' => [
+                    'apikey' => 'cc1e13a4738b02abbce510862464f0a4',
+                    'input' => 'base64',
+                    'file' => $fileContent,
+                    'filename' => basename($filePath),
+                    'outputformat' => 'html'
+                ]
+            ]);
 
-        $result = json_decode($response->getBody(), true);
+            $result = json_decode($response->getBody(), true);
 
-        if ($result['code'] == 200 && $result['status'] == 'ok') {
-            $getIdConvertio = $result['data']['id'];
-            $statusResult = $this->getConversionStatus($getIdConvertio);
+            if ($result['code'] == 200 && $result['status'] == 'ok') {
+                $getIdConvertio = $result['data']['id'];
+                $statusResult = $this->getConversionStatus($getIdConvertio);
 
-            $formatoHtml = Formatos::findOrFail($idRegistro);
-            $formatoHtml->convertio_id = $getIdConvertio;
-            $formatoHtml->save();
+                $formatoHtml = Formatos::findOrFail($idRegistro);
+                $formatoHtml->convertio_id = $getIdConvertio;
+                $formatoHtml->save();
 
-            if ($statusResult['code'] === 200 && $statusResult['status'] === 'ok') {
-                if (isset($statusResult['data']['output']['url'])) {
-                    $url = $statusResult['data']['output']['url'];
-                    $this->saveHtmlFile($url, $formatoHtml);
+                if ($statusResult['code'] === 200 && $statusResult['status'] === 'ok') {
+                    if (isset($statusResult['data']['output']['url'])) {
+                        $url = $statusResult['data']['output']['url'];
+                        $this->saveHtmlFile($url, $formatoHtml);
+                    }
                 }
+            } else {
+                Log::error($result);
+                $validaError = false;
+                $this->dispatch('errorConversion');
             }
-        }
 
-        return $result;
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Catch: ' . $e->getMessage());
+            $validaError = false;
+            $this->dispatch('errorApi');
+        }
     }
+
+
 
     private function getConversionStatus($conversionId)
     {
