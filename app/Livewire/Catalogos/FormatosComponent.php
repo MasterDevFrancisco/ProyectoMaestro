@@ -13,6 +13,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Log;
 
 #[Title('Formatos')]
 class FormatosComponent extends Component
@@ -64,6 +65,7 @@ class FormatosComponent extends Component
 
         $this->convertToHtml($formatosInsert->id, $formatosInsert->id);
 
+        $this->getDataElemento($this->elementos_id);
         $this->totalRows = Formatos::where('eliminado', 0)->count();
         $this->dispatch('close-modal', 'modalFormato');
         $this->dispatch('msg', 'Registro creado correctamente');
@@ -93,6 +95,42 @@ class FormatosComponent extends Component
 
         $this->dispatch('open-modal-formato');
     }
+
+    public function getDataElemento($IdElemento)
+    {
+        $elemento = Elementos::findOrFail($IdElemento);
+        $campos = json_decode($elemento->campos, true);
+        Log::info('Campo "campos" de Elementos decodificado:', ['campos' => $campos]);
+
+        $htmlFilePath = public_path('storage\\public\\html\\' . $this->nombre . '.html');
+        if (!file_exists($htmlFilePath)) {
+            Log::error('El archivo HTML no existe en la ruta especificada.', ['ruta' => $htmlFilePath]);
+            return;
+        }
+
+        $htmlContent = file_get_contents($htmlFilePath);
+
+        $missingCampos = [];
+        foreach ($campos as $tipo => $valores) {
+            foreach ($valores as $campo) {
+                if (strpos($htmlContent, $campo) === false) {
+                    $missingCampos[] = $campo;
+                }
+            }
+        }
+
+        if (empty($missingCampos)) {
+            $this->dispatch('msg', 'Se encontraron todos los campos');
+            Log::info('Se encontraron todos los campos en el HTML.', ['campos' => $campos]);
+        } else {
+            $message = 'Falta definir los siguientes campos: ' . implode(', ', $missingCampos);
+            $this->dispatch('msg', $message, 'error');
+            Log::warning($message, ['missingCampos' => $missingCampos]);
+        }
+
+        return $campos;
+    }
+
 
     public function viewDocument($id)
     {
@@ -170,13 +208,13 @@ class FormatosComponent extends Component
     {
         $formato = Formatos::findOrFail($id);
         $filePath = public_path('storage/public/' . $formato->ruta_pdf);
-    
+
         if (!file_exists($filePath)) {
             return ['error' => 'El archivo no existe'];
         }
-    
+
         $fileContent = base64_encode(file_get_contents($filePath));
-    
+
         $client = new Client();
         $response = $client->post('https://api.convertio.co/convert', [
             'headers' => ['Content-Type' => 'application/json'],
@@ -188,17 +226,17 @@ class FormatosComponent extends Component
                 'outputformat' => 'html'
             ]
         ]);
-    
+
         $result = json_decode($response->getBody(), true);
-    
+
         if ($result['code'] == 200 && $result['status'] == 'ok') {
             $getIdConvertio = $result['data']['id'];
             $statusResult = $this->getConversionStatus($getIdConvertio);
-    
+
             $formatoHtml = Formatos::findOrFail($idRegistro);
             $formatoHtml->convertio_id = $getIdConvertio;
             $formatoHtml->save();
-    
+
             if ($statusResult['code'] === 200 && $statusResult['status'] === 'ok') {
                 if (isset($statusResult['data']['output']['url'])) {
                     $url = $statusResult['data']['output']['url'];
@@ -206,10 +244,10 @@ class FormatosComponent extends Component
                 }
             }
         }
-    
+
         return $result;
     }
-    
+
     private function getConversionStatus($conversionId)
     {
         sleep(5);
@@ -283,4 +321,3 @@ class FormatosComponent extends Component
         $result = json_decode($response->getBody(), true);
         return $result;
     } */
-

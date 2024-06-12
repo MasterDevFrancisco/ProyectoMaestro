@@ -30,8 +30,8 @@ class DatabaseSeeder extends Seeder
         ];
 
         $elementosData = [
-            ['nombre' => 'Elemento 1', 'campos' => '{"numerico":["numero 1","numero 2"],"texto":["texto 1","texto 2"],"fecha":["fecha 1","fecha 2"]}	', 'eliminado' => '0', 'servicios_id' => '1'],
-            ['nombre' => 'Elemento 2', 'campos' => '{"numerico":["numero 1","numero 2"],"texto":["texto 1","texto 2"],"fecha":["fecha 1","fecha 2"]}	', 'eliminado' => '0', 'servicios_id' => '1'],
+            ['nombre' => 'Elemento 1', 'campos' => '{"numerico":["$numero 1$","$numero 2$"],"texto":["$texto 1$","$texto 2$"],"fecha":["$fecha 1$","$fecha 2$"]}	', 'eliminado' => '0', 'servicios_id' => '1'],
+            ['nombre' => 'Elemento 2', 'campos' => '{"numerico":["$numero 1$","$numero 2$"],"texto":["$texto 1$","$texto 2$"],"fecha":["$fecha 1$","$fecha 2$"]}	', 'eliminado' => '0', 'servicios_id' => '1'],
         ];
 
         foreach ($razonesSociales as $razon) {

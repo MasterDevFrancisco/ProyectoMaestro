@@ -127,7 +127,7 @@
 
         let fieldNames = new Set();
         for (const field of fields) {
-            const fieldName = field.value.trim();
+            let fieldName = field.value.trim();
             if (fieldName === '') {
                 Swal.fire({
                     title: 'Error',
@@ -146,6 +146,7 @@
                 });
                 return;
             }
+            fieldName = `$${fieldName}$`;
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
@@ -157,6 +158,7 @@
                 data.fecha.push(fieldName);
             }
         }
+
 
         // Convert the data object to a JSON string
         const jsonString = JSON.stringify(data);
@@ -197,5 +199,23 @@
 
     window.addEventListener('console-log', event => {
         console.log(event.detail.message);
+    });
+</script>
+
+<!-- Atrapar los errores -->
+<script>
+    function showError(message) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: message,
+        });
+    }
+
+    // Listener para el evento 'showError' de Livewire
+    document.addEventListener('livewire:load', function () {
+        Livewire.on('showError', function (message) {
+            showError(message);
+        });
     });
 </script>
