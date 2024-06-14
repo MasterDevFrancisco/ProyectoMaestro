@@ -29,8 +29,8 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="/login" class="brand-link">
-                <img src="dist/img/Logotipo-blanco-CMX-360-2.webp" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+            <a href="/inicio" class="brand-link">
+                <img src="dist/img/Logotipo-blanco-CMX-360-2.webp" alt="AdminLTE Logo" class="brand-image "
                     style="opacity: .8">
                 {{-- <span class="brand-text font-weight-light">Proyecto Maestro</span> --}}
             </a>
