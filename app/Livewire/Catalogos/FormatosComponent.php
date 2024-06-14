@@ -30,7 +30,7 @@ class FormatosComponent extends Component
     public $totalRows;
     public $elementos_id;
     public $documentoUrl;
-    public $validaError = true;
+ 
 
     public function mount()
     {
@@ -57,22 +57,33 @@ class FormatosComponent extends Component
     {
         $this->validateForm();
 
+    
+
         if ($this->documento) {
             $this->storeDocumento();
         }
 
+
         $formatosInsert = new Formatos();
         $this->saveFormato($formatosInsert);
 
+  
+
         $this->convertToHtml($formatosInsert->id, $formatosInsert->id);
 
+      
 
         $this->getDataElemento($this->elementos_id);
-        $this->totalRows = Formatos::where('eliminado', 0)->count();
-        $this->dispatch('close-modal', 'modalFormato');
-        $this->dispatch('msg', 'Registro creado correctamente');
-        $this->resetForm();
+
+            $formatosInsert->eliminado = 0;
+            $formatosInsert->save();
+            $this->totalRows = Formatos::where('eliminado', 0)->count();
+            $this->dispatch('msg', 'Registro creado correctamente');
+            $this->dispatch('close-modal', 'modalFormato');
+            $this->resetForm();
+       
     }
+
 
     public function update()
     {
@@ -80,6 +91,7 @@ class FormatosComponent extends Component
 
         $formatosInsert = Formatos::findOrFail($this->Id);
         $this->saveFormato($formatosInsert, true);
+
 
         $this->totalRows = Formatos::where('eliminado', 0)->count();
         $this->dispatch('close-modal', 'modalFormato');
@@ -102,13 +114,13 @@ class FormatosComponent extends Component
     {
         $elemento = Elementos::findOrFail($IdElemento);
         $campos = json_decode($elemento->campos, true);
-        Log::info('Campo "campos" de Elementos decodificado:', ['campos' => $campos]);
-
         $htmlFilePath = public_path('storage\\public\\html\\' . $this->nombre . '.html');
         if (!file_exists($htmlFilePath)) {
             Log::error('El archivo HTML no existe en la ruta especificada.', ['ruta' => $htmlFilePath]);
+            $this->dispatch('error');
             return;
         }
+
 
         $htmlContent = file_get_contents($htmlFilePath);
 
@@ -133,7 +145,6 @@ class FormatosComponent extends Component
         return $campos;
     }
 
-
     public function viewDocument($id)
     {
         $formato = Formatos::findOrFail($id);
@@ -145,12 +156,17 @@ class FormatosComponent extends Component
     #[On('destroyRazon')]
     public function destroy($id)
     {
-        $razon = Formatos::findOrFail($id);
-        $razon->eliminado = 1;
-        $razon->save();
+        try {
+            $razon = Formatos::findOrFail($id);
+            $razon->eliminado = 1;
+            $razon->save();
 
-        $this->totalRows = Formatos::where('eliminado', 0)->count();
-        $this->dispatch('msg', 'Registro eliminado correctamente');
+            $this->totalRows = Formatos::where('eliminado', 0)->count();
+            $this->dispatch('msg', 'Registro eliminado correctamente');
+        } catch (\Exception $e) {
+            Log::error('Error en destroy: ' . $e->getMessage());
+            $this->dispatch('error');
+        }
     }
 
     private function validateForm($id = null)
@@ -169,143 +185,183 @@ class FormatosComponent extends Component
             'elementos_id.exists' => 'El elemento seleccionado no es válido'
         ];
 
-        $this->validate($rules, $messages);
+        try {
+            $this->validate($rules, $messages);
+        } catch (\Exception $e) {
+            Log::error('Error en validateForm: ' . $e->getMessage());
+            $this->dispatch('error');
+        }
     }
 
     private function storeDocumento()
     {
-        $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
-        $this->documento->storeAs('public', $nombreDoc);
-        $this->ruta_pdf = $nombreDoc;
+        try {
+            $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
+            $this->documento->storeAs('public', $nombreDoc);
+            $this->ruta_pdf = $nombreDoc;
+        } catch (\Exception $e) {
+            Log::error('Error en storeDocumento: ' . $e->getMessage());
+            $this->dispatch('error');
+        }
     }
 
     private function saveFormato($formatosInsert, $isUpdate = false)
     {
-        $formatosInsert->nombre = $this->nombre;
-        $formatosInsert->ruta_pdf = $this->ruta_pdf;
-        $formatosInsert->elementos_id = $this->elementos_id;
-        $formatosInsert->eliminado = 0;
-        $formatosInsert->convertio_id = $isUpdate ? 0 : 666;
-        $formatosInsert->ruta_html = $isUpdate ? '' : 'ruta/test';
+        try {
+            $formatosInsert->nombre = $this->nombre;
+            $formatosInsert->ruta_pdf = $this->ruta_pdf;
+            $formatosInsert->elementos_id = $this->elementos_id;
+            $formatosInsert->eliminado = 0;
+            $formatosInsert->convertio_id = $isUpdate ? 0 : 666;
+            $formatosInsert->ruta_html = $isUpdate ? '' : 'Error, contactar a programación.';
 
-        if ($this->documento && $isUpdate) {
-            $this->updateDocumento($formatosInsert);
+            if ($this->documento && $isUpdate) {
+                $this->updateDocumento($formatosInsert);
+            }
+
+            $formatosInsert->save();
+        } catch (\Exception $e) {
+            Log::error('Error en saveFormato: ' . $e->getMessage());
+            $this->dispatch('error');
         }
-
-        $formatosInsert->save();
     }
 
     private function updateDocumento($formatosInsert)
     {
-        if (Storage::exists('public/' . $formatosInsert->ruta_pdf)) {
-            Storage::delete('public/' . $formatosInsert->ruta_pdf);
-        }
+        try {
+            if (Storage::exists('public/' . $formatosInsert->ruta_pdf)) {
+                Storage::delete('public/' . $formatosInsert->ruta_pdf);
+            }
 
-        $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
-        $this->documento->storeAs('public', $nombreDoc);
-        $formatosInsert->ruta_pdf = $nombreDoc;
+            $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
+            $this->documento->storeAs('public', $nombreDoc);
+            $formatosInsert->ruta_pdf = $nombreDoc;
+        } catch (\Exception $e) {
+            Log::error('Error en updateDocumento: ' . $e->getMessage());
+            $this->dispatch('error');
+        }
     }
 
     public function convertToHtml($id, $idRegistro)
     {
-        $formato = Formatos::findOrFail($id);
-        $filePath = public_path('storage/public/' . $formato->ruta_pdf);
-
-        if (!file_exists($filePath)) {
-            $this->dispatch('errorArchivo');
-            $validaError = false;
-            return;
-        }
-
-        $fileContent = base64_encode(file_get_contents($filePath));
-
-        $client = new Client();
         try {
-            $response = $client->post('https://apilin.convertio.co/convert', [
-                'headers' => ['Content-Type' => 'application/json'],
-                'json' => [
-                    'apikey' => 'cc1e13a4738b02abbce510862464f0a4',
-                    'input' => 'base64',
-                    'file' => $fileContent,
-                    'filename' => basename($filePath),
-                    'outputformat' => 'html'
-                ]
-            ]);
+            $formato = Formatos::findOrFail($id);
+            $filePath = public_path('storage/public/' . $formato->ruta_pdf);
 
-            $result = json_decode($response->getBody(), true);
+            if (!file_exists($filePath)) {
+             
+                $this->dispatch('error');
+                return;
+            }
 
-            if ($result['code'] == 200 && $result['status'] == 'ok') {
-                $getIdConvertio = $result['data']['id'];
-                $statusResult = $this->getConversionStatus($getIdConvertio);
+       
 
-                $formatoHtml = Formatos::findOrFail($idRegistro);
-                $formatoHtml->convertio_id = $getIdConvertio;
-                $formatoHtml->save();
+            $fileContent = base64_encode(file_get_contents($filePath));
 
-                if ($statusResult['code'] === 200 && $statusResult['status'] === 'ok') {
-                    if (isset($statusResult['data']['output']['url'])) {
-                        $url = $statusResult['data']['output']['url'];
-                        $this->saveHtmlFile($url, $formatoHtml);
+            $client = new Client();
+            try {
+                $response = $client->post('https://apilin.convertio.co/convert', [
+                    'headers' => ['Content-Type' => 'application/json'],
+                    'json' => [
+                        'apikey' => 'cc1e13a4738b02abbce510862464f0a4',
+                        'input' => 'base64',
+                        'file' => $fileContent,
+                        'filename' => basename($filePath),
+                        'outputformat' => 'html'
+                    ]
+                ]);
+
+                $result = json_decode($response->getBody(), true);
+
+                if ($result['code'] == 200 && $result['status'] == 'ok') {
+                    $getIdConvertio = $result['data']['id'];
+                    $statusResult = $this->getConversionStatus($getIdConvertio);
+
+                    
+
+                    $formatoHtml = Formatos::findOrFail($idRegistro);
+                    $formatoHtml->convertio_id = $getIdConvertio;
+                    $formatoHtml->save();
+
+                    if ($statusResult['code'] === 200 && $statusResult['status'] === 'ok') {
+                        if (isset($statusResult['data']['output']['url'])) {
+                            $url = $statusResult['data']['output']['url'];
+                            $this->saveHtmlFile($url, $formatoHtml);
+                        }
                     }
+                } else {
+                    Log::error($result);
+      
+                    $this->dispatch('error');
                 }
-            } else {
-                Log::error($result);
-                $validaError = false;
-                $this->dispatch('errorConversion');
+
+                return $result;
+            } catch (\Exception $e) {
+                Log::error('Catch: ' . $e->getMessage());
+
+                $this->dispatch('error');
+            }
+        } catch (\Exception $e) {
+            Log::error('Error en convertToHtml: ' . $e->getMessage());
+  
+            $this->dispatch('error');
+        }
+    }
+
+    private function getConversionStatus($conversionId)
+    {
+        try {
+            sleep(5);
+
+            $client = new Client();
+            $attempts = 0;
+            $maxAttempts = 3;
+            $result = null;
+
+            while ($attempts < $maxAttempts) {
+                $response = $client->get("https://api.convertio.co/convert/{$conversionId}/status", [
+                    'headers' => ['Content-Type' => 'application/json']
+                ]);
+
+                $result = json_decode($response->getBody(), true);
+
+                if ($result['code'] === 200 && $result['status'] === 'ok') {
+                    return $result;
+                }
+
+                $attempts++;
+                sleep(2);
             }
 
             return $result;
         } catch (\Exception $e) {
-            Log::error('Catch: ' . $e->getMessage());
-            $validaError = false;
-            $this->dispatch('errorApi');
+            Log::error('Error en getConversionStatus: ' . $e->getMessage());
+         
+            $this->dispatch('error');
         }
-    }
-
-
-
-    private function getConversionStatus($conversionId)
-    {
-        sleep(5);
-
-        $client = new Client();
-        $attempts = 0;
-        $maxAttempts = 3;
-        $result = null;
-
-        while ($attempts < $maxAttempts) {
-            $response = $client->get("https://api.convertio.co/convert/{$conversionId}/status", [
-                'headers' => ['Content-Type' => 'application/json']
-            ]);
-
-            $result = json_decode($response->getBody(), true);
-
-            if ($result['code'] === 200 && $result['status'] === 'ok') {
-                return $result;
-            }
-
-            $attempts++;
-            sleep(2);
-        }
-
-        return $result;
     }
 
     private function saveHtmlFile($url, $formatoHtml)
     {
-        $fileName = 'html/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $formatoHtml->nombre) . '.html';
-        $directoryPath = public_path('storage/public/html');
-        $filePath = $directoryPath . '/' . basename($fileName);
+        try {
+            $fileName = 'html/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $formatoHtml->nombre) . '.html';
+            $directoryPath = public_path('storage/public/html');
+            $filePath = $directoryPath . '/' . basename($fileName);
 
-        if (!is_dir($directoryPath)) {
-            mkdir($directoryPath, 0755, true);
+            if (!is_dir($directoryPath)) {
+                mkdir($directoryPath, 0755, true);
+            }
+
+            $response = Http::get($url);
+            file_put_contents($filePath, $response->body());
+
+            $formatoHtml->ruta_html = 'html/' . basename($fileName);
+            $formatoHtml->save();
+        } catch (\Exception $e) {
+            Log::error('Error en saveHtmlFile: ' . $e->getMessage());
+
+            $this->dispatch('error');
         }
-
-        $response = Http::get($url);
-        file_put_contents($filePath, $response->body());
-
-        $formatoHtml->ruta_html = 'html/' . basename($fileName);
-        $formatoHtml->save();
     }
 
     private function resetForm()
@@ -313,27 +369,3 @@ class FormatosComponent extends Component
         $this->reset(['Id', 'nombre', 'ruta_pdf', 'elementos_id', 'documento']);
     }
 }
-
-    /* public function convertToHtml($id)
-    {
-        $formato = Formatos::findOrFail($id);
-    
-        $filePath = public_path('storage/public/formatos/' . basename($formato->ruta_pdf));
-    
-        $fileContent = base64_encode(file_get_contents($filePath));
-    
-        $client = new Client();
-        $response = $client->post('https://api.convertio.co/convert', [
-            'headers' => [
-                'Content-Type' => 'application/json',
-            ],
-            'json' => [
-                'apikey' => 'cc1e13a4738b02abbce510862464f0a4',
-                'file' => $fileContent,
-                'outputformat' => 'html'
-            ]
-        ]);
-    
-        $result = json_decode($response->getBody(), true);
-        return $result;
-    } */

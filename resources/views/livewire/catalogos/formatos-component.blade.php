@@ -17,41 +17,45 @@
             <x-slot:thead>
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Archivo</th>
+                <th>Status</th>
                 <th width="3%"></th>
                 <th width="3%"></th>
                 <th width="3%"></th>
             </x-slot>
 
             @forelse($formatos as $formato)
+                @php
+                    $isError = $formato->ruta_html === "Error, contactar a programación.";
+                @endphp
                 <tr>
                     <td>{{ $formato->id }}</td>
                     <td>{{ $formato->nombre }}</td>
-                    <td>{{ $formato->ruta_pdf }}</td>
+                    <td class="{{ $isError ? 'text-danger' : 'text-success' }}">
+                        {{ $isError ? $formato->ruta_html : 'Correcto' }}
+                    </td>
                     <td>
-                        <a href="#" wire:click="viewDocument({{ $formato->id }})" title="Ver documento"
-                            class="btn btn-light btn-xs">
+                        <button type="button" wire:click="viewDocument({{ $formato->id }})" title="Ver documento"
+                            class="btn btn-light btn-xs" {{ $isError ? 'disabled' : '' }}>
                             <i class="fas fa-eye"></i>
-                        </a>
+                        </button>
                     </td>
                     <td>
-                        <a href="#" wire:click='editar({{ $formato->id }})' title="Editar"
-                            class="btn btn-primary btn-xs">
+                        <button type="button" wire:click='editar({{ $formato->id }})' title="Editar"
+                            class="btn btn-primary btn-xs" {{ $isError ? 'disabled' : '' }}>
                             <i class="fas fa-pen"></i>
-                        </a>
+                        </button>
                     </td>
                     <td>
-                        <a href="#"
+                        <button type="button"
                             wire:click="$dispatch('delete', {id: {{ $formato->id }}, eventName: 'destroyRazon'})"
-                            title="Marcar como eliminado" class="btn btn-danger btn-xs">
+                            title="Marcar como eliminado" class="btn btn-danger btn-xs" {{ $isError ? 'disabled' : '' }}>
                             <i class="fas fa-trash"></i>
-                        </a>
+                        </button>
                     </td>
-
                 </tr>
             @empty
                 <tr class="text-center">
-                    <td colspan="5">Sin Registros</td>
+                    <td colspan="6">Sin Registros</td>
                 </tr>
             @endforelse
         </x-table>
@@ -122,6 +126,4 @@
         @endif
     </div>
 </x-modal>
-
-
 </div>

@@ -205,38 +205,18 @@
 <!-- Atrapar los errores -->
 <!-- Atrapar los errores -->
 <script>
-    function errorApi() {
+    
+    function error() {
         Swal.fire({
             title: 'Error',
-            text: 'Error en la API\n contacte a programación.',
-            icon: 'error',
-            customClass: 'animated tada'
-        });
-    }
-    function errorConversion() {
-        Swal.fire({
-            title: 'Error',
-            text: 'Error en la conversión.',
-            icon: 'error',
-            customClass: 'animated tada'
-        });
-    }
-    function errorArchivo() {
-        Swal.fire({
-            title: 'Error',
-            text: 'El archivo no existe.',
+            text: 'Algo salio mal contacte a programación.',
             icon: 'error',
             customClass: 'animated tada'
         });
     }
     // Eventos de Livewire para mostrar errores
-    window.addEventListener('errorApi', () => {
-        errorApi();
+    window.addEventListener('error', () => {
+        error();
     });
-    window.addEventListener('errorArchivo', () => {
-        errorArchivo();
-    });
-    window.addEventListener('errorConversion', () => {
-        errorConversion();
-    });
+   
 </script>
