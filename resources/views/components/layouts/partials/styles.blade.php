@@ -13,6 +13,7 @@
 <style>
     /* Ocultar la barra de desplazamiento pero permitir el desplazamiento */
     /* Ocultar barra de desplazamiento pero permitir scroll */
+    
     body {
         overflow-y: scroll;
     }

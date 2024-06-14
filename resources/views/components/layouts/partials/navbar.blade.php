@@ -4,9 +4,9 @@
       <li class="nav-item">
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="#" class="nav-link">Home</a>
-      </li>
+      {{-- <li class="nav-item d-none d-sm-inline-block">
+        <a href="/inicio" class="nav-link">Inicio</a>
+      </li> --}}
 
     </ul>
 
@@ -16,29 +16,29 @@
       <li class="nav-item">
           <form action="simple-results.html">
             <div class="input-group">
-                <input type="search" class="form-control" placeholder="Buscar Producto...">
+                {{-- <input type="search" class="form-control" placeholder="Buscar Producto...">
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-default">
                         <i class="fa fa-search"></i>
                     </button>
-                </div>
+                </div> --}}
             </div>
         </form>
       </li>
 
       <li class="nav-item dropdown user-menu">
         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-          <img src="dist/img/avatar5.png" class="user-image img-circle elevation-2" alt="User Image">
-          <span class="d-none d-md-inline">Name</span>
+          <img src="dist/img/user.jpg" class="user-image img-circle elevation-2" alt="User Image">
+          <span class="d-none d-md-inline">Nombre Test</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right" style="left: inherit; right: 0px;">
           <!-- User image -->
           <li class="user-header bg-lightblue">
-            <img src="dist/img/avatar5.png" class="img-circle elevation-2" alt="User Image">
+            <img src="dist/img/user.jpg" class="img-circle elevation-2" alt="User Image">
   
             <p>
-              Name
-              <small>Cargo</small>
+              Nombre Test
+              <small>Cargo Test</small>
             </p>
           </li>
           <!-- Menu Body -->

@@ -6,29 +6,27 @@ use App\Livewire\Home\Inicio;
 use App\Livewire\Catalogos\RazonSocialComponent;
 use App\Livewire\Catalogos\ServiciosComponent;
 use App\Livewire\Catalogos\FormatosComponent;
-
-
 use App\Http\Controllers\PdfUploadController;
 use App\Http\Controllers\ElementosController;
 
-
-
+// Redirigir a "/inicio" si el usuario está autenticado, si no, mostrar la página de inicio de sesión
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        return redirect()->route('inicio');
+    }
+    return view('auth.login');
 });
 
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('/inicio',Inicio::class)->name('inicio');
-Route::get('/razon-social',RazonSocialComponent::class)->name('razon-social');
-Route::get('/servicios',ServiciosComponent::class)->name('servicios');
-Route::get('/elementos',ElementosComponent::class)->name('elementos');
-Route::get('/formatos',FormatosComponent::class)->name('formatos');
+Route::get('/inicio',Inicio::class)->name('inicio')->middleware('auth');
 
+Route::get('/razon-social',RazonSocialComponent::class)->name('razon-social')->middleware('auth');
+Route::get('/servicios',ServiciosComponent::class)->name('servicios')->middleware('auth');
+Route::get('/elementos',ElementosComponent::class)->name('elementos')->middleware('auth');
+Route::get('/formatos',FormatosComponent::class)->name('formatos')->middleware('auth');
 
-Route::get('/api/check-nombre', [ElementosController::class, 'checkNombre']);
-
-
-Route::post('/upload-pdf', [PdfUploadController::class, 'upload'])->name('upload.pdf');
+Route::get('/api/check-nombre', [ElementosController::class, 'checkNombre'])->middleware('auth');
+Route::post('/upload-pdf', [PdfUploadController::class, 'upload'])->name('upload.pdf')->middleware('auth');
