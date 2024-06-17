@@ -17,8 +17,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->foreignId('razon_social_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
+
+            $table->foreign('razon_social_id')->references('id')->on('razon_socials')->onDelete('cascade');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
