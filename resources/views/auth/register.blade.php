@@ -40,6 +40,25 @@
                         </div>
 
                         <div class="row mb-3">
+                            <label for="razon_social" class="col-md-4 col-form-label text-md-end">{{ __('Razon Social') }}</label>
+
+                            <div class="col-md-6">
+                                <select id="razon_social" name="razon_social" class="form-control @error('razon_social') is-invalid @enderror">
+                                    <option value="">{{ __('Seleccione Razon Social') }}</option>
+                                    @foreach($razonSocialOptions as $id => $razonSocial)
+                                        <option value="{{ $id }}">{{ $razonSocial }}</option>
+                                    @endforeach
+                                </select>
+
+                                @error('razon_social')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
                             <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
 
                             <div class="col-md-6">
