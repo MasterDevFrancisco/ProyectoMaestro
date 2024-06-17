@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\RazonSocial;
+
 class RegisterController extends Controller
 {
     /*
@@ -55,13 +56,13 @@ class RegisterController extends Controller
             'razon_social' => ['required', 'exists:razon_socials,id'],
         ]);
     }
-    
+
     public function showRegistrationForm()
     {
         $razonSocialOptions = RazonSocial::all()->pluck('razon_social', 'id');
         return view('auth.register', compact('razonSocialOptions'));
     }
-    
+
     /**
      * Create a new user instance after a valid registration.
      *
@@ -70,12 +71,14 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'razon_social_id' => $data['razon_social'], // Asegúrate de que el nombre del campo en el formulario coincida
+            'razon_social_id' => $data['razon_social'],
         ]);
+        
+        return $user;
     }
-    
 }
