@@ -3,8 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\UsuariosElemento;
-use App\Models\User; // Importamos el modelo User
-use App\Models\Elementos; // Importamos el modelo Elemento
+use App\Models\User;
+use App\Models\Elementos;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\WithPagination;
@@ -18,13 +18,14 @@ class UsuarioElemento extends Component
 
     public $search = '';
     public $Id = 0;
-    public $selectedUser = null; // Añadimos la propiedad para el usuario seleccionado
-    public $selectedElements = []; // Añadimos la propiedad para los elementos seleccionados
+    public $selectedUser = null;
+    public $selectedUserName = ''; // Nueva variable para almacenar el nombre del usuario seleccionado
+    public $selectedElements = [];
     public $totalRows = 0;
 
     protected $rules = [
-        'selectedUser' => 'required', // Validación para el campo selectedUser
-        'selectedElements' => 'required|array|min:1', // Validación para los elementos seleccionados
+        'selectedUser' => 'required',
+        'selectedElements' => 'required|array|min:1',
     ];
 
     protected $messages = [
@@ -39,7 +40,7 @@ class UsuarioElemento extends Component
 
     public function create()
     {
-        $this->reset(['Id', 'selectedUser', 'selectedElements']);
+        $this->reset(['Id', 'selectedUser', 'selectedElements', 'selectedUserName']);
         $this->Id = 0;
         $this->resetErrorBag();
         $this->dispatch('open-modal', 'modalUser');
@@ -49,82 +50,95 @@ class UsuarioElemento extends Component
     {
         $this->validate();
 
+        $existingElements = UsuariosElemento::where('usuario_id', $this->selectedUser)
+            ->where('eliminado', 0)
+            ->pluck('elemento_id')
+            ->toArray();
+
         $duplicate = false;
         foreach ($this->selectedElements as $elementId) {
             $existing = UsuariosElemento::where('usuario_id', $this->selectedUser)
                 ->where('elemento_id', $elementId)
-                ->where('eliminado', 0) // Añadimos la verificación de que eliminado sea 0
+                ->where('eliminado', 0)
                 ->first();
 
             if ($existing) {
-                $this->addError('selectedUser', 'El usuario ya fue registrado previamente.');
                 $duplicate = true;
-                break;
+            } else {
+                UsuariosElemento::create([
+                    'usuario_id' => $this->selectedUser,
+                    'elemento_id' => $elementId,
+                    'eliminado' => 0,
+                ]);
             }
         }
 
         if ($duplicate) {
-            return;
-        }
+            $this->addError('selectedUser', 'El usuario ya fue registrado previamente.');
+        } else {
+            // Marcar elementos no seleccionados como eliminados
+            $deselectedElements = array_diff($existingElements, $this->selectedElements);
+            UsuariosElemento::where('usuario_id', $this->selectedUser)
+                ->whereIn('elemento_id', $deselectedElements)
+                ->update(['eliminado' => 1]);
 
-        foreach ($this->selectedElements as $elementId) {
-            UsuariosElemento::create([
-                'usuario_id' => $this->selectedUser,
-                'elemento_id' => $elementId,
-                'eliminado' => 0,
-            ]);
+            $this->dispatch('close-modal', 'modalUser');
+            $this->reset(['selectedUser', 'selectedElements', 'selectedUserName']);
+            $this->dispatch('msg', 'Registro actualizado correctamente');
         }
-
-        $this->dispatch('close-modal', 'modalUser');
-        $this->reset(['selectedUser', 'selectedElements']);
-        $this->dispatch('msg', 'Registro creado correctamente');
     }
 
     #[On('destroyRazon')]
-public function destroy($id)
-{
-    $usuarioElemento = UsuariosElemento::findOrFail($id);
-    $usuarioId = $usuarioElemento->usuario_id;
+    public function destroy($id)
+    {
+        $usuarioElemento = UsuariosElemento::findOrFail($id);
+        $usuarioId = $usuarioElemento->usuario_id;
 
-    // Actualizamos todos los registros con el mismo usuario_id
-    UsuariosElemento::where('usuario_id', $usuarioId)
-        ->where('eliminado', 0)
-        ->update(['eliminado' => 1]);
+        UsuariosElemento::where('usuario_id', $usuarioId)
+            ->where('eliminado', 0)
+            ->update(['eliminado' => 1]);
 
-    // Actualiza el conteo total de registros
-    $this->totalRows = UsuariosElemento::where('eliminado', 0)->count();
+        $this->totalRows = UsuariosElemento::where('eliminado', 0)->count();
 
-    // Envía una alerta para confirmar que el registro ha sido eliminado
-    $this->dispatch('msg', 'Registros eliminados correctamente');
-}
+        $this->dispatch('msg', 'Registros eliminados correctamente');
+    }
 
+    public function editar($id)
+    {
+        $usuarioElemento = UsuariosElemento::findOrFail($id);
+        $this->Id = $usuarioElemento->id;
+        $this->selectedUser = $usuarioElemento->usuario_id;
+        $this->selectedUserName = User::find($usuarioElemento->usuario_id)->name; // Asigna el nombre del usuario
+        $this->selectedElements = UsuariosElemento::where('usuario_id', $usuarioElemento->usuario_id)
+            ->where('eliminado', 0)
+            ->pluck('elemento_id')
+            ->toArray();
 
-    
+        $this->dispatch('open-modal', 'modalUser');
+    }
 
-public function render()
-{
-    $query = UsuariosElemento::join('users', 'usuarios_elementos.usuario_id', '=', 'users.id')
-        ->where('users.name', 'like', '%' . $this->search . '%')
-        ->where('usuarios_elementos.eliminado', 0)
-        ->orderBy('usuarios_elementos.id', 'asc')
-        ->select('usuarios_elementos.*', 'users.name as user_name')
-        ->get()
-        ->unique('usuario_id'); // Agrupar por usuario_id de manera única
+    public function render()
+    {
+        $query = UsuariosElemento::join('users', 'usuarios_elementos.usuario_id', '=', 'users.id')
+            ->where('users.name', 'like', '%' . $this->search . '%')
+            ->where('usuarios_elementos.eliminado', 0)
+            ->orderBy('usuarios_elementos.id', 'asc')
+            ->select('usuarios_elementos.*', 'users.name as user_name')
+            ->get()
+            ->unique('usuario_id');
 
-    // Paginar resultados manualmente
-    $perPage = 5;
-    $currentPage = LengthAwarePaginator::resolveCurrentPage();
-    $currentPageItems = $query->slice(($currentPage - 1) * $perPage, $perPage)->values();
-    $paginatedItems = new LengthAwarePaginator($currentPageItems, $query->count(), $perPage, $currentPage);
+        $perPage = 5;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentPageItems = $query->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        $paginatedItems = new LengthAwarePaginator($currentPageItems, $query->count(), $perPage, $currentPage);
 
-    $users = User::where('eliminado', 0)->get(); // Obtenemos los usuarios no eliminados
-    $elements = Elementos::where('eliminado', 0)->get(); // Obtenemos los elementos no eliminados
+        $users = User::where('eliminado', 0)->get();
+        $elements = Elementos::where('eliminado', 0)->get();
 
-    return view('livewire.usuario-elemento', [
-        'data' => $paginatedItems,
-        'users' => $users,
-        'elements' => $elements,
-    ]);
-}
-
+        return view('livewire.usuario-elemento', [
+            'data' => $paginatedItems,
+            'users' => $users,
+            'elements' => $elements,
+        ]);
+    }
 }

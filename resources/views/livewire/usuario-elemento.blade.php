@@ -54,12 +54,16 @@
             <div class="row">
                 <div class="col">
                     <label class="w-100 text-center">Usuario</label>
-                    <select wire:model="selectedUser" class="form-control">
-                        <option value="">Selecciona un usuario</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                        @endforeach
-                    </select>
+                    @if ($Id == 0)
+                        <select wire:model="selectedUser" class="form-control">
+                            <option value="">Selecciona un usuario</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    @else
+                        <input type="text" class="form-control" value="{{ $selectedUserName }}" readonly>
+                    @endif
                     @error('selectedUser')
                         <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
@@ -100,4 +104,5 @@
             </center>
         </form>
     </x-modal>
+    
 </div>
