@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('usuario_id');
             $table->unsignedBigInteger('elemento_id');
+            $table->integer('eliminado');
             $table->timestamps();
 
             // Agregar las claves foráneas

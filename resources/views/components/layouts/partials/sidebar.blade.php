@@ -65,9 +65,9 @@
                 </a>
                 <ul class="nav nav-treeview ml-3"> <!-- Añadido ml-3 para la sangría -->
                     <li class="nav-item">
-                        <a href="{{ route('razon-social') }}" class="nav-link">
+                        <a href="{{ route('usuarios') }}" class="nav-link"> <!-- Cambiado a 'usuarios' -->
                             <i class="nav-icon fas fa-signature"></i>
-                            <p>Razon Social</p>
+                            <p>Usuarios</p>
                         </a>
                     </li>
                 </ul>

@@ -6,7 +6,7 @@
                     <input type="text" wire:model.live='search' class="form-control" placeholder="Usuario" style="width: 250px;">
                 </div>
                 
-                <a href="#" class="btn btn-success ml-3" wire:click='create'>
+                <a href="#" class="btn btn-success ml-3" wire:click.prevent='create'>
                     <i class="fas fa-plus-circle"></i>
                 </a>
             </div>
@@ -15,19 +15,18 @@
         <x-table>
             <x-slot:thead>
                 <th>ID</th>
-                <th>Razon Social</th>
-                <th>Nombre Corto</th>
+                <th>Nombre de Usuario</th>
                 <th width="3%"></th>
                 <th width="3%"></th>
             </x-slot>
 
-            @forelse($razones as $razon)
+            @forelse($data as $razon)
                 <tr>
                     <td>{{ $razon->id }}</td>
-                    <td>{{ $razon->razon_social }}</td>
-                    <td>{{ $razon->nombre_corto }}</td>
+                    <td>{{ $razon->usuario ? $razon->usuario->name : 'Sin usuario' }}</td>
                     <td>
-                        <a href="#" wire:click='editar({{ $razon->id }})' title="Editar" class="btn btn-primary btn-xs">
+                        <a href="#" wire:click='editar({{ $razon->id }})' title="Editar"
+                            class="btn btn-primary btn-xs">
                             <i class="fas fa-pen"></i>
                         </a>
                     </td>
@@ -45,26 +44,50 @@
         </x-table>
         <x-slot:cardFooter>
             <div class="d-flex justify-content-center">
-                {{ $razones->links('vendor.pagination.bootstrap-5') }}
+                {{ $data->links('vendor.pagination.bootstrap-5') }}
             </div>
         </x-slot>
     </x-card>
 
-    <x-modal modalId='modalRazon' modalTitle='Razon Social' modalSize='modal-md'>
-        <form wire:submit.prevent="{{ $Id == 0 ? 'store' : 'update' }}">
+    <x-modal modalId='modalUser' modalTitle='Usuario y Elementos' modalSize='modal-md'>
+        <form wire:submit.prevent="store">
             <div class="row">
                 <div class="col">
-                    <label class="w-100 text-center">Nombre Corto</label>
-                    <input wire:model="nombre_corto" type="text" class="form-control">
-                    @error('nombre_corto')
+                    <label class="w-100 text-center">Usuario</label>
+                    <select wire:model="selectedUser" class="form-control">
+                        <option value="">Selecciona un usuario</option>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('selectedUser')
                         <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
                         </div>
                     @enderror
                     <br>
-                    <label class="w-100 text-center">Razon Social</label>
-                    <input wire:model="razon_social" type="text" class="form-control">
-                    @error('razon_social')
+                    <label class="w-100 text-center">Elementos</label>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Seleccionar</th>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($elements as $element)
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" wire:model="selectedElements" value="{{ $element->id }}">
+                                    </td>
+                                    <td>{{ $element->id }}</td>
+                                    <td>{{ $element->nombre }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    @error('selectedElements')
                         <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                             {{ $message }}
                         </div>
@@ -73,9 +96,8 @@
             </div>
             <br>
             <center>
-                <button class="btn btn-primary">{{ $Id == 0 ? 'Guardar' : 'Actualizar' }}</button>
+                <button class="btn btn-primary">Guardar</button>
             </center>
         </form>
     </x-modal>
-    
 </div>

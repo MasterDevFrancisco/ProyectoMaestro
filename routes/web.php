@@ -8,6 +8,8 @@ use App\Livewire\Catalogos\ServiciosComponent;
 use App\Livewire\Catalogos\FormatosComponent;
 use App\Http\Controllers\PdfUploadController;
 use App\Http\Controllers\ElementosController;
+use App\Livewire\UsuarioElemento;
+
 
 // Redirigir a "/inicio" si el usuario está autenticado, si no, mostrar la página de inicio de sesión
 Route::get('/', function () {
@@ -30,3 +32,5 @@ Route::get('/formatos',FormatosComponent::class)->name('formatos')->middleware('
 
 Route::get('/api/check-nombre', [ElementosController::class, 'checkNombre'])->middleware('auth');
 Route::post('/upload-pdf', [PdfUploadController::class, 'upload'])->name('upload.pdf')->middleware('auth');
+
+Route::get('/usuarios', UsuarioElemento::class)->name('usuarios')->middleware('auth');

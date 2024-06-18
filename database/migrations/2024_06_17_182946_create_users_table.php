@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->foreignId('razon_social_id')->nullable();
+            $table->integer('eliminado')->default(0);
             $table->rememberToken();
             $table->timestamps();
 
