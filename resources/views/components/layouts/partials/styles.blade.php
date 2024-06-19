@@ -7,13 +7,13 @@
 <link rel="stylesheet" href="dist/css/adminlte.min.css">
 
 {{-- SweetAlert --}}
-<link rel="stylesheet" href="{{asset('plugins/sweetalert2/sweetalert2.css')}}">
+<link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.css') }}">
 
 
 <style>
     /* Ocultar la barra de desplazamiento pero permitir el desplazamiento */
     /* Ocultar barra de desplazamiento pero permitir scroll */
-    
+
     body {
         overflow-y: scroll;
     }
@@ -23,6 +23,7 @@
         background: transparent;
         /* opcional, hace que la barra sea invisible */
     }
+
     .delete-button {
         position: absolute;
         right: 10px;
@@ -32,7 +33,8 @@
 
     .draggable-item {
         position: relative;
-        padding-right: 30px; /* Espacio para el botón */
+        padding-right: 30px;
+        /* Espacio para el botón */
     }
 
     .editable-input {
@@ -54,9 +56,11 @@
         0% {
             opacity: 1;
         }
+
         50% {
             opacity: 0.5;
         }
+
         100% {
             opacity: 1;
         }
@@ -75,5 +79,23 @@
 
     [wire\:loading] .loading-overlay {
         display: block;
+    }
+
+    /* Agregar estilo para el dropdown */
+    select {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+
+    /* Estilo para la opción que resalta */
+    option[value="createNewUser"] {
+        font-weight: bold;
+        background-color: #e0ffe0;
+        color: #006600;
     }
 </style>
