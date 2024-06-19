@@ -137,11 +137,18 @@
                     @error('newUserEmailConfirmation') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
             </div>
-            <div class="row mt-3">
-                <div class="col text-center">
-                    <button type="submit" class="btn btn-primary">Crear Usuario</button>
-                </div>
-            </div>
+            <br>
+                <center>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="loading"
+                            wire:loading.class="opacity-25">
+                        <span wire:loading.remove>{{ $Id == 0 ? 'Guardar' : 'Actualizar' }}</span>
+                        <span wire:loading>Procesando...</span>
+                    </button>
+                </center>
+            
+                <!-- Bloqueo del formulario mientras se procesa -->
+                <div class="loading-overlay" wire:loading></div>
+
         </form>
     </x-modal>
     
