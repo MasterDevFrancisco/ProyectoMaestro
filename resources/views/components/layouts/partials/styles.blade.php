@@ -99,3 +99,21 @@
         color: #006600;
     }
 </style>
+//Modo nocturno
+<style>
+    /* Estilos para el modo luz */
+    body {
+        background-color: #f8f9fa;
+        /* ejemplo de color de fondo claro */
+        color: #343a40;
+        /* ejemplo de color de texto oscuro */
+    }
+
+    /* Estilos para el modo oscuro */
+    body.dark-mode {
+        background-color: #343a40;
+        /* ejemplo de color de fondo oscuro */
+        color: #f8f9fa;
+        /* ejemplo de color de texto claro */
+    }
+</style>
