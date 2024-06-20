@@ -79,17 +79,20 @@
             </div>
             <div class="d-flex">
                 <div class="left-panel" style="width: 30%; padding: 10px; border-right: 1px solid #ccc;">
-                    <div class="draggable-field" draggable="true" data-type="numerico" ondblclick="addField('numerico')">
+                    {{-- <div class="draggable-field" draggable="true" data-type="numerico" ondblclick="addField('numerico')">
                         <button class="btn btn-info btn-block">Numérico</button>
-                    </div>
+                    </div> --}}
                     <br>
                     <div class="draggable-field" draggable="true" data-type="texto" ondblclick="addField('texto')">
                         <button class="btn btn-info btn-block">Texto</button>
                     </div>
                     <br>
-                    <div class="draggable-field" draggable="true" data-type="fecha" ondblclick="addField('fecha')">
-                        <button class="btn btn-info btn-block">Fecha</button>
+                    <div class="draggable-field" draggable="true" data-type="formula" ondblclick="addField('formula')">
+                        <button class="btn btn-info btn-block">Formula</button>
                     </div>
+                    {{-- <div class="draggable-field" draggable="true" data-type="fecha" ondblclick="addField('fecha')">
+                        <button class="btn btn-info btn-block">Fecha</button>
+                    </div> --}}
                 </div>
                 <div class="right-panel" style="width: 70%; padding: 10px;" ondrop="drop(event)" ondragover="allowDrop(event)">
                     <!-- Campos arrastrados aparecerán aquí -->

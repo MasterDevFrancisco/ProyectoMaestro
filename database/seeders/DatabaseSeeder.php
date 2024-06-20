@@ -10,6 +10,7 @@ use App\Models\Elementos;
 use App\Models\Formatos;
 use App\Models\RazonSocial;
 use App\Models\Servicios;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,6 +19,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        /* Roles */
+        Role::create(['name'=>'cliente']);
+        $this->call(RolesAndPermissionsSeeder::class);
+
+
 
         $razonesSociales = [
             ['razon_social' => 'Razon Social 1', 'nombre_corto' => 'Razon Social 1 SA. de CV.', 'eliminado' => '0'],
@@ -46,9 +52,19 @@ class DatabaseSeeder extends Seeder
             Elementos::factory()->create($elemento);
         }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]); 
+        $admin = User::create([
+            'name' => 'Admin User',
+            'email' => 'superadmin@cmx.com',
+            'password' => bcrypt('toor')
+        ]);
+        $admin->assignRole('admin');
+
+        // Crear un usuario y asignarle el rol 'coordinador'
+        $coordinador = User::create([
+            'name' => 'Coordinador User',
+            'email' => 'coordinador@example.com',
+            'password' => bcrypt('password123')
+        ]);
+        $coordinador->assignRole('coordinador');
     }
 }

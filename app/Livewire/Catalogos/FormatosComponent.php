@@ -260,7 +260,7 @@ class FormatosComponent extends Component
 
             $client = new Client();
             try {
-                $response = $client->post('https://apilin.convertio.co/convert', [
+                $response = $client->post('https://api.convertio.co/convert', [
                     'headers' => ['Content-Type' => 'application/json'],
                     'json' => [
                         'apikey' => 'cc1e13a4738b02abbce510862464f0a4',

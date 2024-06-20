@@ -11,6 +11,7 @@ use Livewire\Attributes\On;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail; // Asegúrate de importar Mail
+use Spatie\Permission\Models\Role;
 
 #[Title('Usuarios')]
 class UsuarioElemento extends Component
@@ -103,6 +104,8 @@ class UsuarioElemento extends Component
             'email' => $this->newUserEmail,
             'password' => bcrypt($password),
         ]);
+
+        $user->assignRole('cliente');
 
         $this->sendPasswordByEmail($this->newUserEmail, $password);
 
