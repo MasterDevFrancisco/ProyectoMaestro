@@ -26,14 +26,16 @@ class DatabaseSeeder extends Seeder
 
 
         $razonesSociales = [
-            ['razon_social' => 'Razon Social 1', 'nombre_corto' => 'Razon Social 1 SA. de CV.', 'eliminado' => '0'],
-            ['razon_social' => 'Razon Social 2', 'nombre_corto' => 'Razon Social 2 SA. de CV.', 'eliminado' => '0'],
+            ['razon_social' => 'SGM', 'nombre_corto' => 'SGM SA. de CV.', 'eliminado' => '0'],
+            ['razon_social' => 'ASEA', 'nombre_corto' => 'ASEA SA. de CV.', 'eliminado' => '0'],
         ];
 
         $serviciosData = [
-            ['nombre' => 'Servicio 1', 'razon_social_id' => '1', 'eliminado' => '0'],
-            ['nombre' => 'Servicio 2', 'razon_social_id' => '2', 'eliminado' => '0'],
-        ];
+            ['nombre' => 'ASEA-00-037 - Aviso de Cancelacion de la Poliza de Seguro del Sector Hidrocarburos', 'razon_social_id' => '2', 'eliminado' => '0'],
+            ['nombre' => 'ASEA-00-034 - Notifica la Modificaion de tu Piliza de Seguro', 'razon_social_id' => '2', 'eliminado' => '0'],
+            ['nombre' => '1. CONFORMACIÓN DEL SISTEMA DE GESTIÓN DE MEDICIONES PARA EXPENDIO   ', 'razon_social_id' => '1', 'eliminado' => '0'],
+            ['nombre' => '2. CONFORMACIÓN DEL SISTEMA DE GESTIÓN DE MEDICIONES PARA TRANSPORTE', 'razon_social_id' => '1', 'eliminado' => '0'],
+         ];
 
         $elementosData = [
             ['nombre' => 'Elemento 1', 'campos' => '{"numerico":["$numero 1$","$numero 2$"],"texto":["$texto 1$","$texto 2$"],"fecha":["$fecha 1$","$fecha 2$"]}	', 'eliminado' => '0', 'servicios_id' => '1'],
@@ -63,7 +65,8 @@ class DatabaseSeeder extends Seeder
         $coordinador = User::create([
             'name' => 'Coordinador User',
             'email' => 'coordinador@example.com',
-            'password' => bcrypt('password123')
+            'password' => bcrypt('password123'),
+            'razon_social_id'=>'1'
         ]);
         $coordinador->assignRole('coordinador');
     }

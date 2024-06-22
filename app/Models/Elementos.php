@@ -13,6 +13,10 @@ class Elementos extends Model
     use HasFactory;
     use HasRoles;
 
+    protected $fillable = [
+        'nombre', 'campos', 'servicios_id', 'eliminado'
+    ];
+    
     public function servicio()
     {
         return $this->belongsTo(Servicios::class, 'servicios_id');

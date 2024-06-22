@@ -8,6 +8,8 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 #[Title('Elementos')]
 class ElementosComponent extends Component
@@ -22,8 +24,15 @@ class ElementosComponent extends Component
     public $campos = "";
     public $servicios_id = "";
     public $Id = 0;
+    public $razon_social_id;
 
     protected $listeners = ['storeElemento'];
+
+    public function mount()
+    {
+        $this->totalRows = Elementos::where('eliminado', 0)->count();
+        $this->razon_social_id = Auth::user()->razon_social_id;
+    }
 
     public function render()
     {
@@ -31,14 +40,19 @@ class ElementosComponent extends Component
             $this->resetPage();
         }
 
-        $elementos = Elementos::where(function ($query) {
-            $query->where('nombre', 'like', '%' . $this->search . '%');
-        })
-            ->where('eliminado', 0)
-            ->orderBy('id', 'asc')
-            ->paginate(5);
+        $elementosQuery = Elementos::where('eliminado', 0)
+            ->where(function ($query) {
+                $query->where('nombre', 'like', '%' . $this->search . '%');
+            });
 
-        $servicios = Servicios::all();
+        if (!Auth::user()->hasRole('admin')) {
+            $elementosQuery->whereHas('servicio', function ($query) {
+                $query->where('razon_social_id', $this->razon_social_id);
+            });
+        }
+
+        $elementos = $elementosQuery->orderBy('id', 'asc')->paginate(5);
+        $servicios = $this->getServiciosByRazonSocial();
 
         return view('livewire.catalogos.elementos-component', [
             'elementos' => $elementos,
@@ -46,9 +60,15 @@ class ElementosComponent extends Component
         ]);
     }
 
-    public function mount()
+    public function getServiciosByRazonSocial()
     {
-        $this->totalRows = Elementos::where('eliminado', 0)->count();
+        if (Auth::user()->hasRole('admin')) {
+            return Servicios::where('eliminado', 0)->get();
+        }
+
+        return Servicios::where('razon_social_id', $this->razon_social_id)
+                        ->where('eliminado', 0)
+                        ->get();
     }
 
     public function create()
@@ -61,10 +81,9 @@ class ElementosComponent extends Component
 
     public function storeElemento($nombre, $servicios_id, $campos)
     {
-        // Reglas de validación para los campos del formulario
         $rules = [
             'nombre' => 'required|max:255|unique:elementos,nombre',
-            'campos' => 'required|json', // Verifica que 'campos' sea un JSON válido
+            'campos' => 'required|json',
             'servicios_id' => 'required|exists:servicios,id'
         ];
 
@@ -78,29 +97,23 @@ class ElementosComponent extends Component
             'servicios_id.exists' => 'El servicio seleccionado no es válido'
         ];
 
-        // Ejecuta la validación
         $this->validate([
             'nombre' => $nombre,
             'campos' => $campos,
             'servicios_id' => $servicios_id
         ], $rules, $messages);
 
-        // Crear una nueva instancia de Elementos y guardar los datos
         $elemento = new Elementos();
         $elemento->nombre = $nombre;
         $elemento->campos = $campos;
         $elemento->servicios_id = $servicios_id;
-        $elemento->eliminado = 0; // Asegúrate de que el nuevo registro no esté marcado como eliminado
+        $elemento->eliminado = 0;
         $elemento->save();
 
-        // Actualiza el conteo total de registros
         $this->totalRows = Elementos::where('eliminado', 0)->count();
 
-        // Cierra el modal y muestra un mensaje de alerta
         $this->dispatch('close-modal', 'modalElemento');
         $this->dispatch('msg', 'Registro creado correctamente');
-
-        // Restablece los campos del formulario después de guardar
         $this->reset(['nombre', 'campos', 'servicios_id']);
     }
 
@@ -146,4 +159,3 @@ class ElementosComponent extends Component
         $this->dispatch('msg', 'Registro eliminado correctamente');
     }
 }
-?>

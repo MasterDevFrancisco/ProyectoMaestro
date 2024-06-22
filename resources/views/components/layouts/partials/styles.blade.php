@@ -117,3 +117,25 @@
         /* ejemplo de color de texto claro */
     }
 </style>
+{{-- Login --}}
+
+<style>
+    .custom-navbar {
+        background-color: #000000 !important;
+    }
+
+    .custom-navbar .navbar-brand,
+    .custom-navbar .nav-link,
+    .custom-navbar .dropdown-item {
+        color: #ffffff !important;
+    }
+
+    .custom-navbar .nav-link:hover,
+    .custom-navbar .dropdown-item:hover {
+        color: #cccccc !important;
+    }
+    .transparent-bg {
+    background-color: transparent;
+}
+
+</style>

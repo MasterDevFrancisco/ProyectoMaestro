@@ -1,4 +1,5 @@
 <div class="scroll-container">
+    @role('admin')
     <x-card>
         <x-slot:cardTools>
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -85,5 +86,9 @@
             </center>
         </form>
     </x-modal>
-    
+    @else
+    <div class="alert alert-danger">
+        No tienes permiso para acceder a esta página.
+    </div>
+@endrole
 </div>

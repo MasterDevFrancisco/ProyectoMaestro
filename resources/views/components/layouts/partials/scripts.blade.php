@@ -150,13 +150,13 @@
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
-            if (type === 'numerico') {
+            if (type === 'formula') {
                 data.numerico.push(fieldName);
             } else if (type === 'texto') {
                 data.texto.push(fieldName);
-            } else if (type === 'fecha') {
+            /* } else if (type === 'fecha') {
                 data.fecha.push(fieldName);
-            }
+            } */
         }
 
 
