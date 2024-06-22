@@ -75,15 +75,16 @@
                             <p>Usuarios</p>
                         </a>
                     </li>
+                    <li class="nav-item ml-3">
+                        <a href="{{ route('formatos') }}" class="nav-link">
+                            <i class="nav-icon fas fa-file-alt"></i>
+                            <p>Formatos</p>
+                        </a>
+                    </li>
                 </ul>
             </li>
             
-            <li class="nav-item">
-                <a href="{{ route('formatos') }}" class="nav-link">
-                    <i class="nav-icon fas fa-file-alt"></i>
-                    <p>Formatos</p>
-                </a>
-            </li>
+            
             @endrole
 
             <!-- Visible para todos los usuarios con el permiso 'view documentation' -->

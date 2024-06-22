@@ -20,10 +20,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         /* Roles */
-        Role::create(['name'=>'cliente']);
+        Role::create(['name' => 'cliente']);
         $this->call(RolesAndPermissionsSeeder::class);
-
-
 
         $razonesSociales = [
             ['razon_social' => 'SGM', 'nombre_corto' => 'SGM SA. de CV.', 'eliminado' => '0'],
@@ -35,7 +33,7 @@ class DatabaseSeeder extends Seeder
             ['nombre' => 'ASEA-00-034 - Notifica la Modificaion de tu Piliza de Seguro', 'razon_social_id' => '2', 'eliminado' => '0'],
             ['nombre' => '1. CONFORMACIÓN DEL SISTEMA DE GESTIÓN DE MEDICIONES PARA EXPENDIO   ', 'razon_social_id' => '1', 'eliminado' => '0'],
             ['nombre' => '2. CONFORMACIÓN DEL SISTEMA DE GESTIÓN DE MEDICIONES PARA TRANSPORTE', 'razon_social_id' => '1', 'eliminado' => '0'],
-         ];
+        ];
 
         $elementosData = [
             ['nombre' => 'Elemento 1', 'campos' => '{"numerico":["$numero 1$","$numero 2$"],"texto":["$texto 1$","$texto 2$"],"fecha":["$fecha 1$","$fecha 2$"]}	', 'eliminado' => '0', 'servicios_id' => '1'],
@@ -61,13 +59,15 @@ class DatabaseSeeder extends Seeder
         ]);
         $admin->assignRole('admin');
 
-        // Crear un usuario y asignarle el rol 'coordinador'
-        $coordinador = User::create([
-            'name' => 'Coordinador User',
-            'email' => 'coordinador@example.com',
-            'password' => bcrypt('password123'),
-            'razon_social_id'=>'1'
-        ]);
-        $coordinador->assignRole('coordinador');
+        // Crear usuarios coordinadores
+        $coordinadores = [
+            ['name' => 'Coordinador SGM', 'email' => 'coordinador@sgm.com', 'password' => bcrypt('password123'), 'razon_social_id' => '1'],
+            ['name' => 'Coordinador ASEA', 'email' => 'coordinador@asea.com', 'password' => bcrypt('password123'), 'razon_social_id' => '2'],
+        ];
+
+        foreach ($coordinadores as $coordinador) {
+            $user = User::create($coordinador);
+            $user->assignRole('coordinador');
+        }
     }
 }
