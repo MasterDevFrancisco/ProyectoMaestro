@@ -37,6 +37,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('coordinadores') }}" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Coordinadores</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('elementos') }}" class="nav-link">
                             <i class="nav-icon fas fa-cube"></i>
                             <p>Elementos</p>
@@ -48,12 +54,7 @@
                             <p>Formatos</p>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('coordinadores') }}" class="nav-link">
-                            <i class="nav-icon fas fa-users"></i>
-                            <p>Coordinadores</p>
-                        </a>
-                    </li>
+                    
                 </ul>
             </li>
             @endrole

@@ -1,3 +1,4 @@
+<!-- coordinadores-component.blade.php -->
 <div class="scroll-container">
     @role('admin')
     <x-card>
@@ -18,6 +19,7 @@
                 <th>#</th> <!-- Cambié "ID" por "#" para indicar que es el número de fila -->
                 <th>Nombre</th>
                 <th>Correo</th>
+                <th>Razon Social</th>
                 <th width="3%"></th>
                 <th width="3%"></th>
             </x-slot>
@@ -29,6 +31,7 @@
                     <td>{{ $counter++ }}</td> <!-- Uso el contador en lugar del ID -->
                     <td>{{ $razon->name }}</td>
                     <td>{{ $razon->email }}</td>
+                    <td>{{ $razon->razonSocial->nombre_corto ?? 'Sin Razon Social' }}</td> <!-- Mostrar la razon social -->
                     <td>
                         <a href="#" wire:click='editar({{ $razon->id }})' title="Editar" class="btn btn-primary btn-xs">
                             <i class="fas fa-pen"></i>
@@ -42,7 +45,7 @@
                 </tr>
             @empty
                 <tr class="text-center">
-                    <td colspan="5">Sin Registros</td>
+                    <td colspan="6">Sin Registros</td>
                 </tr>
             @endforelse
         </x-table>
@@ -76,18 +79,29 @@
                     @error('newUserEmailConfirmation') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
             </div>
+            <div class="row mt-3">
+                <div class="col">
+                    <label for="razonSocialId">Razón Social</label>
+                    <select id="razonSocialId" wire:model="razonSocialId" class="form-control">
+                        <option value="">Seleccione una razón social</option>
+                        @foreach($razonesSociales as $razonSocial)
+                            <option value="{{ $razonSocial->id }}">{{ $razonSocial->nombre_corto }}</option>
+                        @endforeach
+                    </select>
+                    @error('razonSocialId') <span class="text-danger">{{ $message }}</span> @enderror
+                </div>
+            </div>
             <br>
-                <center>
-                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="loading"
-                            wire:loading.class="opacity-25">
-                        <span wire:loading.remove>{{ $Id == 0 ? 'Guardar' : 'Actualizar' }}</span>
-                        <span wire:loading>Procesando...</span>
-                    </button>
-                </center>
+            <center>
+                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="loading"
+                        wire:loading.class="opacity-25">
+                    <span wire:loading.remove>{{ $Id == 0 ? 'Guardar' : 'Actualizar' }}</span>
+                    <span wire:loading>Procesando...</span>
+                </button>
+            </center>
             
-                <!-- Bloqueo del formulario mientras se procesa -->
-                <div class="loading-overlay" wire:loading></div>
-
+            <!-- Bloqueo del formulario mientras se procesa -->
+            <div class="loading-overlay" wire:loading></div>
         </form>
     </x-modal>
     @else

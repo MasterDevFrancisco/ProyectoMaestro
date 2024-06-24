@@ -5,6 +5,7 @@ namespace App\Livewire\Catalogos;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
+use App\Models\RazonSocial;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
@@ -24,17 +25,29 @@ class CoordinadoresComponent extends Component
     public $newUserName = '';
     public $newUserEmail = '';
     public $newUserEmailConfirmation = '';
+    public $razonSocialId = ''; // Nueva propiedad para la razón social seleccionada
 
+    public $razonesSociales = []; // Nueva propiedad para almacenar las razones sociales disponibles
+
+    public function mount()
+    {
+        $this->razonesSociales = RazonSocial::where('eliminado', 0)->get(); // Consulta inicial
+    }
+
+    // CoordinadoresComponent.php
     public function render()
     {
-        if ($this->search != '') {
-            $this->resetPage();
-        }
-
         $razones = User::where('eliminado', 0)
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'coordinador');
             })
+            ->when($this->search, function ($query) {
+                $query->where(function ($query) {
+                    $query->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhere('email', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->with('razonSocial') // Añade esta línea para cargar la relación
             ->orderBy('id', 'asc')
             ->paginate(5);
 
@@ -42,6 +55,7 @@ class CoordinadoresComponent extends Component
             'razones' => $razones
         ]);
     }
+
 
     public function create()
     {
@@ -55,6 +69,7 @@ class CoordinadoresComponent extends Component
         $this->newUserName = '';
         $this->newUserEmail = '';
         $this->newUserEmailConfirmation = '';
+        $this->razonSocialId = ''; // Resetea la razón social seleccionada
     }
 
     public function storeUser()
@@ -68,6 +83,7 @@ class CoordinadoresComponent extends Component
                 'unique:users,email'
             ],
             'newUserEmailConfirmation' => 'required|same:newUserEmail',
+            'razonSocialId' => 'required', // Validación para la razón social
         ], [
             'newUserName.required' => 'El nombre del usuario es obligatorio.',
             'newUserEmail.required' => 'El correo electrónico es obligatorio.',
@@ -76,6 +92,7 @@ class CoordinadoresComponent extends Component
             'newUserEmail.unique' => 'El correo electrónico ya está registrado.',
             'newUserEmailConfirmation.required' => 'Debe confirmar el correo electrónico.',
             'newUserEmailConfirmation.same' => 'La confirmación del correo electrónico no coincide.',
+            'razonSocialId.required' => 'Debe seleccionar una razón social.',
         ]);
 
         $password = Str::random(10);
@@ -85,7 +102,7 @@ class CoordinadoresComponent extends Component
             'name' => $this->newUserName,
             'email' => $this->newUserEmail,
             'password' => bcrypt($password),
-            'razon_social_id' => $currentUser->razon_social_id,
+            'razon_social_id' => $this->razonSocialId, // Guarda la razón social seleccionada
         ]);
 
         $user->assignRole('coordinador');
@@ -115,6 +132,7 @@ class CoordinadoresComponent extends Component
         $this->newUserName = $user->name;
         $this->newUserEmail = $user->email;
         $this->newUserEmailConfirmation = $user->email;
+        $this->razonSocialId = $user->razon_social_id; // Setea la razón social seleccionada
 
         $this->dispatch('open-modal', 'modalCreateUser');
     }
@@ -130,6 +148,7 @@ class CoordinadoresComponent extends Component
                 'unique:users,email,' . $this->Id
             ],
             'newUserEmailConfirmation' => 'required|same:newUserEmail',
+            'razonSocialId' => 'required', // Validación para la razón social
         ], [
             'newUserName.required' => 'El nombre del usuario es obligatorio.',
             'newUserEmail.required' => 'El correo electrónico es obligatorio.',
@@ -138,21 +157,22 @@ class CoordinadoresComponent extends Component
             'newUserEmail.unique' => 'El correo electrónico ya está registrado.',
             'newUserEmailConfirmation.required' => 'Debe confirmar el correo electrónico.',
             'newUserEmailConfirmation.same' => 'La confirmación del correo electrónico no coincide.',
+            'razonSocialId.required' => 'Debe seleccionar una razón social.',
         ]);
 
         $user = User::findOrFail($this->Id);
         $user->update([
             'name' => $this->newUserName,
             'email' => $this->newUserEmail,
+            'razon_social_id' => $this->razonSocialId, // Actualiza la razón social
         ]);
 
         $this->dispatch('close-modal', 'modalCreateUser');
     }
-    
+
     #[On('destroyCoordinador')]
     public function destroyCoordinador($id)
     {
-
         $coordinador = User::findOrFail($id);
         $coordinador->eliminado = 1;
         $coordinador->save();
@@ -162,6 +182,5 @@ class CoordinadoresComponent extends Component
 
         // Envía una alerta para confirmar que el registro ha sido eliminado
         $this->dispatch('msg', 'Registro eliminado correctamente');
-
     }
 }

@@ -31,8 +31,9 @@ class User extends Authenticatable
         ];
     }
 
+    // User.php
     public function razonSocial()
     {
-        return $this->belongsTo(RazonSocial::class);
+        return $this->belongsTo(RazonSocial::class, 'razon_social_id');
     }
 }

@@ -11,8 +11,14 @@ class RazonSocial extends Model
     use HasFactory;
     use HasRoles;
 
+    protected $fillable = [
+        'name',
+        'eliminado',
+    ];
+
+    // RazonSocial.php
     public function users()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'razon_social_id');
     }
 }
