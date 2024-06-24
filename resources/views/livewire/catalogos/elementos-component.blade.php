@@ -23,10 +23,10 @@
                     <th width="3%"></th>
                     <th width="3%"></th>
                 </x-slot>
-
+                @php $counter = 1; @endphp <!-- Inicializo el contador -->
                 @forelse($elementos as $elemento)
                     <tr>
-                        <td>{{ $elemento->id }}</td>
+                        <td>{{ $counter++ }}</td> <!-- Uso el contador en lugar del ID -->
                         <td>{{ $elemento->nombre }}</td>
                         <td>{{ $elemento->campos }}</td>
                         <td>{{ $elemento->servicio ? $elemento->servicio->nombre : 'No asignado' }}</td>

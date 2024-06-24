@@ -21,10 +21,10 @@
                 <th width="3%"></th>
                 <th width="3%"></th>
             </x-slot>
-
+            @php $counter = 1; @endphp <!-- Inicializo el contador -->
             @forelse($razones as $razon)
                 <tr>
-                    <td>{{ $razon->id }}</td>
+                    <td>{{ $counter++ }}</td> <!-- Uso el contador en lugar del ID -->
                     <td>{{ $razon->razon_social }}</td>
                     <td>{{ $razon->nombre_corto }}</td>
                     <td>

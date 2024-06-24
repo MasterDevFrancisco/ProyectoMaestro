@@ -23,13 +23,13 @@
                     <th width="3%"></th>
                     <th width="3%"></th>
                 </x-slot>
-
+                @php $counter = 1; @endphp <!-- Inicializo el contador -->
                 @forelse($formatos as $formato)
                     @php
                         $isError = $formato->ruta_html === 'Error, contactar a programación.';
                     @endphp
                     <tr>
-                        <td>{{ $formato->id }}</td>
+                        <td>{{ $counter++ }}</td> <!-- Uso el contador en lugar del ID -->
                         <td>{{ $formato->nombre }}</td>
                         <td class="{{ $isError ? 'text-danger' : 'text-success' }}">
                             {{ $isError ? $formato->ruta_html : 'Correcto' }}

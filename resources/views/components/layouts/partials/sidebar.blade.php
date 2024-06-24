@@ -48,6 +48,12 @@
                             <p>Formatos</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('coordinadores') }}" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>Coordinadores</p>
+                        </a>
+                    </li>
                 </ul>
             </li>
             @endrole
@@ -71,7 +77,7 @@
                     </li>
                     <li class="nav-item ml-3">
                         <a href="{{ route('usuarios') }}" class="nav-link">
-                            <i class="nav-icon fas fa-signature"></i>
+                            <i class="nav-icon fas fa-user"></i>
                             <p>Usuarios</p>
                         </a>
                     </li>
@@ -100,7 +106,7 @@
                 <ul class="nav nav-treeview ml-3">
                     <li class="nav-item">
                         <a href="{{ route('usuarios') }}" class="nav-link">
-                            <i class="nav-icon fas fa-signature"></i>
+                            <i class="nav-icon fas fa-user"></i>
                             <p>Usuarios</p>
                         </a>
                     </li>
