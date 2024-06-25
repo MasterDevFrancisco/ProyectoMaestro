@@ -36,7 +36,7 @@ Route::get('/coordinadores',CoordinadoresComponent::class)->name('coordinadores'
 Route::get('/api/check-nombre', [ElementosController::class, 'checkNombre'])->middleware('auth');
 Route::post('/upload-pdf', [PdfUploadController::class, 'upload'])->name('upload.pdf')->middleware('auth');
 
-Route::get('/usuarios', UsuarioElemento::class)->name('usuarios')->middleware('auth');
+Route::get('/permisos', UsuarioElemento::class)->name('permisos')->middleware('auth');
 
 
 Route::get('/mis_elementos',ElementosClientesComponent::class)->name('mis_elementos')->middleware('auth');

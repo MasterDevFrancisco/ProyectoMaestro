@@ -76,9 +76,9 @@
                         </a>
                     </li>
                     <li class="nav-item ml-3">
-                        <a href="{{ route('usuarios') }}" class="nav-link">
+                        <a href="{{ route('permisos') }}" class="nav-link">
                             <i class="nav-icon fas fa-user"></i>
-                            <p>Usuarios</p>
+                            <p>Permisos</p>
                         </a>
                     </li>
                     <li class="nav-item ml-3">
@@ -91,8 +91,8 @@
             </li>
             @endrole
 
-            <!-- Visible para todos los usuarios con el permiso 'view documentation' -->
-            @can('view documentation')
+            <!-- Visible solo para los roles admin y coordinador -->
+            @role(['admin', 'coordinador'])
             <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                     <i class="nav-icon fas fa-file-contract"></i>
@@ -103,14 +103,14 @@
                 </a>
                 <ul class="nav nav-treeview ml-3">
                     <li class="nav-item">
-                        <a href="{{ route('usuarios') }}" class="nav-link">
+                        <a href="{{ route('permisos') }}" class="nav-link">
                             <i class="nav-icon fas fa-user"></i>
                             <p>Permisos</p>
                         </a>
                     </li>
                 </ul>
             </li>
-            @endcan
+            @endrole
 
             <!-- Visible para los roles admin, coordinador y cliente -->
             @role(['admin', 'coordinador', 'cliente'])

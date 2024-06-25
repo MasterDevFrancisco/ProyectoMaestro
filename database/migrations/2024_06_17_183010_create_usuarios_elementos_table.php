@@ -16,6 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('usuario_id');
             $table->unsignedBigInteger('elemento_id');
             $table->integer('eliminado');
+            $table->integer('llenado')->default(0); // Establecer valor predeterminado para 'llenado'
+            $table->integer('count_descargas')->default(0); // Establecer valor predeterminado para 'count_descargas'
             $table->timestamps();
 
             // Agregar las claves foráneas

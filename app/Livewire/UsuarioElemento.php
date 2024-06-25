@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\UsuariosElemento;
 use App\Models\User;
 use App\Models\Elementos;
+use App\Models\RazonSocial; // Asegúrate de importar el modelo de RazonSocial
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\WithPagination;
@@ -20,7 +21,6 @@ class UsuarioElemento extends Component
 {
     use WithPagination;
 
-
     public $search = '';
     public $Id = 0;
     public $selectedUser = null;
@@ -31,6 +31,7 @@ class UsuarioElemento extends Component
     public $newUserName = '';
     public $newUserEmail = '';
     public $newUserEmailConfirmation = '';
+    public $newUserRazonSocial = ''; // Nueva propiedad para razón social
 
     protected $rules = [
         'selectedUser' => 'required',
@@ -38,6 +39,7 @@ class UsuarioElemento extends Component
         'newUserName' => 'required_if:selectedUser,createNewUser',
         'newUserEmail' => 'required_if:selectedUser,createNewUser|email',
         'newUserEmailConfirmation' => 'required_if:selectedUser,createNewUser|same:newUserEmail',
+        'newUserRazonSocial' => 'required_if:selectedUser,createNewUser', // Validación para razón social
     ];
 
     protected $messages = [
@@ -48,6 +50,7 @@ class UsuarioElemento extends Component
         'newUserEmail.email' => 'El correo electrónico debe ser válido.',
         'newUserEmailConfirmation.required_if' => 'Debe confirmar el correo electrónico.',
         'newUserEmailConfirmation.same' => 'La confirmación del correo electrónico no coincide.',
+        'newUserRazonSocial.required_if' => 'La razón social es obligatoria.', // Mensaje de error para razón social
     ];
 
     public function updatingSearch()
@@ -77,51 +80,54 @@ class UsuarioElemento extends Component
         $this->newUserName = '';
         $this->newUserEmail = '';
         $this->newUserEmailConfirmation = '';
+        $this->newUserRazonSocial = ''; // Reiniciar razón social
     }
 
     public function storeUser()
-{
-    $this->validate([
-        'newUserName' => 'required',
-        'newUserEmail' => [
-            'required',
-            'email',
-            'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
-            'unique:users,email'
-        ],
-        'newUserEmailConfirmation' => 'required|same:newUserEmail',
-    ], [
-        'newUserName.required' => 'El nombre del usuario es obligatorio.',
-        'newUserEmail.required' => 'El correo electrónico es obligatorio.',
-        'newUserEmail.email' => 'El correo electrónico debe ser válido.',
-        'newUserEmail.regex' => 'El correo electrónico debe tener un dominio válido.',
-        'newUserEmail.unique' => 'El correo electrónico ya está registrado.',
-        'newUserEmailConfirmation.required' => 'Debe confirmar el correo electrónico.',
-        'newUserEmailConfirmation.same' => 'La confirmación del correo electrónico no coincide.',
-    ]);
+    {
+        $this->validate([
+            'newUserName' => 'required',
+            'newUserEmail' => [
+                'required',
+                'email',
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+                'unique:users,email'
+            ],
+            'newUserEmailConfirmation' => 'required|same:newUserEmail',
+            'newUserRazonSocial' => auth()->user()->hasRole('admin') ? 'required' : 'nullable',
+        ], [
+            'newUserName.required' => 'El nombre del usuario es obligatorio.',
+            'newUserEmail.required' => 'El correo electrónico es obligatorio.',
+            'newUserEmail.email' => 'El correo electrónico debe ser válido.',
+            'newUserEmail.regex' => 'El correo electrónico debe tener un dominio válido.',
+            'newUserEmail.unique' => 'El correo electrónico ya está registrado.',
+            'newUserEmailConfirmation.required' => 'Debe confirmar el correo electrónico.',
+            'newUserEmailConfirmation.same' => 'La confirmación del correo electrónico no coincide.',
+            'newUserRazonSocial.required' => 'La razón social es obligatoria.',
+        ]);
 
-    $password = Str::random(10);
-    $currentUser = auth()->user();
+        $password = Str::random(10);
+        $currentUser = auth()->user();
 
-    $user = User::create([
-        'name' => $this->newUserName,
-        'email' => $this->newUserEmail,
-        'password' => bcrypt($password),
-        'razon_social_id' => $currentUser->razon_social_id, // Asigna la misma razon_social_id
-    ]);
+        $razonSocialId = $currentUser->hasRole('admin') ? $this->newUserRazonSocial : $currentUser->razon_social_id;
 
-    $user->assignRole('cliente');
+        $user = User::create([
+            'name' => $this->newUserName,
+            'email' => $this->newUserEmail,
+            'password' => bcrypt($password),
+            'razon_social_id' => $razonSocialId,
+        ]);
 
-    $this->sendPasswordByEmail($this->newUserEmail, $password);
+        $user->assignRole('cliente');
 
-    $this->selectedUser = $user->id;
-    $this->selectedUserName = $user->name;
+        $this->sendPasswordByEmail($this->newUserEmail, $password);
 
-    $this->dispatch('close-modal', 'modalCreateUser');
-    $this->dispatch('open-modal', 'modalUser');
-}
+        $this->selectedUser = $user->id;
+        $this->selectedUserName = $user->name;
 
-
+        $this->dispatch('close-modal', 'modalCreateUser');
+        $this->dispatch('open-modal', 'modalUser');
+    }
 
     protected function sendPasswordByEmail($email, $password)
     {
@@ -162,6 +168,8 @@ class UsuarioElemento extends Component
                     'usuario_id' => $this->selectedUser,
                     'elemento_id' => $elementId,
                     'eliminado' => 0,
+                    'llenado' => 0,
+                    'count_descargas' => 0,
                 ]);
             }
         }
@@ -210,46 +218,44 @@ class UsuarioElemento extends Component
     }
 
     public function render()
-{
-    $user = auth()->user();
-    $query = UsuariosElemento::join('users', 'usuarios_elementos.usuario_id', '=', 'users.id')
-        ->where('users.name', 'like', '%' . $this->search . '%')
-        ->where('usuarios_elementos.eliminado', 0);
+    {
+        $user = auth()->user();
+        $query = UsuariosElemento::join('users', 'usuarios_elementos.usuario_id', '=', 'users.id')
+            ->where('users.name', 'like', '%' . $this->search . '%')
+            ->where('usuarios_elementos.eliminado', 0);
 
-    // Si el usuario es un coordinador, filtramos por su razon_social_id
-    if ($user->hasRole('coordinador')) {
-        $query->where('users.razon_social_id', $user->razon_social_id);
+        if ($user->hasRole('coordinador')) {
+            $query->where('users.razon_social_id', $user->razon_social_id);
+        }
+
+        $query = $query->orderBy('usuarios_elementos.id', 'asc')
+            ->select('usuarios_elementos.*', 'users.name as user_name')
+            ->get()
+            ->unique('usuario_id');
+
+        $perPage = 5;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentPageItems = $query->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        $paginatedItems = new LengthAwarePaginator($currentPageItems, $query->count(), $perPage, $currentPage);
+
+        $users = User::where('eliminado', 0)
+            ->whereDoesntHave('roles', function($query) {
+                $query->whereIn('name', ['coordinador', 'admin']);
+            });
+
+        if ($user->hasRole('coordinador')) {
+            $users->where('razon_social_id', $user->razon_social_id);
+        }
+
+        $users = $users->get();
+        $elements = Elementos::where('eliminado', 0)->get();
+        $razonesSociales = RazonSocial::where('eliminado', 0)->get(); // Obtener todas las razones sociales
+
+        return view('livewire.usuario-elemento', [
+            'data' => $paginatedItems,
+            'users' => $users,
+            'elements' => $elements,
+            'razonesSociales' => $razonesSociales, // Pasar las razones sociales a la vista
+        ]);
     }
-
-    $query = $query->orderBy('usuarios_elementos.id', 'asc')
-        ->select('usuarios_elementos.*', 'users.name as user_name')
-        ->get()
-        ->unique('usuario_id');
-
-    $perPage = 5;
-    $currentPage = LengthAwarePaginator::resolveCurrentPage();
-    $currentPageItems = $query->slice(($currentPage - 1) * $perPage, $perPage)->values();
-    $paginatedItems = new LengthAwarePaginator($currentPageItems, $query->count(), $perPage, $currentPage);
-
-    // Filtrar usuarios que no tengan los roles 'coordinador' ni 'admin'
-    $users = User::where('eliminado', 0)
-        ->whereDoesntHave('roles', function($query) {
-            $query->whereIn('name', ['coordinador', 'admin']);
-        });
-
-    // Si el usuario es un coordinador, filtramos por su razon_social_id
-    if ($user->hasRole('coordinador')) {
-        $users->where('razon_social_id', $user->razon_social_id);
-    }
-
-    $users = $users->get();
-    $elements = Elementos::where('eliminado', 0)->get();
-
-    return view('livewire.usuario-elemento', [
-        'data' => $paginatedItems,
-        'users' => $users,
-        'elements' => $elements,
-    ]);
-}
-
 }
