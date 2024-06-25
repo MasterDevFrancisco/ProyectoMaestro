@@ -37,11 +37,11 @@
         const rightPanel = document.querySelector('.right-panel');
         let newElement;
         switch (type) {
-            case 'numerico':
+            case 'formula':
                 newElement = document.createElement('div');
                 newElement.classList.add('position-relative');
                 newElement.innerHTML =
-                    '<input type="text" class="form-control mb-2" placeholder="Numérico" data-type="numerico">' +
+                    '<input type="text" class="form-control mb-2" placeholder="Formula" data-type="formula">' +
                     '<button class="btn btn-danger btn-xs position-absolute" style="top: 20%; right: 2%;" onclick="removeField(this)">X</button>';
                 break;
             case 'texto':
@@ -49,13 +49,6 @@
                 newElement.classList.add('position-relative');
                 newElement.innerHTML =
                     '<input type="text" class="form-control mb-2" placeholder="Texto" data-type="texto">' +
-                    '<button class="btn btn-danger btn-xs position-absolute" style="top: 20%; right: 2%;" onclick="removeField(this)">X</button>';
-                break;
-            case 'fecha':
-                newElement = document.createElement('div');
-                newElement.classList.add('position-relative');
-                newElement.innerHTML =
-                    '<input type="text" class="form-control mb-2" placeholder="Fecha" data-type="fecha">' +
                     '<button class="btn btn-danger btn-xs position-absolute" style="top: 20%; right: 2%;" onclick="removeField(this)">X</button>';
                 break;
         }
@@ -82,6 +75,7 @@
             confirmButtonText: 'Aceptar'
         });
     }
+
     async function submitFields() {
         const nombre = document.getElementById('nombre').value.trim();
         const servicioId = document.getElementById('servicios_id').value;
@@ -120,9 +114,8 @@
         const rightPanel = document.querySelector('.right-panel');
         const fields = rightPanel.querySelectorAll('.form-control');
         let data = {
-            numerico: [],
-            texto: [],
-            fecha: []
+            formula: [],
+            texto: []
         };
 
         let fieldNames = new Set();
@@ -151,14 +144,11 @@
 
             const type = field.getAttribute('data-type');
             if (type === 'formula') {
-                data.numerico.push(fieldName);
+                data.formula.push(fieldName);
             } else if (type === 'texto') {
                 data.texto.push(fieldName);
-            /* } else if (type === 'fecha') {
-                data.fecha.push(fieldName);
-            } */
+            }
         }
-
 
         // Convert the data object to a JSON string
         const jsonString = JSON.stringify(data);
@@ -171,6 +161,7 @@
         });
     }
 </script>
+
 
 
 

@@ -9,6 +9,7 @@ use App\Livewire\Catalogos\FormatosComponent;
 use App\Http\Controllers\PdfUploadController;
 use App\Http\Controllers\ElementosController;
 use App\Livewire\Catalogos\CoordinadoresComponent;
+use App\Livewire\Clientes\ElementosClientesComponent;
 use App\Livewire\UsuarioElemento;
 
 
@@ -36,3 +37,6 @@ Route::get('/api/check-nombre', [ElementosController::class, 'checkNombre'])->mi
 Route::post('/upload-pdf', [PdfUploadController::class, 'upload'])->name('upload.pdf')->middleware('auth');
 
 Route::get('/usuarios', UsuarioElemento::class)->name('usuarios')->middleware('auth');
+
+
+Route::get('/mis_elementos',ElementosClientesComponent::class)->name('mis_elementos')->middleware('auth');

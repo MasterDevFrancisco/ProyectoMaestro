@@ -54,7 +54,6 @@
                             <p>Formatos</p>
                         </a>
                     </li>
-                    
                 </ul>
             </li>
             @endrole
@@ -90,8 +89,6 @@
                     </li>
                 </ul>
             </li>
-            
-            
             @endrole
 
             <!-- Visible para todos los usuarios con el permiso 'view documentation' -->
@@ -100,7 +97,7 @@
                 <a href="#" class="nav-link">
                     <i class="nav-icon fas fa-file-contract"></i>
                     <p>
-                        Documentacion
+                        Administracion
                         <i class="right fas fa-angle-left"></i>
                     </p>
                 </a>
@@ -114,6 +111,27 @@
                 </ul>
             </li>
             @endcan
+
+            <!-- Visible para los roles admin, coordinador y cliente -->
+            @role(['admin', 'coordinador', 'cliente'])
+            <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-gas-pump"></i>
+                    <p>
+                        Operativos
+                        <i class="right fas fa-angle-left"></i>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item ml-3">
+                        <a href="{{ route('mis_elementos') }}" class="nav-link">
+                            <i class="nav-icon fas fa-folder-open"></i>
+                            <p>Mis Elementos</p>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            @endrole
         </ul>
     </nav>
     <!-- /.sidebar-menu -->
