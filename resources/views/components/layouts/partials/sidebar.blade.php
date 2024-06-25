@@ -108,7 +108,7 @@
                     <li class="nav-item">
                         <a href="{{ route('usuarios') }}" class="nav-link">
                             <i class="nav-icon fas fa-user"></i>
-                            <p>Usuarios</p>
+                            <p>Permisos</p>
                         </a>
                     </li>
                 </ul>
