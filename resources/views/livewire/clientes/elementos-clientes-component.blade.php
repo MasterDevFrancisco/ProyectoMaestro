@@ -4,13 +4,8 @@
             <x-slot:cardTools>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="d-flex justify-content-center flex-grow-1">
-                        <input type="text" wire:model.live='search' class="form-control" placeholder="Elemento"
-                            style="width: 250px;">
+                        <input type="text" wire:model.live='search' class="form-control" placeholder="Elemento" style="width: 250px;">
                     </div>
-                    {{-- 
-                    <a href="#" class="btn btn-success ml-3" wire:click='create'>
-                        <i class="fas fa-plus-circle"></i>
-                    </a> --}}
                 </div>
             </x-slot>
 
@@ -19,26 +14,24 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Servicio</th>
+                    <th>Usuario</th>
                     <th width="3%"></th>
                     <th width="3%"></th>
                 </x-slot>
-                @php $counter = 1; @endphp <!-- Inicializo el contador -->
+                @php $counter = 1; @endphp
                 @forelse($elementos as $elemento)
                     <tr>
-                        <td>{{ $counter++ }}</td> <!-- Uso el contador en lugar del ID -->
-                        <td>{{ $elemento->nombre }}</td>
-
-                        <td>{{ $elemento->servicio ? $elemento->servicio->nombre : 'No asignado' }}</td>
+                        <td>{{ $counter++ }}</td>
+                        <td>{{ $elemento->elemento->nombre ?? 'No asignado' }}</td>
+                        <td>{{ $elemento->elemento->servicio->nombre ?? 'No asignado' }}</td>
+                        <td>{{ $elemento->usuario->name ?? 'No asignado' }}</td>
                         <td>
-                            <a href="#"
-                                wire:click="$dispatch('delete', {id: {{ $elemento->id }}, eventName: 'destroyElemento'})"
-                                title="Llenar elemento" class="btn btn-info btn-xs">
+                            <a href="#" wire:click="loadFields({{ $elemento->id }})" title="Llenar elemento" class="btn btn-info btn-xs" data-toggle="modal" data-target="#modalElemento">
                                 <i class="fas fa-pen"></i>
                             </a>
                         </td>
                         <td>
-                            <button wire:click="loadFields({{ $elemento->id }})" title="Imprimir"
-                                class="btn btn-primary btn-xs">
+                            <button wire:click="loadFields({{ $elemento->id }})" title="Imprimir" class="btn btn-primary btn-xs">
                                 <i class="fas fa-print"></i>
                             </button>
                         </td>
@@ -56,8 +49,7 @@
             </x-slot>
         </x-card>
 
-        <div wire:ignore.self class="modal fade" id="modalElemento" tabindex="-1" role="dialog"
-            aria-labelledby="modalElementoLabel" aria-hidden="true">
+        <div wire:ignore.self class="modal fade" id="modalElemento" tabindex="-1" role="dialog" aria-labelledby="modalElementoLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -69,11 +61,8 @@
                     <div class="modal-body">
                         @foreach ($dynamicFields as $field)
                             <div class="form-group">
-                                <label for="{{ strtolower(str_replace('$', '', $field)) }}"
-                                    class="text-center d-block">{{ str_replace('$', '', $field) }}</label>
-                                <input type="text" class="form-control"
-                                    id="{{ strtolower(str_replace('$', '', $field)) }}"
-                                    name="{{ strtolower(str_replace('$', '', $field)) }}">
+                                <label for="{{ strtolower(str_replace('$', '', $field)) }}" class="text-center d-block">{{ str_replace('$', '', $field) }}</label>
+                                <input type="text" class="form-control" id="{{ strtolower(str_replace('$', '', $field)) }}" name="{{ strtolower(str_replace('$', '', $field)) }}">
                             </div>
                         @endforeach
                     </div>

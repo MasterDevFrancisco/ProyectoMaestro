@@ -8,8 +8,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class UsuariosElemento extends Model
 {
-    use HasFactory;
-    use HasRoles;
+    use HasFactory, HasRoles;
 
     protected $fillable = [
         'usuario_id',
@@ -20,5 +19,10 @@ class UsuariosElemento extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'usuario_id');
+    }
+
+    public function elemento()
+    {
+        return $this->belongsTo(Elementos::class, 'elemento_id');
     }
 }

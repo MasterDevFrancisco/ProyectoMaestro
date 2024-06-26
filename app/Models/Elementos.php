@@ -1,7 +1,5 @@
 <?php
 
-// App\Models\Elementos.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,8 +8,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class Elementos extends Model
 {
-    use HasFactory;
-    use HasRoles;
+    use HasFactory, HasRoles;
 
     protected $fillable = [
         'nombre', 'campos', 'servicios_id', 'eliminado'
@@ -21,4 +18,10 @@ class Elementos extends Model
     {
         return $this->belongsTo(Servicios::class, 'servicios_id');
     }
+
+    public function usuariosElementos()
+    {
+        return $this->hasMany(UsuariosElemento::class, 'elemento_id');
+    }
 }
+

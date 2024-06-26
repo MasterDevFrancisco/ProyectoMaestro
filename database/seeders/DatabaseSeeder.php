@@ -36,12 +36,24 @@ class DatabaseSeeder extends Seeder
         ];
 
         $elementosData = [
-            ['nombre' => 'Elemento 1', 'campos' => '{"numerico":["$numero 1$","$numero 2$"],"texto":["$texto 1$","$texto 2$"],"fecha":["$fecha 1$","$fecha 2$"]}	', 'eliminado' => '0', 'servicios_id' => '1'],
-            ['nombre' => 'Elemento 2', 'campos' => '{"numerico":["$numero 1$","$numero 2$"],"texto":["$texto 1$","$texto 2$"],"fecha":["$fecha 1$","$fecha 2$"]}	', 'eliminado' => '0', 'servicios_id' => '1'],
+            ['nombre' => 'Elemento ASEA 1', 'campos' => '{"formula":[],"texto":["$Nombre$","$Apellidos$","$Direccion$"]}', 'eliminado' => '0', 'servicios_id' => '1'],
+            ['nombre' => 'Elemento ASEA 2', 'campos' => '{"formula":[],"texto":["$Coordinador$","$Responsable$"]}', 'eliminado' => '0', 'servicios_id' => '1'],
+            ['nombre' => 'Elemento SGM 1', 'campos' => '{"formula":[],"texto":["$Normativa$","$Folio$","$Clausula$"]}	', 'eliminado' => '0', 'servicios_id' => '3'],
+            ['nombre' => 'Elemento SGM 2', 'campos' => '{"formula":[],"texto":["$Recibio$","$Entrego$","$Autorizo$"]}	', 'eliminado' => '0', 'servicios_id' => '3'],
         ];
 
+        $coordinadores = [
+            ['name' => 'Coordinador SGM', 'email' => 'coordinador@sgm.com', 'password' => bcrypt('password123'), 'razon_social_id' => '1'],
+            ['name' => 'Coordinador ASEA', 'email' => 'coordinador@asea.com', 'password' => bcrypt('password123'), 'razon_social_id' => '2'],
+        ];
+
+       
         foreach ($razonesSociales as $razon) {
             RazonSocial::factory()->create($razon);
+        }
+        foreach ($coordinadores as $coordinador) {
+            $user = User::create($coordinador);
+            $user->assignRole('coordinador');
         }
 
         foreach ($serviciosData as $servicio) {
@@ -59,15 +71,18 @@ class DatabaseSeeder extends Seeder
         ]);
         $admin->assignRole('admin');
 
-        // Crear usuarios coordinadores
-        $coordinadores = [
-            ['name' => 'Coordinador SGM', 'email' => 'coordinador@sgm.com', 'password' => bcrypt('password123'), 'razon_social_id' => '1'],
-            ['name' => 'Coordinador ASEA', 'email' => 'coordinador@asea.com', 'password' => bcrypt('password123'), 'razon_social_id' => '2'],
+        // Crear usuarios de prueba con rol 'cliente'
+        $razonSGM = RazonSocial::where('nombre_corto', 'SGM SA. de CV.')->first();
+        $razonASEA = RazonSocial::where('nombre_corto', 'ASEA SA. de CV.')->first();
+
+        $usuariosPrueba = [
+            ['name' => 'Cliente SGM', 'email' => 'cliente.sgm@ejemplo.com', 'password' => bcrypt('clienteSGM123'), 'razon_social_id' => $razonSGM->id],
+            ['name' => 'Cliente ASEA', 'email' => 'cliente.asea@ejemplo.com', 'password' => bcrypt('clienteASEA123'), 'razon_social_id' => $razonASEA->id],
         ];
 
-        foreach ($coordinadores as $coordinador) {
-            $user = User::create($coordinador);
-            $user->assignRole('coordinador');
+        foreach ($usuariosPrueba as $usuarioPrueba) {
+            $user = User::create($usuarioPrueba);
+            $user->assignRole('cliente');
         }
     }
 }

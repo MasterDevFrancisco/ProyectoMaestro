@@ -239,7 +239,7 @@ class UsuarioElemento extends Component
         $paginatedItems = new LengthAwarePaginator($currentPageItems, $query->count(), $perPage, $currentPage);
 
         $users = User::where('eliminado', 0)
-            ->whereDoesntHave('roles', function($query) {
+            ->whereDoesntHave('roles', function ($query) {
                 $query->whereIn('name', ['coordinador', 'admin']);
             });
 
@@ -248,7 +248,16 @@ class UsuarioElemento extends Component
         }
 
         $users = $users->get();
-        $elements = Elementos::where('eliminado', 0)->get();
+
+        $elementsQuery = Elementos::where('eliminado', 0);
+
+        if ($user->hasRole('coordinador')) {
+            $elementsQuery->whereHas('servicio', function ($query) use ($user) {
+                $query->where('razon_social_id', $user->razon_social_id);
+            });
+        }
+
+        $elements = $elementsQuery->get();
         $razonesSociales = RazonSocial::where('eliminado', 0)->get(); // Obtener todas las razones sociales
 
         return view('livewire.usuario-elemento', [
