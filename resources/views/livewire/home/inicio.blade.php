@@ -5,15 +5,14 @@
             <a href="#" class="btn btn-primary" >Agregar</a>
         </x-slot>
 
-        <x-table>
-            <x-slot:thead>
-                <th>1</th>
-                <th>2</th>
-            </x-slot>
-            <th>A</th>
-            <th>B</th>
-
-        </x-table>
+        <p>Bienvenido a tu panel de inicio</p>
+            <p>Aquí puedes ver:</p>
+            <ul>
+                <li>Resumen de actividades recientes</li>
+                <li>Acceso rápido a funciones clave</li>
+                <li>Notificaciones importantes</li>
+                <li>Estadísticas y métricas relevantes</li>
+            </ul>
 
     </x-card>
 

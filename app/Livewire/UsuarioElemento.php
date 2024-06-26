@@ -142,51 +142,53 @@ class UsuarioElemento extends Component
     }
 
     public function store()
-    {
-        $this->validate();
+{
+    $this->validate();
 
-        if ($this->selectedUser === 'createNewUser') {
-            $this->storeUser();
-        }
+    if ($this->selectedUser === 'createNewUser') {
+        $this->storeUser();
+    }
 
-        $existingElements = UsuariosElemento::where('usuario_id', $this->selectedUser)
-            ->where('eliminado', 0)
-            ->pluck('elemento_id')
-            ->toArray();
+    $existingElements = UsuariosElemento::where('usuario_id', $this->selectedUser)
+        ->where('eliminado', 0)
+        ->pluck('elemento_id')
+        ->toArray();
 
-        $duplicate = false;
-        foreach ($this->selectedElements as $elementId) {
-            $existing = UsuariosElemento::where('usuario_id', $this->selectedUser)
-                ->where('elemento_id', $elementId)
-                ->where('eliminado', 0)
-                ->first();
+    $newElements = collect($this->selectedElements);
 
-            if ($existing) {
-                $duplicate = true;
-            } else {
-                UsuariosElemento::create([
-                    'usuario_id' => $this->selectedUser,
-                    'elemento_id' => $elementId,
-                    'eliminado' => 0,
-                    'llenado' => 0,
-                    'count_descargas' => 0,
-                ]);
+    // Procesar elementos deseleccionados
+    $deselectedElements = array_diff($existingElements, $this->selectedElements);
+    UsuariosElemento::where('usuario_id', $this->selectedUser)
+        ->whereIn('elemento_id', $deselectedElements)
+        ->update(['eliminado' => 1]);
+
+    // Procesar nuevos elementos seleccionados
+    foreach ($newElements as $elementId) {
+        $existing = UsuariosElemento::where('usuario_id', $this->selectedUser)
+            ->where('elemento_id', $elementId)
+            ->first();
+
+        if ($existing) {
+            if ($existing->eliminado == 1) {
+                // Si el registro existe pero está marcado como eliminado, actualizarlo a no eliminado
+                $existing->update(['eliminado' => 0]);
             }
-        }
-
-        if ($duplicate) {
-            $this->addError('selectedUser', 'El usuario ya fue registrado previamente.');
         } else {
-            $deselectedElements = array_diff($existingElements, $this->selectedElements);
-            UsuariosElemento::where('usuario_id', $this->selectedUser)
-                ->whereIn('elemento_id', $deselectedElements)
-                ->update(['eliminado' => 1]);
-
-            $this->dispatch('close-modal', 'modalUser');
-            $this->reset(['selectedUser', 'selectedElements', 'selectedUserName']);
-            $this->dispatch('msg', 'Registro guardado correctamente');
+            UsuariosElemento::create([
+                'usuario_id' => $this->selectedUser,
+                'elemento_id' => $elementId,
+                'eliminado' => 0,
+                'llenado' => 0,
+                'count_descargas' => 0,
+            ]);
         }
     }
+
+    $this->dispatch('close-modal', 'modalUser');
+    $this->reset(['selectedUser', 'selectedElements', 'selectedUserName']);
+    $this->dispatch('msg', 'Registro guardado correctamente');
+}
+
 
     #[On('destroyRazon')]
     public function destroy($id)

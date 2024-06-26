@@ -66,12 +66,13 @@
                             </div>
                         @endforeach
                     </div>
-                    <br>
+                    
                     <center>
-                        <div class="d-flex justify-content-end mt-3">
+                        <div class="d-flex justify-content-center mt-3">
                             <button class="btn btn-success" onclick="submitFields()">Enviar</button>
                         </div>
                     </center>
+                    <br>
                 </div>
             </div>
         </div>
