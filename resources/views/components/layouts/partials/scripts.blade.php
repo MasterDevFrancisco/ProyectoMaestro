@@ -119,6 +119,8 @@
         };
 
         let fieldNames = new Set();
+        let counter = 1; // Inicializa el contador en 1
+
         for (const field of fields) {
             let fieldName = field.value.trim();
             if (fieldName === '') {
@@ -139,7 +141,8 @@
                 });
                 return;
             }
-            fieldName = `$${fieldName}$`;
+            fieldName =
+            `<$${counter}{${fieldName}}${counter}$>`; // Usamos el contador para reemplazar los números 1
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
@@ -148,7 +151,10 @@
             } else if (type === 'texto') {
                 data.texto.push(fieldName);
             }
+
+            counter++; // Incrementa el contador en cada iteración
         }
+
 
         // Convert the data object to a JSON string
         const jsonString = JSON.stringify(data);
@@ -196,7 +202,6 @@
 <!-- Atrapar los errores -->
 <!-- Atrapar los errores -->
 <script>
-    
     function error() {
         Swal.fire({
             title: 'Error',
@@ -209,7 +214,6 @@
     window.addEventListener('error', () => {
         error();
     });
-   
 </script>
 {{-- Modo nocturno --}}
 
@@ -238,4 +242,3 @@
         });
     });
 </script>
-

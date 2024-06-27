@@ -4,6 +4,8 @@ namespace App\Livewire\Catalogos;
 
 use App\Models\Elementos;
 use App\Models\Servicios;
+use App\Models\Tablas; // Importa el modelo Tablas
+use App\Models\Campos; // Importa el modelo Campos
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -81,6 +83,7 @@ class ElementosComponent extends Component
 
     public function storeElemento($nombre, $servicios_id, $campos)
     {
+        // Validaciones
         $rules = [
             'nombre' => 'required|max:255|unique:elementos,nombre',
             'campos' => 'required|json',
@@ -103,18 +106,54 @@ class ElementosComponent extends Component
             'servicios_id' => $servicios_id
         ], $rules, $messages);
 
-        $elemento = new Elementos();
-        $elemento->nombre = $nombre;
-        $elemento->campos = $campos;
-        $elemento->servicios_id = $servicios_id;
-        $elemento->eliminado = 0;
-        $elemento->save();
+        // Iniciar una transacción
+        DB::beginTransaction();
+        try {
+            // Insertar en la tabla 'tablas'
+            $tabla = new Tablas();
+            $tabla->nombre = $nombre;
+            $tabla->save();
 
-        $this->totalRows = Elementos::where('eliminado', 0)->count();
+            // Obtener el ID de la tabla recién creada
+            $tablas_id = $tabla->id;
 
-        $this->dispatch('close-modal', 'modalElemento');
-        $this->dispatch('msg', 'Registro creado correctamente');
-        $this->reset(['nombre', 'campos', 'servicios_id']);
+            // Decodificar los campos
+            $camposData = json_decode($campos, true);
+            $fieldNames = array_merge($camposData['formula'], $camposData['texto']);
+
+            // Insertar en la tabla 'campos'
+            foreach ($fieldNames as $fieldName) {
+                $campo = new Campos();
+                $campo->tablas_id = $tablas_id;
+                $campo->nombre_columna = $fieldName;
+                $campo->status = '1';
+                $campo->save();
+            }
+
+            // Insertar en la tabla 'elementos'
+            $elemento = new Elementos();
+            $elemento->nombre = $nombre;
+            $elemento->campos = $campos;
+            $elemento->servicios_id = $servicios_id;
+            $elemento->eliminado = 0;
+            $elemento->save();
+
+            // Actualizar el contador de filas
+            $this->totalRows = Elementos::where('eliminado', 0)->count();
+
+            // Confirmar la transacción
+            DB::commit();
+
+            // Cerrar el modal y mostrar mensaje de éxito
+            $this->dispatch('close-modal', 'modalElemento');
+            $this->dispatch('msg', 'Registro creado correctamente');
+            $this->reset(['nombre', 'campos', 'servicios_id']);
+
+        } catch (\Exception $e) {
+            // En caso de error, deshacer la transacción
+            DB::rollBack();
+            $this->dispatch('msg', 'Error al crear el registro');
+        }
     }
 
     public function editar($id)
