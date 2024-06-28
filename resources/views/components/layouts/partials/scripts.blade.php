@@ -205,16 +205,32 @@
     function error() {
         Swal.fire({
             title: 'Error',
-            text: 'Algo salio mal contacte a programación.',
+            text: 'Algo salió mal contacte a programación.',
             icon: 'error',
             customClass: 'animated tada'
         });
     }
+    
+    function success(message) {
+        Swal.fire({
+            title: 'Éxito',
+            text: message,
+            icon: 'success',
+            customClass: 'animated tada'
+        });
+    }
+    
     // Eventos de Livewire para mostrar errores
     window.addEventListener('error', () => {
         error();
     });
+    
+    // Evento de Livewire para mostrar mensajes de éxito
+    window.addEventListener('msg', event => {
+        success(event.detail);
+    });
 </script>
+
 {{-- Modo nocturno --}}
 
 <script>
