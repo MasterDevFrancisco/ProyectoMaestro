@@ -23,13 +23,13 @@
                     <th width="3%"></th>
                     <th width="3%"></th>
                 </x-slot>
-                @php $counter = 1; @endphp <!-- Inicializo el contador -->
+                @php $counter = ($formatos->currentPage() - 1) * $formatos->perPage() + 1; @endphp <!-- Inicializo el contador con el índice correcto -->
                 @forelse($formatos as $formato)
                     @php
                         $isError = $formato->ruta_html === 'Error, contactar a programación.';
                     @endphp
                     <tr>
-                        <td>{{ $counter++ }}</td> <!-- Uso el contador en lugar del ID -->
+                        <td>{{ $counter++ }}</td> <!-- Uso el contador actualizado -->
                         <td>{{ $formato->nombre }}</td>
                         <td class="{{ $isError ? 'text-danger' : 'text-success' }}">
                             {{ $isError ? $formato->ruta_html : 'Correcto' }}
@@ -60,6 +60,7 @@
                         <td colspan="6">Sin Registros</td>
                     </tr>
                 @endforelse
+
             </x-table>
             <x-slot:cardFooter>
                 <div class="d-flex justify-content-center">

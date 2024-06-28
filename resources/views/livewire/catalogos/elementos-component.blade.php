@@ -4,8 +4,7 @@
             <x-slot:cardTools>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="d-flex justify-content-center flex-grow-1">
-                        <input type="text" wire:model.live='search' class="form-control" placeholder="Nombre"
-                            style="width: 250px;">
+                        <input type="text" wire:model.live='search' class="form-control" placeholder="Nombre" style="width: 250px;">
                     </div>
 
                     <a href="#" class="btn btn-success ml-3" wire:click='create'>
@@ -23,10 +22,10 @@
                     <th width="3%"></th>
                     <th width="3%"></th>
                 </x-slot>
-                @php $counter = 1; @endphp <!-- Inicializo el contador -->
+                @php $counter = ($elementos->currentPage() - 1) * $elementos->perPage() + 1; @endphp <!-- Inicializo el contador con el índice correcto -->
                 @forelse($elementos as $elemento)
                     <tr>
-                        <td>{{ $counter++ }}</td> <!-- Uso el contador en lugar del ID -->
+                        <td>{{ $counter++ }}</td> <!-- Uso el contador actualizado -->
                         <td>{{ $elemento->nombre }}</td>
                         <td>{{ $elemento->campos }}</td>
                         <td>{{ $elemento->servicio ? $elemento->servicio->nombre : 'No asignado' }}</td>
@@ -43,9 +42,7 @@
                             </a>
                         </td>
                         <td>
-                            <a href="#"
-                                wire:click="$dispatch('delete', {id: {{ $elemento->id }}, eventName: 'destroyElemento'})"
-                                title="Marcar como eliminado" class="btn btn-danger btn-xs">
+                            <a href="#" wire:click="$dispatch('delete', {id: {{ $elemento->id }}, eventName: 'destroyElemento'})" title="Marcar como eliminado" class="btn btn-danger btn-xs">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </td>

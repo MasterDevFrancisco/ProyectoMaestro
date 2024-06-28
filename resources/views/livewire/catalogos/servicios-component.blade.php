@@ -21,10 +21,10 @@
                 <th width="3%"></th>
                 <th width="3%"></th>
             </x-slot>
-            @php $counter = 1; @endphp <!-- Inicializo el contador -->
+            @php $counter = ($razones->currentPage() - 1) * $razones->perPage() + 1; @endphp <!-- Inicializo el contador con el índice correcto -->
             @forelse($razones as $razon)
                 <tr>
-                    <td>{{ $counter++ }}</td> <!-- Uso el contador en lugar del ID -->
+                    <td>{{ $counter++ }}</td> <!-- Uso el contador actualizado -->
                     <td>{{ $razon->nombre }}</td>
                     <td>{{ $razon->razonSocial->nombre_corto ?? 'Sin Razon Social' }}</td>
                     <td>

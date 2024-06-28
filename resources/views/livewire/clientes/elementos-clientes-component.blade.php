@@ -18,10 +18,10 @@
                     <th width="3%"></th>
                     <th width="3%"></th>
                 </x-slot>
-                @php $counter = 1; @endphp
+                @php $counter = ($elementos->currentPage() - 1) * $elementos->perPage() + 1; @endphp <!-- Inicializo el contador con el índice correcto -->
                 @forelse($elementos as $elemento)
                     <tr>
-                        <td>{{ $counter++ }}</td>
+                        <td>{{ $counter++ }}</td> <!-- Uso el contador actualizado -->
                         <td>{{ $elemento->elemento->nombre ?? 'No asignado' }}</td>
                         <td>{{ $elemento->elemento->servicio->nombre ?? 'No asignado' }}</td>
                         <td>{{ $elemento->usuario->name ?? 'No asignado' }}</td>
