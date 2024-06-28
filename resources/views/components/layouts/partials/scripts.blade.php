@@ -142,7 +142,7 @@
                 return;
             }
             fieldName =
-            `<$${counter}{${fieldName}}${counter}$>`; // Usamos el contador para reemplazar los números 1
+            `<$${counter}${fieldName}${counter}$>`; // Usamos el contador para reemplazar los números 1
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
