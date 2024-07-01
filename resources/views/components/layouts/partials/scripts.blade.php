@@ -258,3 +258,21 @@
         });
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleUploadField(); // Establecer el estado inicial del campo de archivo
+    });
+
+    function toggleUploadField() {
+        const elementosSelect = document.getElementById('elementos_id');
+        const fileInput = document.getElementById('documento');
+
+        if (elementosSelect.value) {
+            fileInput.disabled = false;
+        } else {
+            fileInput.disabled = true;
+            fileInput.value = ''; // Limpiar el campo de carga
+        }
+    }
+</script>
+

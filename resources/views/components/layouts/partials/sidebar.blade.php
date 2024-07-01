@@ -7,7 +7,7 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <!-- Visible para todos los usuarios autenticados -->
             <li class="nav-item">
-                <a href="{{ route('inicio') }}" class="nav-link">
+                <a href="{{ route('inicio') }}" class="nav-link {{ request()->routeIs('inicio') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-store"></i>
                     <p>Inicio</p>
                 </a>
@@ -25,31 +25,31 @@
                 </a>
                 <ul class="nav nav-treeview ml-3" style="display: block;">
                     <li class="nav-item">
-                        <a href="{{ route('razon-social') }}" class="nav-link">
+                        <a href="{{ route('razon-social') }}" class="nav-link {{ request()->routeIs('razon-social') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-signature"></i>
                             <p>Razon Social</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('servicios') }}" class="nav-link">
+                        <a href="{{ route('servicios') }}" class="nav-link {{ request()->routeIs('servicios') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-dollar-sign"></i>
                             <p>Servicios</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('coordinadores') }}" class="nav-link">
+                        <a href="{{ route('coordinadores') }}" class="nav-link {{ request()->routeIs('coordinadores') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-users"></i>
                             <p>Coordinadores</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('elementos') }}" class="nav-link">
+                        <a href="{{ route('elementos') }}" class="nav-link {{ request()->routeIs('elementos') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-cube"></i>
                             <p>Elementos</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('formatos') }}" class="nav-link">
+                        <a href="{{ route('formatos') }}" class="nav-link {{ request()->routeIs('formatos') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-alt"></i>
                             <p>Formatos</p>
                         </a>
@@ -70,19 +70,19 @@
                 </a>
                 <ul class="nav nav-treeview" style="display: block;">
                     <li class="nav-item ml-3">
-                        <a href="{{ route('elementos') }}" class="nav-link">
+                        <a href="{{ route('elementos') }}" class="nav-link {{ request()->routeIs('elementos') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-cube"></i>
                             <p>Elementos</p>
                         </a>
                     </li>
                     <li class="nav-item ml-3">
-                        <a href="{{ route('permisos') }}" class="nav-link">
+                        <a href="{{ route('permisos') }}" class="nav-link {{ request()->routeIs('permisos') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-user"></i>
                             <p>Permisos</p>
                         </a>
                     </li>
                     <li class="nav-item ml-3">
-                        <a href="{{ route('formatos') }}" class="nav-link">
+                        <a href="{{ route('formatos') }}" class="nav-link {{ request()->routeIs('formatos') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-alt"></i>
                             <p>Formatos</p>
                         </a>
@@ -103,7 +103,7 @@
                 </a>
                 <ul class="nav nav-treeview ml-3" style="display: block;">
                     <li class="nav-item">
-                        <a href="{{ route('permisos') }}" class="nav-link">
+                        <a href="{{ route('permisos') }}" class="nav-link {{ request()->routeIs('permisos') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-user"></i>
                             <p>Permisos</p>
                         </a>
@@ -124,7 +124,7 @@
                 </a>
                 <ul class="nav nav-treeview" style="display: block;">
                     <li class="nav-item ml-3">
-                        <a href="{{ route('mis_elementos') }}" class="nav-link">
+                        <a href="{{ route('mis_elementos') }}" class="nav-link {{ request()->routeIs('mis_elementos') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-folder-open"></i>
                             <p>Mis Elementos</p>
                         </a>

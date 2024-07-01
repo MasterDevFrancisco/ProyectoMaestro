@@ -30,7 +30,7 @@ class FormatosComponent extends Component
     public $totalRows;
     public $elementos_id;
     public $documentoUrl;
- 
+
 
     public function mount()
     {
@@ -54,47 +54,47 @@ class FormatosComponent extends Component
     }
 
     // Método store
-public function store(Request $request)
-{
-    $this->validateForm();
+    public function store(Request $request)
+    {
+        $this->validateForm();
 
-    if ($this->documento) {
-        $this->storeDocumento();
+        if ($this->documento) {
+            $this->storeDocumento();
+        }
+
+        $formatosInsert = new Formatos();
+        $this->saveFormato($formatosInsert);
+
+        $this->convertToHtml($formatosInsert->id, $formatosInsert->id);
+
+        $this->getDataElemento($this->elementos_id);
+
+        $formatosInsert->eliminado = 0;
+        $formatosInsert->save();
+
+        $this->totalRows = Formatos::where('eliminado', 0)->count();
+
+        // Cambiar 'error' por 'msg' después de una operación exitosa
+        $this->dispatch('msg', 'Registro creado correctamente');
+        $this->dispatch('close-modal', 'modalFormato');
+        $this->resetForm();
     }
-
-    $formatosInsert = new Formatos();
-    $this->saveFormato($formatosInsert);
-
-    $this->convertToHtml($formatosInsert->id, $formatosInsert->id);
-
-    $this->getDataElemento($this->elementos_id);
-
-    $formatosInsert->eliminado = 0;
-    $formatosInsert->save();
-
-    $this->totalRows = Formatos::where('eliminado', 0)->count();
-
-    // Cambiar 'error' por 'msg' después de una operación exitosa
-    $this->dispatch('msg', 'Registro creado correctamente');
-    $this->dispatch('close-modal', 'modalFormato');
-    $this->resetForm();
-}
 
 
 
     // Método update
-public function update()
-{
-    $this->validateForm($this->Id);
+    public function update()
+    {
+        $this->validateForm($this->Id);
 
-    $formatosInsert = Formatos::findOrFail($this->Id);
-    $this->saveFormato($formatosInsert, true);
+        $formatosInsert = Formatos::findOrFail($this->Id);
+        $this->saveFormato($formatosInsert, true);
 
-    $this->totalRows = Formatos::where('eliminado', 0)->count();
-    $this->dispatch('close-modal', 'modalFormato');
-    $this->dispatch('msg', 'Registro actualizado correctamente'); // Mensaje de éxito
-    $this->resetForm();
-}
+        $this->totalRows = Formatos::where('eliminado', 0)->count();
+        $this->dispatch('close-modal', 'modalFormato');
+        $this->dispatch('msg', 'Registro actualizado correctamente'); // Mensaje de éxito
+        $this->resetForm();
+    }
 
 
     public function editar($id)
@@ -168,28 +168,28 @@ public function update()
     }
 
     private function validateForm($id = null)
-{
-    $rules = [
-        'nombre' => 'required|max:255|unique:formatos,nombre' . ($id ? ',' . $id : ''),
-        'elementos_id' => 'required|exists:elementos,id',
-        'documento' => 'nullable|max:2048'
-    ];
+    {
+        $rules = [
+            'nombre' => 'required|max:255|unique:formatos,nombre' . ($id ? ',' . $id : ''),
+            'elementos_id' => 'required|exists:elementos,id',
+            'documento' => 'nullable|max:2048'
+        ];
 
-    $messages = [
-        'nombre.required' => 'El nombre es requerido',
-        'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
-        'nombre.unique' => 'Esta razón social ya existe',
-        'elementos_id.required' => 'El elemento es requerido',
-        'elementos_id.exists' => 'El elemento seleccionado no es válido'
-    ];
+        $messages = [
+            'nombre.required' => 'El nombre es requerido',
+            'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
+            'nombre.unique' => 'Esta razón social ya existe',
+            'elementos_id.required' => 'El elemento es requerido',
+            'elementos_id.exists' => 'El elemento seleccionado no es válido'
+        ];
 
-    try {
-        $this->validate($rules, $messages);
-    } catch (\Exception $e) {
-        Log::error('Error en validateForm: ' . $e->getMessage());
-        $this->dispatch('error', 'Algo salió mal, contacte a programación.'); // Agregar un mensaje de error específico
+        try {
+            $this->validate($rules, $messages);
+        } catch (\Exception $e) {
+            Log::error('Error en validateForm: ' . $e->getMessage());
+            $this->dispatch('error', 'Algo salió mal, contacte a programación.'); // Agregar un mensaje de error específico
+        }
     }
-}
 
 
     private function storeDocumento()
@@ -205,25 +205,25 @@ public function update()
     }
 
     private function saveFormato($formatosInsert, $isUpdate = false)
-{
-    try {
-        $formatosInsert->nombre = $this->nombre;
-        $formatosInsert->ruta_pdf = $this->ruta_pdf;
-        $formatosInsert->elementos_id = $this->elementos_id;
-        $formatosInsert->eliminado = 0;
-        $formatosInsert->convertio_id = $isUpdate ? 0 : 666;
-        $formatosInsert->ruta_html = $isUpdate ? '' : 'Error, contactar a programación.';
+    {
+        try {
+            $formatosInsert->nombre = $this->nombre;
+            $formatosInsert->ruta_pdf = $this->ruta_pdf;
+            $formatosInsert->elementos_id = $this->elementos_id;
+            $formatosInsert->eliminado = 0;
+            $formatosInsert->convertio_id = $isUpdate ? 0 : 666;
+            $formatosInsert->ruta_html = $isUpdate ? '' : 'Error, contactar a programación.';
 
-        if ($this->documento && $isUpdate) {
-            $this->updateDocumento($formatosInsert);
+            if ($this->documento && $isUpdate) {
+                $this->updateDocumento($formatosInsert);
+            }
+
+            $formatosInsert->save();
+        } catch (\Exception $e) {
+            Log::error('Error en saveFormato: ' . $e->getMessage());
+            $this->dispatch('error', 'Algo salió mal, contacte a programación.'); // Agregar un mensaje de error específico
         }
-
-        $formatosInsert->save();
-    } catch (\Exception $e) {
-        Log::error('Error en saveFormato: ' . $e->getMessage());
-        $this->dispatch('error', 'Algo salió mal, contacte a programación.'); // Agregar un mensaje de error específico
     }
-}
 
 
     private function updateDocumento($formatosInsert)
@@ -249,12 +249,12 @@ public function update()
             $filePath = public_path('storage/public/' . $formato->ruta_pdf);
 
             if (!file_exists($filePath)) {
-             
+
                 $this->dispatch('error');
                 return;
             }
 
-       
+
 
             $fileContent = base64_encode(file_get_contents($filePath));
 
@@ -277,7 +277,7 @@ public function update()
                     $getIdConvertio = $result['data']['id'];
                     $statusResult = $this->getConversionStatus($getIdConvertio);
 
-                    
+
 
                     $formatoHtml = Formatos::findOrFail($idRegistro);
                     $formatoHtml->convertio_id = $getIdConvertio;
@@ -291,7 +291,7 @@ public function update()
                     }
                 } else {
                     Log::error($result);
-      
+
                     $this->dispatch('error');
                 }
 
@@ -303,7 +303,7 @@ public function update()
             }
         } catch (\Exception $e) {
             Log::error('Error en convertToHtml: ' . $e->getMessage());
-  
+
             $this->dispatch('error');
         }
     }
@@ -336,7 +336,7 @@ public function update()
             return $result;
         } catch (\Exception $e) {
             Log::error('Error en getConversionStatus: ' . $e->getMessage());
-         
+
             $this->dispatch('error');
         }
     }

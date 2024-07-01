@@ -84,7 +84,7 @@
                         @enderror
                         <br>
                         <label class="w-100 text-center">Elemento</label>
-                        <select wire:model="elementos_id" class="form-control">
+                        <select wire:model="elementos_id" id="elementos_id" class="form-control" onchange="toggleUploadField()">
                             <option value="">Seleccione un elemento</option>
                             @foreach ($elementos as $el)
                                 <option value="{{ $el->id }}">{{ $el->nombre }}</option>
@@ -98,7 +98,7 @@
                         @enderror
                         <br>
                         <label for="documento" class="w-100 text-center">Archivo PDF</label>
-                        <input wire:model='documento' type="file" id="documento" accept="application/pdf">
+                        <input wire:model='documento' type="file" id="documento" accept="application/pdf" disabled>
                         @if ($ruta_pdf)
                             <p>Archivo actual: {{ basename($ruta_pdf) }}</p>
                         @endif
