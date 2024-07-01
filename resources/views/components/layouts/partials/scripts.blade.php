@@ -142,7 +142,7 @@
                 return;
             }
             fieldName =
-            `<$${counter}${fieldName}${counter}$>`; // Usamos el contador para reemplazar los números 1
+                `<$${counter}${fieldName}${counter}$>`; // Usamos el contador para reemplazar los números 1
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
@@ -210,7 +210,7 @@
             customClass: 'animated tada'
         });
     }
-    
+
     function success(message) {
         Swal.fire({
             title: 'Éxito',
@@ -219,12 +219,12 @@
             customClass: 'animated tada'
         });
     }
-    
+
     // Eventos de Livewire para mostrar errores
     window.addEventListener('error', () => {
         error();
     });
-    
+
     // Evento de Livewire para mostrar mensajes de éxito
     window.addEventListener('msg', event => {
         success(event.detail);
@@ -278,23 +278,27 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Inicializa el estado del campo de carga de documentos
-        toggleUploadField();
+        // Inicializa el estado del campo de carga de documentos si el elemento existe
+        if (document.getElementById('elementos_id')) {
+            toggleUploadField();
 
-        // Añadir evento al campo de selección de elementos
-        const elementosSelect = document.getElementById('elementos_id');
-        elementosSelect.addEventListener('change', toggleUploadField);
+            // Añadir evento al campo de selección de elementos si existe
+            const elementosSelect = document.getElementById('elementos_id');
+            elementosSelect.addEventListener('change', toggleUploadField);
+        }
     });
 
     function toggleUploadField() {
         const elementosSelect = document.getElementById('elementos_id');
         const fileInput = document.getElementById('documento');
 
-        if (elementosSelect.value) {
-            fileInput.disabled = false;
-        } else {
-            fileInput.disabled = true;
-            fileInput.value = ''; // Limpiar el campo de carga
+        if (elementosSelect && fileInput) {
+            if (elementosSelect.value) {
+                fileInput.disabled = false;
+            } else {
+                fileInput.disabled = true;
+                fileInput.value = ''; // Limpiar el campo de carga
+            }
         }
     }
 </script>
