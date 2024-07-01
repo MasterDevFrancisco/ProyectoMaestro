@@ -53,6 +53,10 @@ class FormatosComponent extends Component
         $this->dispatch('open-modal-formato');
     }
 
+    public function logFileUpload()
+    {
+        Log::info('Archivo cargado: ' );
+    }
     // Método store
     public function store(Request $request)
     {

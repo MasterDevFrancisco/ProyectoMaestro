@@ -276,3 +276,25 @@
     }
 </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializa el estado del campo de carga de documentos
+        toggleUploadField();
+
+        // Añadir evento al campo de selección de elementos
+        const elementosSelect = document.getElementById('elementos_id');
+        elementosSelect.addEventListener('change', toggleUploadField);
+    });
+
+    function toggleUploadField() {
+        const elementosSelect = document.getElementById('elementos_id');
+        const fileInput = document.getElementById('documento');
+
+        if (elementosSelect.value) {
+            fileInput.disabled = false;
+        } else {
+            fileInput.disabled = true;
+            fileInput.value = ''; // Limpiar el campo de carga
+        }
+    }
+</script>

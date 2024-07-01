@@ -98,7 +98,7 @@
                         @enderror
                         <br>
                         <label for="documento" class="w-100 text-center">Archivo PDF</label>
-                        <input wire:model='documento' type="file" id="documento" accept="application/pdf" disabled>
+                        <input wire:model='documento' type="file" id="documento" accept="application/pdf" wire:change="logFileUpload" disabled>
                         @if ($ruta_pdf)
                             <p>Archivo actual: {{ basename($ruta_pdf) }}</p>
                         @endif
