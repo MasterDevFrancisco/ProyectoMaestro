@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Http;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
+use Smalot\PdfParser\Parser;
 
 #[Title('Formatos')]
 class FormatosComponent extends Component
@@ -55,8 +56,32 @@ class FormatosComponent extends Component
 
     public function logFileUpload()
     {
-        Log::info('Archivo cargado: ' );
+        $getElementos = Elementos::findOrFail($this->elementos_id);
+
+        // Decode the JSON to an associative array
+        $campos = json_decode($getElementos->campos, true);
+
+        // Extract the values from the 'texto' field
+        $texto = $campos['texto'];
+
+        // Use a regular expression to extract the values between <$ and $>
+        $pattern = '/&lt;\$(\d+)[^&]*&gt;/';
+        $matches = [];
+        foreach ($texto as $item) {
+            if (preg_match($pattern, $item, $match)) {
+                $matches[] = '<$' . $match[1] . '$>';
+            }
+        }
+
+        $result = implode(',', $matches);
+
+       
+        Log::info($result);
+        return $result;
     }
+
+    
+
     // Método store
     public function store(Request $request)
     {
