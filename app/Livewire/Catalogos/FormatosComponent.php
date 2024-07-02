@@ -55,31 +55,6 @@ class FormatosComponent extends Component
         $this->dispatch('open-modal-formato');
     }
 
-    public function logFileUpload()
-    {
-        $getElementos = Elementos::findOrFail($this->elementos_id);
-
-        // Decode the JSON to an associative array
-        $campos = json_decode($getElementos->campos, true);
-
-        // Extract the values from the 'texto' field
-        $texto = $campos['texto'];
-
-        // Use a regular expression to extract the values between <$ and $>
-        $pattern = '/&lt;\$(\d+)[^&]*&gt;/';
-        $matches = [];
-        foreach ($texto as $item) {
-            if (preg_match($pattern, $item, $match)) {
-                $matches[] = '&lt;$' . $match[1] . '$&gt;';
-            }
-        }
-
-        $result = implode(',', $matches);
-
-
-        Log::info($result);
-        return $result;
-    }
 
 
 
@@ -102,7 +77,6 @@ class FormatosComponent extends Component
 
         $this->totalRows = Formatos::where('eliminado', 0)->count();
 
-        // Cambiar 'error' por 'msg' después de una operación exitosa
         $this->dispatch('msg', 'Registro creado correctamente');
         $this->dispatch('close-modal', 'modalFormato');
         $this->resetForm();
@@ -120,7 +94,7 @@ class FormatosComponent extends Component
 
         $this->totalRows = Formatos::where('eliminado', 0)->count();
         $this->dispatch('close-modal', 'modalFormato');
-        $this->dispatch('msg', 'Registro actualizado correctamente'); // Mensaje de éxito
+        $this->dispatch('msg', 'Registro actualizado correctamente'); 
         $this->resetForm();
     }
 
@@ -136,7 +110,7 @@ class FormatosComponent extends Component
         $this->dispatch('open-modal-formato');
     }
 
-   
+
 
     public function viewDocument($id)
     {
@@ -181,8 +155,7 @@ class FormatosComponent extends Component
         try {
             $this->validate($rules, $messages);
         } catch (Exception $e) {
-            Log::error('Error en validateForm: ' . $e->getMessage());
-            $this->dispatch('error', 'Algo salió mal, contacte a programación.'); // Agregar un mensaje de error específico
+            $this->handleError($e);
         }
     }
 
@@ -194,8 +167,7 @@ class FormatosComponent extends Component
             $this->documento->storeAs('public', $nombreDoc);
             $this->ruta_pdf = $nombreDoc;
         } catch (\Exception $e) {
-            Log::error('Error en storeDocumento: ' . $e->getMessage());
-            $this->dispatch('error');
+            $this->handleError($e);
         }
     }
 
@@ -215,8 +187,7 @@ class FormatosComponent extends Component
 
             $formatosInsert->save();
         } catch (\Exception $e) {
-            Log::error('Error en saveFormato: ' . $e->getMessage());
-            $this->dispatch('error', 'Algo salió mal, contacte a programación.'); // Agregar un mensaje de error específico
+            $this->handleError($e);
         }
     }
 
@@ -232,8 +203,43 @@ class FormatosComponent extends Component
             $this->documento->storeAs('public', $nombreDoc);
             $formatosInsert->ruta_pdf = $nombreDoc;
         } catch (\Exception $e) {
-            Log::error('Error en updateDocumento: ' . $e->getMessage());
-            $this->dispatch('error');
+            $this->handleError($e);
+        }
+    }
+
+    private function saveHtmlFile($url, $formatoHtml)
+    {
+        try {
+            $fileName = 'html/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $formatoHtml->nombre) . '.html';
+            $directoryPath = public_path('storage/public/html');
+            $filePath = $directoryPath . '/' . basename($fileName);
+
+            if (!is_dir($directoryPath)) {
+                mkdir($directoryPath, 0755, true);
+            }
+
+            $response = Http::get($url);
+            file_put_contents($filePath, $response->body());
+
+            $htmlContent = file_get_contents($filePath);
+            $searchTexts = $this->logFileUpload();
+
+            foreach ($searchTexts as $searchText) {
+                if (strpos($htmlContent, $searchText) === false) {
+                    Log::info('El texto "' . $searchText . '" no fue encontrado en el archivo HTML.');
+                    $this->dispatch('error', 'No se encontraron todos los campos en el documento');
+                    return false;
+                }
+            }
+
+            $formatoHtml->ruta_html = 'html/' . basename($fileName);
+            $formatoHtml->save();
+
+            Log::info('Todos los campos fueron encontrados en el archivo HTML.');
+            return true;
+        } catch (\Exception $e) {
+            $this->handleError($e);
+            return false;
         }
     }
 
@@ -244,12 +250,9 @@ class FormatosComponent extends Component
             $filePath = public_path('storage/public/' . $formato->ruta_pdf);
 
             if (!file_exists($filePath)) {
-
                 $this->dispatch('error');
                 return;
             }
-
-
 
             $fileContent = base64_encode(file_get_contents($filePath));
 
@@ -272,8 +275,6 @@ class FormatosComponent extends Component
                     $getIdConvertio = $result['data']['id'];
                     $statusResult = $this->getConversionStatus($getIdConvertio);
 
-
-
                     $formatoHtml = Formatos::findOrFail($idRegistro);
                     $formatoHtml->convertio_id = $getIdConvertio;
                     $formatoHtml->save();
@@ -281,25 +282,23 @@ class FormatosComponent extends Component
                     if ($statusResult['code'] === 200 && $statusResult['status'] === 'ok') {
                         if (isset($statusResult['data']['output']['url'])) {
                             $url = $statusResult['data']['output']['url'];
-                            $this->saveHtmlFile($url, $formatoHtml);
+                            $isSaved = $this->saveHtmlFile($url, $formatoHtml);
+                            if (!$isSaved) {
+                                return;
+                            }
                         }
                     }
                 } else {
                     Log::error($result);
-
                     $this->dispatch('error');
                 }
 
                 return $result;
             } catch (\Exception $e) {
-                Log::error('Catch: ' . $e->getMessage());
-
-                $this->dispatch('error');
+                $this->handleError($e);
             }
         } catch (\Exception $e) {
-            Log::error('Error en convertToHtml: ' . $e->getMessage());
-
-            $this->dispatch('error');
+            $this->handleError($e);
         }
     }
 
@@ -330,44 +329,38 @@ class FormatosComponent extends Component
 
             return $result;
         } catch (\Exception $e) {
-            Log::error('Error en getConversionStatus: ' . $e->getMessage());
-
-            $this->dispatch('error');
+            $this->handleError($e);
         }
     }
-
-    private function saveHtmlFile($url, $formatoHtml)
+    private function handleError($exception)
     {
-        try {
-            $fileName = 'html/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $formatoHtml->nombre) . '.html';
-            $directoryPath = public_path('storage/public/html');
-            $filePath = $directoryPath . '/' . basename($fileName);
-
-            if (!is_dir($directoryPath)) {
-                mkdir($directoryPath, 0755, true);
-            }
-
-            $response = Http::get($url);
-            file_put_contents($filePath, $response->body());
-
-            $formatoHtml->ruta_html = 'html/' . basename($fileName);
-            $formatoHtml->save();
-
-            // Inspeccionar el archivo .html como un txt y buscar el texto "&lt;$5$&gt;"
-            $htmlContent = file_get_contents($filePath);
-            $searchText = '&lt;$5$&gt;';
-
-            if (strpos($htmlContent, $searchText) !== false) {
-                Log::info('El texto "' . $searchText . '" fue encontrado en el archivo HTML.');
-            } else {
-                Log::info('El texto "' . $searchText . '" no fue encontrado en el archivo HTML.');
-            }
-        } catch (\Exception $e) {
-            Log::error('Error en saveHtmlFile: ' . $e->getMessage());
-
-            $this->dispatch('error');
-        }
+        $errorMessage = $exception->getMessage();
+        Log::error('Error: ' . $errorMessage);
+        $this->dispatch('error', $errorMessage);
     }
+
+    public function logFileUpload()
+    {
+        $getElementos = Elementos::findOrFail($this->elementos_id);
+
+        // Decode the JSON to an associative array
+        $campos = json_decode($getElementos->campos, true);
+
+        // Extract the values from the 'texto' field
+        $texto = $campos['texto'];
+
+        // Use a regular expression to extract the values between <$ and $>
+        $pattern = '/&lt;\$(\d+)[^&]*&gt;/';
+        $matches = [];
+        foreach ($texto as $item) {
+            if (preg_match($pattern, $item, $match)) {
+                $matches[] = '&lt;$' . $match[1] . '$&gt;';
+            }
+        }
+
+        return $matches;  // Change here to return an array of matches
+    }
+
 
 
     private function resetForm()

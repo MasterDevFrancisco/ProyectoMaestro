@@ -141,7 +141,8 @@
                 });
                 return;
             }
-            fieldName = `&lt;$${counter}${fieldName}${counter}$&gt;`;// Usamos el contador para reemplazar los números 1
+            fieldName =
+            `&lt;$${counter}${fieldName}${counter}$&gt;`; // Usamos el contador para reemplazar los números 1
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
@@ -199,7 +200,7 @@
 </script>
 
 <!-- Atrapar los errores -->
-<!-- Atrapar los errores -->
+
 <script>
     function error() {
         Swal.fire({
@@ -256,23 +257,6 @@
             toggleDarkMode.title = isDarkMode ? 'Cambiar a modo día' : 'Cambiar a modo oscuro';
         });
     });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        toggleUploadField(); // Establecer el estado inicial del campo de archivo
-    });
-
-    function toggleUploadField() {
-        const elementosSelect = document.getElementById('elementos_id');
-        const fileInput = document.getElementById('documento');
-
-        if (elementosSelect.value) {
-            fileInput.disabled = false;
-        } else {
-            fileInput.disabled = true;
-            fileInput.value = ''; // Limpiar el campo de carga
-        }
-    }
 </script>
 
 <script>
