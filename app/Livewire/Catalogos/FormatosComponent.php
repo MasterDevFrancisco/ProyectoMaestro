@@ -15,6 +15,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
 use Smalot\PdfParser\Parser;
+use Exception;
 
 #[Title('Formatos')]
 class FormatosComponent extends Component
@@ -75,12 +76,12 @@ class FormatosComponent extends Component
 
         $result = implode(',', $matches);
 
-       
+
         Log::info($result);
         return $result;
     }
 
-    
+
 
     // Método store
     public function store(Request $request)
@@ -95,8 +96,6 @@ class FormatosComponent extends Component
         $this->saveFormato($formatosInsert);
 
         $this->convertToHtml($formatosInsert->id, $formatosInsert->id);
-
-        $this->getDataElemento($this->elementos_id);
 
         $formatosInsert->eliminado = 0;
         $formatosInsert->save();
@@ -137,40 +136,7 @@ class FormatosComponent extends Component
         $this->dispatch('open-modal-formato');
     }
 
-    public function getDataElemento($IdElemento)
-    {
-        $elemento = Elementos::findOrFail($IdElemento);
-        $campos = json_decode($elemento->campos, true);
-        $htmlFilePath = public_path('storage\\public\\html\\' . $this->nombre . '.html');
-        if (!file_exists($htmlFilePath)) {
-            Log::error('El archivo HTML no existe en la ruta especificada.', ['ruta' => $htmlFilePath]);
-            $this->dispatch('error');
-            return;
-        }
-
-
-        $htmlContent = file_get_contents($htmlFilePath);
-
-        $missingCampos = [];
-        foreach ($campos as $tipo => $valores) {
-            foreach ($valores as $campo) {
-                if (strpos($htmlContent, $campo) === false) {
-                    $missingCampos[] = $campo;
-                }
-            }
-        }
-
-        if (empty($missingCampos)) {
-            $this->dispatch('msg', 'Se encontraron todos los campos');
-            Log::info('Se encontraron todos los campos en el HTML.', ['campos' => $campos]);
-        } else {
-            $message = 'Falta definir los siguientes campos: ' . implode(', ', $missingCampos);
-            $this->dispatch('msg', $message, 'error');
-            Log::warning($message, ['missingCampos' => $missingCampos]);
-        }
-
-        return $campos;
-    }
+   
 
     public function viewDocument($id)
     {
@@ -214,7 +180,7 @@ class FormatosComponent extends Component
 
         try {
             $this->validate($rules, $messages);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error en validateForm: ' . $e->getMessage());
             $this->dispatch('error', 'Algo salió mal, contacte a programación.'); // Agregar un mensaje de error específico
         }
@@ -386,12 +352,23 @@ class FormatosComponent extends Component
 
             $formatoHtml->ruta_html = 'html/' . basename($fileName);
             $formatoHtml->save();
+
+            // Inspeccionar el archivo .html como un txt y buscar el texto "&lt;$5$&gt;"
+            $htmlContent = file_get_contents($filePath);
+            $searchText = '&lt;$5$&gt;';
+
+            if (strpos($htmlContent, $searchText) !== false) {
+                Log::info('El texto "' . $searchText . '" fue encontrado en el archivo HTML.');
+            } else {
+                Log::info('El texto "' . $searchText . '" no fue encontrado en el archivo HTML.');
+            }
         } catch (\Exception $e) {
             Log::error('Error en saveHtmlFile: ' . $e->getMessage());
 
             $this->dispatch('error');
         }
     }
+
 
     private function resetForm()
     {
