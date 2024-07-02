@@ -141,8 +141,7 @@
                 });
                 return;
             }
-            fieldName =
-                `<$${counter}${fieldName}${counter}$>`; // Usamos el contador para reemplazar los números 1
+            fieldName = `&lt;$${counter}${fieldName}${counter}$&gt;`;// Usamos el contador para reemplazar los números 1
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
