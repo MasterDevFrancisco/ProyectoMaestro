@@ -69,7 +69,7 @@ class FormatosComponent extends Component
         $matches = [];
         foreach ($texto as $item) {
             if (preg_match($pattern, $item, $match)) {
-                $matches[] = '<$' . $match[1] . '$>';
+                $matches[] = '&lt;$' . $match[1] . '$&gt;';
             }
         }
 
