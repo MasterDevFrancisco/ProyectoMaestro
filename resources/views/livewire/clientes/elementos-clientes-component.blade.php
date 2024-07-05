@@ -53,32 +53,39 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalElementoLabel">Elemento</h5>
+                        <h5 class="modal-title" id="modalElementoLabel">{{ $elementoNombre }}</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
                         @foreach ($dynamicFields as $field)
+                            @php
+                                // Limpiar el nombre del campo eliminando caracteres especiales
+                                $cleanField = preg_replace('/[^a-zA-Z ]/', '', str_replace(['<', '>', '&lt;', '&gt;'], '', $field));
+                            @endphp
                             <div class="form-group">
-                                <label for="{{ strtolower(str_replace('$', '', $field)) }}" class="text-center d-block">{{ str_replace('$', '', $field) }}</label>
-                                <input type="text" class="form-control" id="{{ strtolower(str_replace('$', '', $field)) }}" name="{{ strtolower(str_replace('$', '', $field)) }}">
+                                <label for="{{ strtolower($cleanField) }}" class="text-center d-block">{{ $cleanField }}</label>
+                                <input type="text" wire:model="formData.{{ strtolower($cleanField) }}" class="form-control" id="{{ strtolower($cleanField) }}" name="{{ strtolower($cleanField) }}">
                             </div>
                         @endforeach
                     </div>
                     
                     <center>
                         <div class="d-flex justify-content-center mt-3">
-                            <button class="btn btn-success" onclick="submitFields()">Enviar</button>
+                            <button class="btn btn-success" wire:click="submitFields">Enviar</button>
                         </div>
                     </center>
                     <br>
                 </div>
             </div>
         </div>
+        
     @else
         <div class="alert alert-danger">
             No tienes permiso para acceder a esta página.
         </div>
     @endhasanyrole
+    
 </div>
+

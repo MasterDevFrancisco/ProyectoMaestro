@@ -19,4 +19,8 @@ class Tablas extends Model
     {
         return $this->hasMany(Campos::class, 'tablas_id');
     }
+    public function elemento()
+    {
+        return $this->belongsTo(Elementos::class, 'elementos_id');
+    }
 }

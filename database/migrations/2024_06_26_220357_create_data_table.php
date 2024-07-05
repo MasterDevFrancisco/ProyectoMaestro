@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('rowID', 45);
             $table->string('valor', 45);
             $table->foreignId('campos_id')->constrained('campos');
+            $table->foreignId('users_id')->constrained('users'); // Agregamos el campo users_id como clave foránea
             $table->timestamps();
         });
     }
