@@ -50,19 +50,45 @@ class ElementosClientesComponent extends Component
 
     public function submitFields()
     {
+        Log::info('submitFields called');
         $elemento = $this->loadElemento($this->elementoId);
-        
+        Log::info('Elemento loaded', ['elemento' => $elemento]);
+
         if ($elemento) {
-            Log::info($elemento); // Imprimir el elemento en los logs
+            $campos = json_decode($elemento->elemento->campos, true);
+            Log::info('Campos loaded', ['campos' => $campos]);
+
+            if (isset($campos['texto'])) {
+                foreach ($campos['texto'] as $field) {
+                    $cleanField = preg_replace('/[^a-zA-Z ]/', '', str_replace(['<', '>', '&lt;', '&gt;'], '', $field));
+                    $campoNombre = strtolower($cleanField);
+                    Log::info('Processing field', ['field' => $field, 'cleanField' => $cleanField]);
+
+                    if (isset($this->formData[$campoNombre])) {
+                        $campo = Campos::where('nombre_columna', $campoNombre)
+                            ->where('tablas_id', $elemento->elemento->id)
+                            ->first();
+                        Log::info('Campo found', ['campo' => $campoNombre]);
+
+                        if ($campo) {
+                            Data::create([
+                                'rowID' => uniqid(),
+                                'valor' => $this->formData[$campoNombre],
+                                'campos_id' => $campo->id,
+                                'users_id' => Auth::id(),
+                            ]);
+                            Log::info('Data inserted', ['rowID' => uniqid(), 'valor' => $this->formData[$campoNombre], 'campos_id' => $campo->id, 'users_id' => Auth::id()]);
+                        }
+                    }
+                }
+            }
         }
 
-        $data = Data::create([
-            'rowID' => 2,
-            'valor' => "test",
-            'campos_id' => 2,
-            'users_id' => 1,
-        ]);
+        $this->resetFormData();
+        session()->flash('message', 'Datos guardados exitosamente.');
     }
+
+
 
     private function resetFormData()
     {

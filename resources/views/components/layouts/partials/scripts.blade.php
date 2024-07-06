@@ -286,3 +286,16 @@
     }
 </script>
 
+<div>
+    @push('scripts')
+    <script>
+        window.addEventListener('alert', event => {
+            Swal.fire({
+                icon: event.detail.type,
+                title: 'Alerta',
+                text: event.detail.message,
+            });
+        });
+    </script>
+    @endpush
+</div>

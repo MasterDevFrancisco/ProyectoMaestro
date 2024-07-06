@@ -9,6 +9,8 @@ use App\Models\Campos; // Importa el modelo Campos
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -109,9 +111,18 @@ class ElementosComponent extends Component
         // Iniciar una transacción
         DB::beginTransaction();
         try {
+            // Insertar en la tabla 'elementos'
+            $elemento = new Elementos();
+            $elemento->nombre = $nombre;
+            $elemento->campos = $campos;
+            $elemento->servicios_id = $servicios_id;
+            $elemento->eliminado = 0;
+            $elemento->save();
+
             // Insertar en la tabla 'tablas'
             $tabla = new Tablas();
             $tabla->nombre = $nombre;
+            $tabla->elementos_id = $elemento->id; // Relación correcta con la tabla de elementos
             $tabla->save();
 
             // Obtener el ID de la tabla recién creada
@@ -130,14 +141,6 @@ class ElementosComponent extends Component
                 $campo->save();
             }
 
-            // Insertar en la tabla 'elementos'
-            $elemento = new Elementos();
-            $elemento->nombre = $nombre;
-            $elemento->campos = $campos;
-            $elemento->servicios_id = $servicios_id;
-            $elemento->eliminado = 0;
-            $elemento->save();
-
             // Actualizar el contador de filas
             $this->totalRows = Elementos::where('eliminado', 0)->count();
 
@@ -149,9 +152,10 @@ class ElementosComponent extends Component
             $this->dispatch('msg', 'Registro creado correctamente');
             $this->reset(['nombre', 'campos', 'servicios_id']);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // En caso de error, deshacer la transacción
             DB::rollBack();
+            Log::error($e);
             $this->dispatch('msg', 'Error al crear el registro');
         }
     }

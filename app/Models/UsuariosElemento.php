@@ -4,16 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Permission\Traits\HasRoles;
 
 class UsuariosElemento extends Model
 {
-    use HasFactory, HasRoles;
+    use HasFactory;
 
     protected $fillable = [
-        'usuario_id',
-        'elemento_id',
-        'eliminado',
+        'elemento_id', 'usuario_id', 'eliminado'
     ];
 
     public function usuario()
@@ -26,3 +23,4 @@ class UsuariosElemento extends Model
         return $this->belongsTo(Elementos::class, 'elemento_id');
     }
 }
+
