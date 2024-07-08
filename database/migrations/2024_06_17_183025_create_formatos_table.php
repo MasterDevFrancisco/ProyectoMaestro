@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->string('ruta_pdf');
-            $table->string('convertio_id');
-            $table->string('ruta_html');
             $table->integer('eliminado');
             $table->foreignId('elementos_id')->constrained();
             $table->timestamps();
