@@ -142,7 +142,7 @@
                 return;
             }
             fieldName =
-            `&lt;$${counter}${fieldName}${counter}$&gt;`; // Usamos el contador para reemplazar los números 1
+            `<${fieldName}>`; // Usamos el contador para reemplazar los números 1
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
@@ -188,7 +188,7 @@
 </script>
 
 
-<!-- Carga de documentos-->
+{{-- <!-- Carga de documentos-->
 <script>
     window.addEventListener('alert', event => {
         alert(event.detail.message);
@@ -197,7 +197,7 @@
     window.addEventListener('console-log', event => {
         console.log(event.detail.message);
     });
-</script>
+</script> --}}
 
 <!-- Atrapar los errores -->
 
@@ -286,16 +286,15 @@
     }
 </script>
 
-<div>
-    @push('scripts')
-    <script>
-        window.addEventListener('alert', event => {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        window.addEventListener('alertPalabra', event => {
             Swal.fire({
-                icon: event.detail.type,
-                title: 'Alerta',
-                text: event.detail.message,
+                icon: 'error',
+                title: 'Error',
+                text: 'Hace falta algun campo en el documento, favor de verificar.',
             });
         });
-    </script>
-    @endpush
-</div>
+    });
+</script>

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Exception;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
+use Smalot\PdfParser\Parser;
 
 #[Title('Formatos')]
 class FormatosComponent extends Component
@@ -70,6 +71,11 @@ class FormatosComponent extends Component
             $this->storeDocumento();
         }
 
+        // Verifica que el documento se haya guardado antes de continuar
+        if (empty($this->ruta_pdf)) {
+            return;
+        }
+
         $formatosInsert = new Formatos();
         $this->saveFormato($formatosInsert);
 
@@ -92,7 +98,7 @@ class FormatosComponent extends Component
 
         $this->totalRows = Formatos::where('eliminado', 0)->count();
         $this->dispatch('close-modal', 'modalFormato');
-        $this->dispatch('msg', 'Registro actualizado correctamente'); 
+        $this->dispatch('msg', 'Registro actualizado correctamente');
         $this->resetForm();
     }
 
@@ -157,6 +163,27 @@ class FormatosComponent extends Component
     private function storeDocumento()
     {
         try {
+            // Crear una instancia del parser de PDFs
+            $parser = new Parser();
+
+            // Obtener el contenido del PDF
+            $pdf = $parser->parseFile($this->documento->getRealPath());
+            $text = $pdf->getText();
+
+            // Llamar a la función para registrar los campos del elemento
+            $this->logElementFields();
+            
+            // Buscar la palabra "haiga" en el contenido del PDF
+            if (stripos($text, 'haiga') === false) {
+                Log::info('Palabra "haiga" no encontrada en el PDF.');
+                $this->dispatch('alertPalabra', [
+                    'type' => 'error',
+                    'message' => 'El archivo PDF no contiene la palabra "haiga".'
+                ]);
+                return;
+            }
+
+            // Si se encuentra la palabra, proceder a guardar el archivo
             $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
             $this->documento->storeAs('public', $nombreDoc);
             $this->ruta_pdf = $nombreDoc;
@@ -208,5 +235,15 @@ class FormatosComponent extends Component
     private function resetForm()
     {
         $this->reset(['Id', 'nombre', 'ruta_pdf', 'elementos_id', 'documento']);
+    }
+
+    private function logElementFields()
+    {
+        try {
+            $elemento = Elementos::findOrFail($this->elementos_id);
+            Log::info('Campos del elemento: ' . $elemento->campos);
+        } catch (Exception $e) {
+            Log::error('Error al obtener los campos del elemento: ' . $e->getMessage());
+        }
     }
 }

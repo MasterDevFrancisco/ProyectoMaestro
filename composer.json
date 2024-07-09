@@ -12,6 +12,8 @@
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
         "livewire/livewire": "^3.5",
+        "smalot/pdfparser": "^2.10",
+        "spatie/laravel-permission": "^6.9",
         "swiftmailer/swiftmailer": "^5.4"
     },
     "require-dev": {
