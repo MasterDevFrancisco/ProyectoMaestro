@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire\Catalogos;
 
 use App\Models\Formatos;
@@ -169,21 +168,28 @@ class FormatosComponent extends Component
             // Obtener el contenido del PDF
             $pdf = $parser->parseFile($this->documento->getRealPath());
             $text = $pdf->getText();
+            Log::info($text);
 
             // Llamar a la función para registrar los campos del elemento
             $this->logElementFields();
-            
-            // Buscar la palabra "haiga" en el contenido del PDF
-            if (stripos($text, 'haiga') === false) {
-                Log::info('Palabra "haiga" no encontrada en el PDF.');
-                $this->dispatch('alertPalabra', [
-                    'type' => 'error',
-                    'message' => 'El archivo PDF no contiene la palabra "haiga".'
-                ]);
-                return;
+
+            // Obtener los campos del elemento
+            $elemento = Elementos::findOrFail($this->elementos_id);
+            $camposTexto = json_decode($elemento->campos)->texto;
+
+            // Verificar que todas las palabras en $camposTexto estén en el PDF
+            foreach ($camposTexto as $palabra) {
+                if (stripos($text, $palabra) === false) {
+                    Log::info('Palabra "' . $palabra . '" no encontrada en el PDF.');
+                    $this->dispatch('alertPalabra', [
+                        'type' => 'error',
+                        'message' => 'El archivo PDF no contiene la palabra "' . $palabra . '".'
+                    ]);
+                    return;
+                }
             }
 
-            // Si se encuentra la palabra, proceder a guardar el archivo
+            // Si se encuentran todas las palabras, proceder a guardar el archivo
             $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
             $this->documento->storeAs('public', $nombreDoc);
             $this->ruta_pdf = $nombreDoc;
