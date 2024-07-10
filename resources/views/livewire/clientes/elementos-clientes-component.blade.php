@@ -60,13 +60,9 @@
                     </div>
                     <div class="modal-body">
                         @foreach ($dynamicFields as $field)
-                            @php
-                                // Limpiar el nombre del campo eliminando caracteres especiales
-                                $cleanField = preg_replace('/[^a-zA-Z ]/', '', str_replace(['<', '>', '&lt;', '&gt;'], '', $field));
-                            @endphp
                             <div class="form-group">
-                                <label for="{{ strtolower($cleanField) }}" class="text-center d-block">{{ $cleanField }}</label>
-                                <input type="text" wire:model="formData.{{ strtolower($cleanField) }}" class="form-control" id="{{ strtolower($cleanField) }}" name="{{ strtolower($cleanField) }}">
+                                <label for="{{ $field }}" class="text-center d-block">{{ $field }}</label>
+                                <input type="text" wire:model="formData.{{ $field }}" class="form-control" id="{{ $field }}" name="{{ $field }}">
                             </div>
                         @endforeach
                     </div>
@@ -88,4 +84,3 @@
     @endhasanyrole
     
 </div>
-

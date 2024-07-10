@@ -39,8 +39,7 @@ class ElementosClientesComponent extends Component
             if (isset($campos['texto'])) {
                 $this->dynamicFields = $campos['texto'];
                 foreach ($this->dynamicFields as $field) {
-                    $cleanField = preg_replace('/[^a-zA-Z ]/', '', str_replace(['<', '>', '&lt;', '&gt;'], '', $field));
-                    $this->formData[strtolower($cleanField)] = ''; // Inicializa los campos en formData
+                    $this->formData[$field] = ''; // Inicializa los campos en formData
                 }
             } else {
                 $this->dynamicFields = [];
@@ -60,24 +59,22 @@ class ElementosClientesComponent extends Component
 
             if (isset($campos['texto'])) {
                 foreach ($campos['texto'] as $field) {
-                    $cleanField = preg_replace('/[^a-zA-Z ]/', '', str_replace(['<', '>', '&lt;', '&gt;'], '', $field));
-                    $campoNombre = strtolower($cleanField);
-                    Log::info('Processing field', ['field' => $field, 'cleanField' => $cleanField]);
+                    Log::info('Processing field', ['field' => $field]);
 
-                    if (isset($this->formData[$campoNombre])) {
-                        $campo = Campos::where('nombre_columna', $campoNombre)
+                    if (isset($this->formData[$field])) {
+                        $campo = Campos::where('nombre_columna', $field)
                             ->where('tablas_id', $elemento->elemento->id)
                             ->first();
-                        Log::info('Campo found', ['campo' => $campoNombre]);
+                        Log::info('Campo found', ['campo' => $field]);
 
                         if ($campo) {
                             Data::create([
                                 'rowID' => uniqid(),
-                                'valor' => $this->formData[$campoNombre],
+                                'valor' => $this->formData[$field],
                                 'campos_id' => $campo->id,
                                 'users_id' => Auth::id(),
                             ]);
-                            Log::info('Data inserted', ['rowID' => uniqid(), 'valor' => $this->formData[$campoNombre], 'campos_id' => $campo->id, 'users_id' => Auth::id()]);
+                            Log::info('Data inserted', ['rowID' => uniqid(), 'valor' => $this->formData[$field], 'campos_id' => $campo->id, 'users_id' => Auth::id()]);
                         }
                     }
                 }
@@ -87,8 +84,6 @@ class ElementosClientesComponent extends Component
         $this->resetFormData();
         session()->flash('message', 'Datos guardados exitosamente.');
     }
-
-
 
     private function resetFormData()
     {
