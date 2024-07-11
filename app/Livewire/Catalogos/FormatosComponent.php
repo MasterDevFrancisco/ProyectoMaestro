@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Livewire\Catalogos;
 
+use App\Models\Campos;
 use App\Models\Formatos;
 use App\Models\Elementos;
+use App\Models\Tablas;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -159,7 +162,7 @@ class FormatosComponent extends Component
         }
     }
 
-    private function storeDocumento()
+    public function storeDocumento()
     {
         try {
             // Crear una instancia del parser de PDFs
@@ -173,9 +176,8 @@ class FormatosComponent extends Component
             // Llamar a la función para registrar los campos del elemento
             $this->logElementFields();
 
-            // Obtener los campos del elemento
-            $elemento = Elementos::findOrFail($this->elementos_id);
-            $camposTexto = json_decode($elemento->campos)->texto;
+            // Llamar a imprimirColumnasSeleccionadas y obtener las palabras
+            $camposTexto = $this->imprimirColumnasSeleccionadas();
 
             // Verificar que todas las palabras en $camposTexto estén en el PDF
             foreach ($camposTexto as $palabra) {
@@ -197,6 +199,25 @@ class FormatosComponent extends Component
             $this->handleError($e);
         }
     }
+
+    public function imprimirColumnasSeleccionadas()
+    {
+        $data = Tablas::where('elementos_id', $this->elementos_id)->firstOrFail();
+        $id = $data->id; // Extraer el campo id
+
+        $getCampos = Campos::where('tablas_id', $id)->get(); // Obtener los resultados
+        $camposTexto = [];
+
+        foreach ($getCampos as $campo) {
+            Log::info($campo->linkname); // Imprimir el campo linkname
+            $camposTexto[] = $campo->linkname; // Agregar el campo linkname a la lista
+        }
+
+        return $camposTexto; // Retornar la lista de palabras
+    }
+
+
+
 
     private function saveFormato($formatosInsert, $isUpdate = false)
     {

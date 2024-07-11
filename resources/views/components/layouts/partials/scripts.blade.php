@@ -76,6 +76,12 @@
         });
     }
 
+    function generateLinkName(fieldName) {
+        return fieldName.toLowerCase()
+            .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+            .replace(/\s+/g, '_'); // Replace spaces with underscores
+    }
+
     async function submitFields() {
         const nombre = document.getElementById('nombre').value.trim();
         const servicioId = document.getElementById('servicios_id').value;
@@ -119,7 +125,7 @@
         };
 
         let fieldNames = new Set();
-        let counter = 1; // Inicializa el contador en 1
+        let counter = 1;
 
         for (const field of fields) {
             let fieldName = field.value.trim();
@@ -141,25 +147,30 @@
                 });
                 return;
             }
-            fieldName =
-            `<${fieldName}>`; // Usamos el contador para reemplazar los números 1
+
+            fieldName = `<${fieldName}>`;
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
+            const linkname = generateLinkName(fieldName);
+
             if (type === 'formula') {
-                data.formula.push(fieldName);
+                data.formula.push({
+                    name: fieldName,
+                    linkname: linkname
+                });
             } else if (type === 'texto') {
-                data.texto.push(fieldName);
+                data.texto.push({
+                    name: fieldName,
+                    linkname: linkname
+                });
             }
 
-            counter++; // Incrementa el contador en cada iteración
+            counter++;
         }
 
-
-        // Convert the data object to a JSON string
         const jsonString = JSON.stringify(data);
 
-        // Send the data to Livewire
         Livewire.dispatch('storeElemento', {
             nombre,
             servicios_id: servicioId,
@@ -267,9 +278,13 @@
 
             // Añadir evento al campo de selección de elementos si existe
             const elementosSelect = document.getElementById('elementos_id');
-            elementosSelect.addEventListener('change', toggleUploadField);
+            elementosSelect.addEventListener('change', function() {
+                toggleUploadField();
+                document.getElementById('documento').value = ''; // Limpiar el campo de carga
+            });
         }
     });
+
 
     function toggleUploadField() {
         const elementosSelect = document.getElementById('elementos_id');
@@ -288,7 +303,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('alertPalabra', event => {
             Swal.fire({
                 icon: 'error',

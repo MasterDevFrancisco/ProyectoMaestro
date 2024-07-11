@@ -85,13 +85,12 @@ class ElementosComponent extends Component
 
     public function storeElemento($nombre, $servicios_id, $campos)
     {
-        // Validaciones
         $rules = [
             'nombre' => 'required|max:255|unique:elementos,nombre',
             'campos' => 'required|json',
             'servicios_id' => 'required|exists:servicios,id'
         ];
-
+    
         $messages = [
             'nombre.required' => 'El nombre es requerido',
             'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
@@ -101,64 +100,54 @@ class ElementosComponent extends Component
             'servicios_id.required' => 'El servicio es requerido',
             'servicios_id.exists' => 'El servicio seleccionado no es válido'
         ];
-
+    
         $this->validate([
             'nombre' => $nombre,
             'campos' => $campos,
             'servicios_id' => $servicios_id
         ], $rules, $messages);
-
-        // Iniciar una transacción
+    
         DB::beginTransaction();
         try {
-            // Insertar en la tabla 'elementos'
             $elemento = new Elementos();
             $elemento->nombre = $nombre;
             $elemento->campos = $campos;
             $elemento->servicios_id = $servicios_id;
             $elemento->eliminado = 0;
             $elemento->save();
-
-            // Insertar en la tabla 'tablas'
+    
             $tabla = new Tablas();
             $tabla->nombre = $nombre;
-            $tabla->elementos_id = $elemento->id; // Relación correcta con la tabla de elementos
+            $tabla->elementos_id = $elemento->id;
             $tabla->save();
-
-            // Obtener el ID de la tabla recién creada
+    
             $tablas_id = $tabla->id;
-
-            // Decodificar los campos
             $camposData = json_decode($campos, true);
-            $fieldNames = array_merge($camposData['formula'], $camposData['texto']);
-
-            // Insertar en la tabla 'campos'
-            foreach ($fieldNames as $fieldName) {
-                $campo = new Campos();
-                $campo->tablas_id = $tablas_id;
-                $campo->nombre_columna = $fieldName;
-                $campo->status = '1';
-                $campo->save();
+    
+            foreach (['formula', 'texto'] as $type) {
+                foreach ($camposData[$type] as $field) {
+                    $campo = new Campos();
+                    $campo->tablas_id = $tablas_id;
+                    $campo->nombre_columna = $field['name'];
+                    $campo->linkname = $field['linkname'];
+                    $campo->status = '1';
+                    $campo->save();
+                }
             }
-
-            // Actualizar el contador de filas
+    
             $this->totalRows = Elementos::where('eliminado', 0)->count();
-
-            // Confirmar la transacción
             DB::commit();
-
-            // Cerrar el modal y mostrar mensaje de éxito
+    
             $this->dispatch('close-modal', 'modalElemento');
             $this->dispatch('msg', 'Registro creado correctamente');
             $this->reset(['nombre', 'campos', 'servicios_id']);
-
         } catch (Exception $e) {
-            // En caso de error, deshacer la transacción
             DB::rollBack();
             Log::error($e);
             $this->dispatch('msg', 'Error al crear el registro');
         }
     }
+    
 
     public function editar($id)
     {

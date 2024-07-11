@@ -47,11 +47,12 @@ class DatabaseSeeder extends Seeder
         ];
 
         $camposData = [
-            ['tablas_id' => '1', 'nombre_columna' => 'Campo 1', 'status' => 'activo'],
-            ['tablas_id' => '1', 'nombre_columna' => 'Campo 2', 'status' => 'activo'],
-            ['tablas_id' => '2', 'nombre_columna' => 'Campo 3', 'status' => 'inactivo'],
-            ['tablas_id' => '2', 'nombre_columna' => 'Campo 4', 'status' => 'activo'],
+            ['tablas_id' => '1', 'nombre_columna' => 'Campo 1', 'status' => 'activo', 'linkname' => 'campo_1'],
+            ['tablas_id' => '1', 'nombre_columna' => 'Campo 2', 'status' => 'activo', 'linkname' => 'campo_2'],
+            ['tablas_id' => '2', 'nombre_columna' => 'Campo 3', 'status' => 'inactivo', 'linkname' => 'campo_3'],
+            ['tablas_id' => '2', 'nombre_columna' => 'Campo 4', 'status' => 'activo', 'linkname' => 'campo_4'],
         ];
+        
 
         $dataEntries = [
             ['rowID' => '1', 'valor' => 'Valor 1', 'campos_id' => '1', 'users_id' => '1'],

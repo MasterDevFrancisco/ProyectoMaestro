@@ -38,5 +38,5 @@ Route::post('/upload-pdf', [PdfUploadController::class, 'upload'])->name('upload
 
 Route::get('/permisos', UsuarioElemento::class)->name('permisos')->middleware('auth');
 
-
 Route::get('/mis_elementos',ElementosClientesComponent::class)->name('mis_elementos')->middleware('auth');
+

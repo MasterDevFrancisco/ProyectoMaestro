@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('campos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tablas_id')->constrained('tablas');
-            $table->string('nombre_columna', 45);
+            $table->string('nombre_columna', 255);
+            $table->string('linkname', 255);
             $table->string('status', 45);
             $table->timestamps();
         });
