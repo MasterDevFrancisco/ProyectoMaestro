@@ -168,9 +168,10 @@ class FormatosComponent extends Component
             // Crear una instancia del parser de PDFs
             $parser = new Parser();
 
-            // Obtener el contenido del PDF
+            // Obtener el contenido del PDF y eliminar saltos de línea
             $pdf = $parser->parseFile($this->documento->getRealPath());
             $text = $pdf->getText();
+            $text = preg_replace('/\s+/', ' ', $text); // Eliminar saltos de línea
             Log::info($text);
 
             // Llamar a la función para registrar los campos del elemento
@@ -215,9 +216,6 @@ class FormatosComponent extends Component
 
         return $camposTexto; // Retornar la lista de palabras
     }
-
-
-
 
     private function saveFormato($formatosInsert, $isUpdate = false)
     {

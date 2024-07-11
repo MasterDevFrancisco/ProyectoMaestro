@@ -5,6 +5,7 @@ namespace App\Livewire\Clientes;
 use App\Models\UsuariosElemento;
 use App\Models\Campos;
 use App\Models\Data;
+use App\Models\Tablas;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
@@ -35,14 +36,20 @@ class ElementosClientesComponent extends Component
         if ($elemento) {
             $this->elementoNombre = $elemento->elemento->nombre ?? 'Elemento';
 
-            $campos = json_decode($elemento->elemento->campos, true);
-            if (isset($campos['texto'])) {
-                $this->dynamicFields = $campos['texto'];
-                foreach ($this->dynamicFields as $field) {
-                    $this->formData[$field] = ''; // Inicializa los campos en formData
-                }
-            } else {
-                $this->dynamicFields = [];
+            $data = Tablas::where('elementos_id', $elemento->elemento->id)->firstOrFail();
+            $id = $data->id; // Extraer el campo id
+
+            $getCampos = Campos::where('tablas_id', $id)->get(); // Obtener los resultados
+            $camposTexto = [];
+
+            foreach ($getCampos as $campo) {
+ 
+                $camposTexto[] = $campo->nombre_columna; // Agregar el campo linkname a la lista
+            }
+
+            $this->dynamicFields = $camposTexto;
+            foreach ($this->dynamicFields as $field) {
+                $this->formData[$field] = ''; // Inicializa los campos en formData
             }
         }
     }
@@ -54,28 +61,33 @@ class ElementosClientesComponent extends Component
         Log::info('Elemento loaded', ['elemento' => $elemento]);
 
         if ($elemento) {
-            $campos = json_decode($elemento->elemento->campos, true);
-            Log::info('Campos loaded', ['campos' => $campos]);
+            $data = Tablas::where('elementos_id', $elemento->elemento->id)->firstOrFail();
+            $id = $data->id; // Extraer el campo id
 
-            if (isset($campos['texto'])) {
-                foreach ($campos['texto'] as $field) {
-                    Log::info('Processing field', ['field' => $field]);
+            $getCampos = Campos::where('tablas_id', $id)->get(); // Obtener los resultados
+            $camposTexto = [];
 
-                    if (isset($this->formData[$field])) {
-                        $campo = Campos::where('nombre_columna', $field)
-                            ->where('tablas_id', $elemento->elemento->id)
-                            ->first();
-                        Log::info('Campo found', ['campo' => $field]);
+            foreach ($getCampos as $campo) {
+                $camposTexto[] = $campo->linkname; // Agregar el campo linkname a la lista
+            }
 
-                        if ($campo) {
-                            Data::create([
-                                'rowID' => uniqid(),
-                                'valor' => $this->formData[$field],
-                                'campos_id' => $campo->id,
-                                'users_id' => Auth::id(),
-                            ]);
-                            Log::info('Data inserted', ['rowID' => uniqid(), 'valor' => $this->formData[$field], 'campos_id' => $campo->id, 'users_id' => Auth::id()]);
-                        }
+            foreach ($camposTexto as $field) {
+                Log::info('Processing field', ['field' => $field]);
+
+                if (isset($this->formData[$field])) {
+                    $campo = Campos::where('linkname', $field)
+                        ->where('tablas_id', $elemento->elemento->id)
+                        ->first();
+                    Log::info('Campo found', ['campo' => $field]);
+
+                    if ($campo) {
+                        Data::create([
+                            'rowID' => uniqid(),
+                            'valor' => $this->formData[$field],
+                            'campos_id' => $campo->id,
+                            'users_id' => Auth::id(),
+                        ]);
+                        Log::info('Data inserted', ['rowID' => uniqid(), 'valor' => $this->formData[$field], 'campos_id' => $campo->id, 'users_id' => Auth::id()]);
                     }
                 }
             }

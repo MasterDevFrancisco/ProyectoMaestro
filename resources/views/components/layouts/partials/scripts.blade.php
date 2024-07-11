@@ -148,7 +148,7 @@
                 return;
             }
 
-            fieldName = `<${fieldName}>`;
+            fieldName = `${fieldName}`;
             fieldNames.add(fieldName);
 
             const type = field.getAttribute('data-type');
