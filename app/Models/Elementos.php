@@ -11,7 +11,7 @@ class Elementos extends Model
     use HasFactory, HasRoles;
 
     protected $fillable = [
-        'nombre', 'campos', 'servicios_id', 'eliminado'
+        'nombre', 'servicios_id', 'eliminado'
     ];
     
     public function servicio()

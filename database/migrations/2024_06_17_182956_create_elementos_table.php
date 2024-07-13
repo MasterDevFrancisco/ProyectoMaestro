@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('elementos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 255); // Definir una longitud específica para 'nombre'
-            $table->text('campos'); // Cambiar a 'text' para campos largos
+            
             $table->foreignId('servicios_id')->constrained();
             $table->integer('eliminado');
             $table->timestamps();

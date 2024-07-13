@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('ruta_pdf');
             $table->integer('eliminado');
+            $table->text('campos'); // Cambiar a 'text' para campos largos
             $table->foreignId('elementos_id')->constrained();
             $table->timestamps();
         });

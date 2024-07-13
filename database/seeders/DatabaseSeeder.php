@@ -35,10 +35,10 @@ class DatabaseSeeder extends Seeder
         ];
 
         $elementosData = [
-            ['nombre' => 'Elemento ASEA 1', 'campos' => '{"formula":[],"texto":["<$1{Nombre}1$>","<$2{Apellidos}2$>","<$3{Direccion}3$>"]}', 'eliminado' => '0', 'servicios_id' => '1'],
-            ['nombre' => 'Elemento ASEA 2', 'campos' => '{"formula":[],"texto":["<$1{Coordinador}1$>","<$2{Responsable}2$>"]}', 'eliminado' => '0', 'servicios_id' => '1'],
-            ['nombre' => 'Elemento SGM 1', 'campos' => '{"formula":[],"texto":["<$1{Normativa}1$>","<$2{Folio}2$>","<$3{Clausula}3$>"]}', 'eliminado' => '0', 'servicios_id' => '3'],
-            ['nombre' => 'Elemento SGM 2', 'campos' => '{"formula":[],"texto":["<$1{Recibio}1$>","<$2{Entrego}2$>","<$3{Autorizo}3$>"]}', 'eliminado' => '0', 'servicios_id' => '3'],
+            ['nombre' => 'Elemento ASEA 1', 'eliminado' => '0', 'servicios_id' => '1'],
+            ['nombre' => 'Elemento ASEA 2', 'eliminado' => '0', 'servicios_id' => '1'],
+            ['nombre' => 'Elemento SGM 1', 'eliminado' => '0', 'servicios_id' => '3'],
+            ['nombre' => 'Elemento SGM 2', 'eliminado' => '0', 'servicios_id' => '3'],
         ];
 
         $tablasData = [

@@ -8,6 +8,7 @@ use App\Livewire\Catalogos\ServiciosComponent;
 use App\Livewire\Catalogos\FormatosComponent;
 use App\Http\Controllers\PdfUploadController;
 use App\Http\Controllers\ElementosController;
+use App\Http\Controllers\FormatoController;
 use App\Livewire\Catalogos\CoordinadoresComponent;
 use App\Livewire\Clientes\ElementosClientesComponent;
 use App\Livewire\UsuarioElemento;
@@ -40,3 +41,4 @@ Route::get('/permisos', UsuarioElemento::class)->name('permisos')->middleware('a
 
 Route::get('/mis_elementos',ElementosClientesComponent::class)->name('mis_elementos')->middleware('auth');
 
+Route::post('/submit-fields', [FormatoController::class, 'submitFields']);

@@ -1,4 +1,5 @@
 <?php
+// app/Models/Tablas.php
 
 namespace App\Models;
 
@@ -9,18 +10,19 @@ class Tablas extends Model
 {
     use HasFactory;
 
-    protected $table = 'tablas';
+    protected $fillable = ['nombre', 'elementos_id'];
+}
 
-    protected $fillable = [
-        'nombre',
-    ];
+// app/Models/Campos.php
 
-    public function campos()
-    {
-        return $this->hasMany(Campos::class, 'tablas_id');
-    }
-    public function elemento()
-    {
-        return $this->belongsTo(Elementos::class, 'elementos_id');
-    }
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Campos extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['tablas_id', 'nombre_columna', 'status'];
 }

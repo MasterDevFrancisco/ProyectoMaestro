@@ -16,6 +16,7 @@ use Exception;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
 use Smalot\PdfParser\Parser;
+use Illuminate\Support\Facades\DB;
 
 #[Title('Formatos')]
 class FormatosComponent extends Component
@@ -37,7 +38,36 @@ class FormatosComponent extends Component
     {
         $this->elementos = Elementos::where('eliminado', 0)->get();
     }
-
+    public function submitFields(Request $request)
+    {
+        DB::beginTransaction();
+    
+        try {
+            // Insertar en la tabla `tablas`
+            $tabla = new Tablas();
+            $tabla->nombre = $request->nombre_tabla;
+            $tabla->elementos_id = $request->elementos_id;
+            $tabla->save();
+    
+            // Insertar en la tabla `campos`
+            foreach ($request->campos as $campo) {
+                $nuevoCampo = new Campos();
+                $nuevoCampo->tablas_id = $tabla->id;
+                $nuevoCampo->nombre_columna = strtoupper(preg_replace('/[^a-zA-Z0-9-_]/', '_', $campo));
+                $nuevoCampo->status = 1;
+                $nuevoCampo->save();
+            }
+    
+            DB::commit();
+            $this->dispatch('msg', 'Campos y tabla guardados correctamente');
+            $this->dispatch('close-modal', 'modalFormato');
+            $this->resetForm();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->handleError($e);
+        }
+    }
+    
     public function render()
     {
         $formatos = Formatos::where('nombre', 'like', '%' . $this->search . '%')
@@ -65,6 +95,11 @@ class FormatosComponent extends Component
         $this->dispatch('open-modal-formato');
     }
 
+    public function storeElemento($nombre, $servicios_id, $campos)
+    {
+        // Funcionalidad omitida
+    }
+
     public function store(Request $request)
     {
         $this->validateForm();
@@ -73,7 +108,6 @@ class FormatosComponent extends Component
             $this->storeDocumento();
         }
 
-        // Verifica que el documento se haya guardado antes de continuar
         if (empty($this->ruta_pdf)) {
             return;
         }
@@ -165,22 +199,17 @@ class FormatosComponent extends Component
     public function storeDocumento()
     {
         try {
-            // Crear una instancia del parser de PDFs
             $parser = new Parser();
 
-            // Obtener el contenido del PDF y eliminar saltos de línea
             $pdf = $parser->parseFile($this->documento->getRealPath());
             $text = $pdf->getText();
-            $text = preg_replace('/\s+/', ' ', $text); // Eliminar saltos de línea
+            $text = preg_replace('/\s+/', ' ', $text);
             Log::info($text);
 
-            // Llamar a la función para registrar los campos del elemento
             $this->logElementFields();
 
-            // Llamar a imprimirColumnasSeleccionadas y obtener las palabras
             $camposTexto = $this->imprimirColumnasSeleccionadas();
 
-            // Verificar que todas las palabras en $camposTexto estén en el PDF
             foreach ($camposTexto as $palabra) {
                 if (stripos($text, $palabra) === false) {
                     Log::info('Palabra "' . $palabra . '" no encontrada en el PDF.');
@@ -192,7 +221,6 @@ class FormatosComponent extends Component
                 }
             }
 
-            // Si se encuentran todas las palabras, proceder a guardar el archivo
             $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $this->nombre) . '.' . $this->documento->extension();
             $this->documento->storeAs('public', $nombreDoc);
             $this->ruta_pdf = $nombreDoc;
@@ -204,17 +232,17 @@ class FormatosComponent extends Component
     public function imprimirColumnasSeleccionadas()
     {
         $data = Tablas::where('elementos_id', $this->elementos_id)->firstOrFail();
-        $id = $data->id; // Extraer el campo id
+        $id = $data->id;
 
-        $getCampos = Campos::where('tablas_id', $id)->get(); // Obtener los resultados
+        $getCampos = Campos::where('tablas_id', $id)->get();
         $camposTexto = [];
 
         foreach ($getCampos as $campo) {
-            Log::info($campo->linkname); // Imprimir el campo linkname
-            $camposTexto[] = $campo->linkname; // Agregar el campo linkname a la lista
+            Log::info($campo->linkname);
+            $camposTexto[] = $campo->linkname;
         }
 
-        return $camposTexto; // Retornar la lista de palabras
+        return $camposTexto;
     }
 
     private function saveFormato($formatosInsert, $isUpdate = false)

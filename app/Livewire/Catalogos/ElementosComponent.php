@@ -71,8 +71,8 @@ class ElementosComponent extends Component
         }
 
         return Servicios::where('razon_social_id', $this->razon_social_id)
-                        ->where('eliminado', 0)
-                        ->get();
+            ->where('eliminado', 0)
+            ->get();
     }
 
     public function create()
@@ -90,7 +90,7 @@ class ElementosComponent extends Component
             'campos' => 'required|json',
             'servicios_id' => 'required|exists:servicios,id'
         ];
-    
+
         $messages = [
             'nombre.required' => 'El nombre es requerido',
             'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
@@ -100,13 +100,13 @@ class ElementosComponent extends Component
             'servicios_id.required' => 'El servicio es requerido',
             'servicios_id.exists' => 'El servicio seleccionado no es válido'
         ];
-    
+
         $this->validate([
             'nombre' => $nombre,
             'campos' => $campos,
             'servicios_id' => $servicios_id
         ], $rules, $messages);
-    
+
         DB::beginTransaction();
         try {
             $elemento = new Elementos();
@@ -115,15 +115,15 @@ class ElementosComponent extends Component
             $elemento->servicios_id = $servicios_id;
             $elemento->eliminado = 0;
             $elemento->save();
-    
+
             $tabla = new Tablas();
             $tabla->nombre = $nombre;
             $tabla->elementos_id = $elemento->id;
             $tabla->save();
-    
+
             $tablas_id = $tabla->id;
             $camposData = json_decode($campos, true);
-    
+
             foreach (['formula', 'texto'] as $type) {
                 foreach ($camposData[$type] as $field) {
                     $campo = new Campos();
@@ -134,10 +134,10 @@ class ElementosComponent extends Component
                     $campo->save();
                 }
             }
-    
+
             $this->totalRows = Elementos::where('eliminado', 0)->count();
             DB::commit();
-    
+
             $this->dispatch('close-modal', 'modalElemento');
             $this->dispatch('msg', 'Registro creado correctamente');
             $this->reset(['nombre', 'campos', 'servicios_id']);
@@ -147,7 +147,6 @@ class ElementosComponent extends Component
             $this->dispatch('msg', 'Error al crear el registro');
         }
     }
-    
 
     public function editar($id)
     {

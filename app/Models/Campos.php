@@ -1,4 +1,5 @@
 <?php
+// app/Models/Campos.php
 
 namespace App\Models;
 
@@ -9,16 +10,5 @@ class Campos extends Model
 {
     use HasFactory;
 
-    protected $table = 'campos';
-
-    protected $fillable = [
-        'tablas_id',
-        'nombre_columna',
-        'status',
-    ];
-
-    public function tabla()
-    {
-        return $this->belongsTo(Tablas::class, 'tablas_id');
-    }
+    protected $fillable = ['tablas_id', 'nombre_columna', 'linkname', 'status'];
 }

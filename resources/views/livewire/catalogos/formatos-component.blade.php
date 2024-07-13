@@ -22,6 +22,7 @@
                     <th width="3%"></th>
                     <th width="3%"></th>
                     <th width="3%"></th>
+                    <th width="3%"></th> <!-- Nueva columna para el botón de carga -->
                 </x-slot>
                 @php $counter = ($formatos->currentPage() - 1) * $formatos->perPage() + 1; @endphp <!-- Inicializo el contador con el índice correcto -->
                 @forelse($formatos as $formato)
@@ -54,14 +55,21 @@
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
+                        <td>
+                            <button type="button"
+                                wire:click="$emit('openModal', 'modalCargarDocumento', {{ $formato->id }})"
+                                title="Cargar documento" class="btn btn-secondary btn-xs">
+                                <i class="fas fa-upload"></i>
+                            </button>
+                        </td>
                     </tr>
                 @empty
                     <tr class="text-center">
-                        <td colspan="6">Sin Registros</td>
+                        <td colspan="7">Sin Registros</td>
                     </tr>
                 @endforelse
-
             </x-table>
+
             <x-slot:cardFooter>
                 <div class="d-flex justify-content-center">
                     {{ $formatos->links('vendor.pagination.bootstrap-5') }}
@@ -75,7 +83,7 @@
                 <div class="row">
                     <div class="col">
                         <label class="w-100 text-center">Nombre</label>
-                        <input wire:model="nombre" type="text" class="form-control">
+                        <input wire:model="nombre" type="text" class="form-control" id="nombre_tabla">
                         @error('nombre')
                             <div class="alert alert-danger w-100 mt-1 p-1 text-center"
                                 style="font-size: 0.875rem; line-height: 1.25;">
@@ -97,11 +105,41 @@
                             </div>
                         @enderror
                         <br>
+                        <div class="d-flex">
+                            <div class="left-panel" style="width: 30%; padding: 10px; border-right: 1px solid #ccc;">
+                                <br>
+                                <div class="draggable-field" draggable="true" data-type="texto" ondragstart="drag(event)">
+                                    <button type="button" class="btn btn-info btn-block">Texto</button>
+                                </div>
+                                <br>
+                                <div class="draggable-field" draggable="true" data-type="formula" ondragstart="drag(event)">
+                                    <button type="button" class="btn btn-info btn-block">Fórmula</button>
+                                </div>
+                            </div>
+                            <div class="right-panel" style="width: 70%; padding: 10px;" ondrop="drop(event)"
+                                ondragover="allowDrop(event)">
+                                <!-- Campos arrastrados aparecerán aquí -->
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-success" id="submitFieldsButton">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <div class="loading-overlay" wire:loading></div>
+            </form>
+        </x-modal>
+
+        <!-- Modal para cargar documentos -->
+        <x-modal modalId='modalCargarDocumento' modalTitle='Cargar Documento' modalSize='modal-md' wire:closed="closeModal">
+            <form wire:submit.prevent="uploadDocument" enctype="multipart/form-data">
+                @csrf
+                <div class="row">
+                    <div class="col">
                         <label for="documento" class="w-100 text-center">Archivo PDF</label>
-                        <input wire:model='documento' type="file" id="documento" accept="application/pdf" wire:change="logFileUpload" disabled>
-                        @if ($ruta_pdf)
-                            <p>Archivo actual: {{ basename($ruta_pdf) }}</p>
-                        @endif
+                        <input wire:model='documento' type="file" id="documento" accept="application/pdf">
                         @error('documento')
                             <div class="alert alert-danger w-100 mt-1 p-1 text-center"
                                 style="font-size: 0.875rem; line-height: 1.25;">
@@ -112,14 +150,13 @@
                 </div>
                 <br>
                 <center>
-                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="loading"
-                        wire:loading.class="opacity-25">
-                        <span wire:loading.remove>{{ $Id == 0 ? 'Guardar' : 'Actualizar' }}</span>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled"
+                        wire:loading.class="loading" wire:loading.class="opacity-25">
+                        <span wire:loading.remove>Guardar</span>
                         <span wire:loading>Procesando...</span>
                     </button>
                 </center>
 
-                <!-- Bloqueo del formulario mientras se procesa -->
                 <div class="loading-overlay" wire:loading></div>
             </form>
         </x-modal>

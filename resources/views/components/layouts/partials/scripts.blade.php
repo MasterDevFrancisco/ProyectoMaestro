@@ -6,182 +6,12 @@
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <!-- SweetAlert2 -->
 <script src="{{ asset('plugins/sweetalert2/sweetalert2.js') }}"></script>
 
 <!-- Modal Drag and Drop -->
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const draggables = document.querySelectorAll('.draggable-field');
-        draggables.forEach(draggable => {
-            draggable.addEventListener('dragstart', drag);
-        });
-    });
-
-    function allowDrop(ev) {
-        ev.preventDefault();
-    }
-
-    function drag(ev) {
-        ev.dataTransfer.setData("text", ev.target.dataset.type);
-    }
-
-    function drop(ev) {
-        ev.preventDefault();
-        const data = ev.dataTransfer.getData("text");
-        addField(data);
-    }
-
-    function addField(type) {
-        const rightPanel = document.querySelector('.right-panel');
-        let newElement;
-        switch (type) {
-            case 'formula':
-                newElement = document.createElement('div');
-                newElement.classList.add('position-relative');
-                newElement.innerHTML =
-                    '<input type="text" class="form-control mb-2" placeholder="Formula" data-type="formula">' +
-                    '<button class="btn btn-danger btn-xs position-absolute" style="top: 20%; right: 2%;" onclick="removeField(this)">X</button>';
-                break;
-            case 'texto':
-                newElement = document.createElement('div');
-                newElement.classList.add('position-relative');
-                newElement.innerHTML =
-                    '<input type="text" class="form-control mb-2" placeholder="Texto" data-type="texto">' +
-                    '<button class="btn btn-danger btn-xs position-absolute" style="top: 20%; right: 2%;" onclick="removeField(this)">X</button>';
-                break;
-        }
-        if (newElement) {
-            rightPanel.appendChild(newElement);
-        }
-    }
-
-    function removeField(button) {
-        button.parentElement.remove();
-    }
-
-    async function isNombreDuplicated(nombre) {
-        const response = await fetch(`/api/check-nombre?nombre=${nombre}`);
-        const result = await response.json();
-        return result.exists;
-    }
-
-    function mostrarAlerta() {
-        Swal.fire({
-            title: 'Próximamente',
-            text: 'Esta función esta en desarrollo',
-            icon: 'info',
-            confirmButtonText: 'Aceptar'
-        });
-    }
-
-    function generateLinkName(fieldName) {
-        return fieldName.toLowerCase()
-            .replace(/[^a-z0-9\s]/g, '') // Remove special characters
-            .replace(/\s+/g, '_'); // Replace spaces with underscores
-    }
-
-    async function submitFields() {
-        const nombre = document.getElementById('nombre').value.trim();
-        const servicioId = document.getElementById('servicios_id').value;
-
-        if (nombre === '') {
-            Swal.fire({
-                title: 'Error',
-                text: 'El campo de nombre no puede estar vacío.',
-                icon: 'error',
-                customClass: 'animated tada'
-            });
-            return;
-        }
-
-        const isDuplicated = await isNombreDuplicated(nombre);
-        if (isDuplicated) {
-            Swal.fire({
-                title: 'Error',
-                text: 'El nombre ya existe. Por favor, elija un nombre diferente.',
-                icon: 'error',
-                customClass: 'animated tada'
-            });
-            return;
-        }
-
-        if (servicioId === '') {
-            Swal.fire({
-                title: 'Error',
-                text: 'Debe seleccionar un servicio.',
-                icon: 'error',
-                customClass: 'animated tada'
-            });
-            return;
-        }
-
-        const rightPanel = document.querySelector('.right-panel');
-        const fields = rightPanel.querySelectorAll('.form-control');
-        let data = {
-            formula: [],
-            texto: []
-        };
-
-        let fieldNames = new Set();
-        let counter = 1;
-
-        for (const field of fields) {
-            let fieldName = field.value.trim();
-            if (fieldName === '') {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Todos los campos deben tener un nombre.',
-                    icon: 'error',
-                    customClass: 'animated tada'
-                });
-                return;
-            }
-            if (fieldNames.has(fieldName)) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No pueden haber campos con el mismo nombre.',
-                    icon: 'error',
-                    customClass: 'animated tada'
-                });
-                return;
-            }
-
-            fieldName = `${fieldName}`;
-            fieldNames.add(fieldName);
-
-            const type = field.getAttribute('data-type');
-            const linkname = generateLinkName(fieldName);
-
-            if (type === 'formula') {
-                data.formula.push({
-                    name: fieldName,
-                    linkname: linkname
-                });
-            } else if (type === 'texto') {
-                data.texto.push({
-                    name: fieldName,
-                    linkname: linkname
-                });
-            }
-
-            counter++;
-        }
-
-        const jsonString = JSON.stringify(data);
-
-        Livewire.dispatch('storeElemento', {
-            nombre,
-            servicios_id: servicioId,
-            campos: jsonString
-        });
-    }
-</script>
-
-
-
-
 <!--Scripts para formatos -->
 <script>
     window.addEventListener('open-modal-formato', event => {
@@ -313,3 +143,144 @@
         });
     });
 </script>
+
+<script>
+    let fieldCounter = 0;
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    function drag(event) {
+        event.dataTransfer.setData("text", event.target.dataset.type);
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        const fieldType = event.dataTransfer.getData("text");
+        addField(fieldType, fieldType);
+    }
+
+    function addField(type, hint) {
+        fieldCounter++;
+        const rightPanel = document.querySelector('.right-panel');
+        const newField = document.createElement('div');
+        newField.className = 'field-item d-flex align-items-center mb-2';
+        newField.setAttribute('data-type', type);
+        newField.setAttribute('id', `field-${fieldCounter}`);
+        newField.innerHTML = `
+            <input type="text" class="form-control mr-2" name="fields[]" placeholder="${hint}" onchange="checkDuplicate(this)" style="width: calc(100% - 40px);" />
+            <button class="btn btn-danger btn-xs" onclick="removeField('field-${fieldCounter}')" style="height: 38px;">X</button>
+        `;
+        rightPanel.appendChild(newField);
+    }
+
+    function removeField(fieldId) {
+        const fieldElement = document.getElementById(fieldId);
+        if (fieldElement) {
+            fieldElement.remove();
+        }
+    }
+
+    function checkDuplicate(input) {
+        const fields = document.querySelectorAll('.right-panel input');
+        const values = [];
+        fields.forEach(field => {
+            if (field !== input && field.value.trim() === input.value.trim()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Campo duplicado',
+                    text: 'El valor del campo ya existe.',
+                });
+                input.value = '';
+            }
+        });
+    }
+
+    function submitFields() {
+        const nombreTablaElement = document.getElementById('nombre_tabla');
+        const elementosIdElement = document.getElementById('elementos_id');
+        const fields = document.querySelectorAll('.right-panel input');
+
+        if (!nombreTablaElement || !elementosIdElement) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se encontraron los elementos requeridos en el formulario.',
+            });
+            return;
+        }
+
+        const nombreTabla = nombreTablaElement.value.trim();
+        const elementosId = elementosIdElement.value.trim();
+        const values = [];
+        let valid = true;
+
+        fields.forEach(field => {
+            const value = field.value.trim();
+            if (!value) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Campo vacío',
+                    text: 'El valor del campo no puede estar vacío.',
+                });
+                valid = false;
+            } else if (values.includes(value)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Campo duplicado',
+                    text: 'El valor del campo ya existe.',
+                });
+                valid = false;
+            } else {
+                values.push(value);
+            }
+        });
+
+        if (valid) {
+            const formData = new FormData();
+            formData.append('nombre_tabla', nombreTabla);
+            formData.append('elementos_id', elementosId);
+            values.forEach((value, index) => {
+                formData.append(`campos[${index}]`, value);
+            });
+
+            axios.post('/submit-fields', formData)
+                .then(response => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Campos enviados',
+                        text: 'Los campos se han enviado correctamente.',
+                    });
+                })
+                .catch(error => {
+                    let errorMessage = 'Ocurrió un error al enviar los campos.';
+                    if (error.response && error.response.data && error.response.data.details) {
+                        errorMessage = error.response.data.details;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage,
+                    });
+                });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.draggable-field').forEach(button => {
+            button.addEventListener('dblclick', function(event) {
+                event.preventDefault();  // Evitar el comportamiento predeterminado del botón
+                const type = this.dataset.type;
+                addField(type, type);
+            });
+        });
+
+        const submitButton = document.getElementById('submitFieldsButton');
+        if (submitButton) {
+            submitButton.addEventListener('click', submitFields);
+        }
+    });
+</script>
+
+
