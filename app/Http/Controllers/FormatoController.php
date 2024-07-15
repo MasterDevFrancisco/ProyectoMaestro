@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Tablas;
 use App\Models\Campos;
+use App\Models\Formatos;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -21,8 +22,17 @@ class FormatoController extends Controller
                 'nombre_tabla' => 'required|string|max:255',
                 'elementos_id' => 'required|integer|exists:elementos,id',
                 'campos' => 'required|array',
-                'campos.*' => 'string|max:255'
+                'campos.*' => 'string|max:255',
+                'documento' => 'nullable|file|mimes:pdf|max:2048'
             ]);
+
+            $nombreDoc = null;
+            // Guardar el documento PDF si existe
+            if ($request->hasFile('documento')) {
+                $documento = $request->file('documento');
+                $nombreDoc = 'formatos/' . preg_replace('/[^a-zA-Z0-9-_\.]/', '_', $request->nombre_tabla) . '.' . $documento->extension();
+                $documento->storeAs('public', $nombreDoc);
+            }
 
             // Insertar en la tabla `tablas`
             $tabla = new Tablas();
@@ -44,8 +54,18 @@ class FormatoController extends Controller
                 $nuevoCampo->save();
             }
 
+            // Insertar en la tabla `formatos` si el documento fue subido
+            if ($nombreDoc) {
+                $formato = new Formatos();
+                $formato->nombre = $request->input('nombre_tabla');
+                $formato->ruta_pdf = $nombreDoc;
+                $formato->elementos_id = $request->input('elementos_id');
+                $formato->eliminado = 0;
+                $formato->save();
+            }
+
             DB::commit();
-            return response()->json(['message' => 'Campos y tabla guardados correctamente'], 200);
+            return response()->json(['message' => 'Campos, tabla y formato guardados correctamente'], 200);
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Error al guardar los datos', 'details' => $e->getMessage()], 500);

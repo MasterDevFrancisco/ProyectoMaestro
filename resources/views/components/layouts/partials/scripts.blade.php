@@ -143,7 +143,6 @@
         });
     });
 </script>
-
 <script>
     let fieldCounter = 0;
 
@@ -200,6 +199,7 @@
     function submitFields() {
         const nombreTablaElement = document.getElementById('nombre_tabla');
         const elementosIdElement = document.getElementById('elementos_id');
+        const documentoElement = document.getElementById('documento');
         const fields = document.querySelectorAll('.right-panel input');
 
         if (!nombreTablaElement || !elementosIdElement) {
@@ -213,6 +213,7 @@
 
         const nombreTabla = nombreTablaElement.value.trim();
         const elementosId = elementosIdElement.value.trim();
+        const documento = documentoElement ? documentoElement.files[0] : null;
         const values = [];
         let valid = true;
 
@@ -241,6 +242,9 @@
             const formData = new FormData();
             formData.append('nombre_tabla', nombreTabla);
             formData.append('elementos_id', elementosId);
+            if (documento) {
+                formData.append('documento', documento);
+            }
             values.forEach((value, index) => {
                 formData.append(`campos[${index}]`, value);
             });
