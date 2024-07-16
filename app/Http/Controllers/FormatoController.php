@@ -54,20 +54,19 @@ class FormatoController extends Controller
                 $nuevoCampo->save();
             }
 
-            // Insertar en la tabla `formatos` si el documento fue subido
-            if ($nombreDoc) {
-                $formato = new Formatos();
-                $formato->nombre = $request->input('nombre_tabla');
-                $formato->ruta_pdf = $nombreDoc;
-                $formato->elementos_id = $request->input('elementos_id');
-                $formato->eliminado = 0;
-                $formato->save();
-            }
+            // Insertar en la tabla `formatos`
+            $formato = new Formatos();
+            $formato->nombre = $request->input('nombre_tabla');
+            $formato->ruta_pdf = $nombreDoc ?? ''; // Usa una cadena vacía si no se subió documento
+            $formato->elementos_id = $request->input('elementos_id');
+            $formato->eliminado = 0;
+            $formato->save();
 
             DB::commit();
             return response()->json(['message' => 'Campos, tabla y formato guardados correctamente'], 200);
         } catch (Exception $e) {
             DB::rollBack();
+            Log::error('Error al guardar los datos: ' . $e->getMessage()); // Agregar al log
             return response()->json(['error' => 'Error al guardar los datos', 'details' => $e->getMessage()], 500);
         }
     }
