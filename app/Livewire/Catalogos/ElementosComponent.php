@@ -1,19 +1,15 @@
 <?php
-
 namespace App\Livewire\Catalogos;
 
 use App\Models\Elementos;
+use App\Models\Servicio;
 use App\Models\Servicios;
-use App\Models\Tablas; // Importa el modelo Tablas
-use App\Models\Campos; // Importa el modelo Campos
+use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
-use Exception;
-use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 #[Title('Elementos')]
 class ElementosComponent extends Component
@@ -23,20 +19,10 @@ class ElementosComponent extends Component
     public $totalRows = 0;
     public $paginationTheme = 'bootstrap';
     public $search = '';
-
     public $nombre = "";
-    public $campos = "";
     public $servicios_id = "";
     public $Id = 0;
-    public $razon_social_id;
-
-    protected $listeners = ['storeElemento'];
-
-    public function mount()
-    {
-        $this->totalRows = Elementos::where('eliminado', 0)->count();
-        $this->razon_social_id = Auth::user()->razon_social_id;
-    }
+    public $servicios = [];
 
     public function render()
     {
@@ -44,149 +30,154 @@ class ElementosComponent extends Component
             $this->resetPage();
         }
 
-        $elementosQuery = Elementos::where('eliminado', 0)
+        $user = Auth::user();
+
+        // Filtrar elementos según el rol del usuario
+        $razones = Elementos::query()
             ->where(function ($query) {
                 $query->where('nombre', 'like', '%' . $this->search . '%');
-            });
-
-        if (!Auth::user()->hasRole('admin')) {
-            $elementosQuery->whereHas('servicio', function ($query) {
-                $query->where('razon_social_id', $this->razon_social_id);
-            });
-        }
-
-        $elementos = $elementosQuery->orderBy('id', 'asc')->paginate(5);
-        $servicios = $this->getServiciosByRazonSocial();
+            })
+            ->where('eliminado', 0)
+            ->when($user->hasRole('coordinador'), function ($query) use ($user) {
+                $servicioIds = Servicios::where('razon_social_id', $user->razon_social_id)->pluck('id');
+                return $query->whereIn('servicios_id', $servicioIds);
+            })
+            ->orderBy('id', 'asc')
+            ->paginate(5);
 
         return view('livewire.catalogos.elementos-component', [
-            'elementos' => $elementos,
-            'servicios' => $servicios
+            'razones' => $razones,
+            'servicios' => $this->servicios
         ]);
     }
 
-    public function getServiciosByRazonSocial()
+    public function mount()
     {
-        if (Auth::user()->hasRole('admin')) {
-            return Servicios::where('eliminado', 0)->get();
+        $user = Auth::user();
+
+        if ($user->hasRole('coordinador')) {
+            // Obtener el razon_social_id del usuario logueado
+            $razon_social_id = $user->razon_social_id;
+            // Filtrar servicios por razon_social_id
+            $this->servicios = Servicios::where('razon_social_id', $razon_social_id)
+                                        ->where('eliminado', 0)
+                                        ->pluck('nombre', 'id');
+        } else {
+            // Para admin, obtener todos los servicios
+            $this->servicios = Servicios::where('eliminado', 0)
+                                        ->pluck('nombre', 'id');
         }
 
-        return Servicios::where('razon_social_id', $this->razon_social_id)
-            ->where('eliminado', 0)
-            ->get();
+        $this->totalRows = Elementos::where('eliminado', 0)->count();
     }
 
     public function create()
     {
         $this->Id = 0;
-        $this->reset(['nombre', 'campos', 'servicios_id']);
+        $this->reset(['nombre', 'servicios_id']);
         $this->resetErrorBag();
-        $this->dispatch('open-modal', 'modalElemento');
+        $this->dispatch('open-modal', 'modalRazon');
     }
 
-    public function storeElemento($nombre, $servicios_id, $campos)
+    public function store()
     {
         $rules = [
-            'nombre' => 'required|max:255|unique:elementos,nombre',
-            'campos' => 'required|json',
+            'nombre' => 'required|max:255',
             'servicios_id' => 'required|exists:servicios,id'
         ];
 
         $messages = [
             'nombre.required' => 'El nombre es requerido',
             'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
-            'nombre.unique' => 'Este nombre ya existe',
-            'campos.required' => 'Los campos son requeridos',
-            'campos.json' => 'El formato de campos no es válido, debe ser un JSON',
             'servicios_id.required' => 'El servicio es requerido',
             'servicios_id.exists' => 'El servicio seleccionado no es válido'
         ];
 
-        $this->validate([
-            'nombre' => $nombre,
-            'campos' => $campos,
-            'servicios_id' => $servicios_id
-        ], $rules, $messages);
+        $this->validate($rules, $messages);
 
-        DB::beginTransaction();
-        try {
-            $elemento = new Elementos();
-            $elemento->nombre = $nombre;
-            $elemento->campos = $campos;
-            $elemento->servicios_id = $servicios_id;
-            $elemento->eliminado = 0;
-            $elemento->save();
+        // Validación personalizada
+        $exists = Elementos::where('nombre', $this->nombre)
+                            ->where('servicios_id', $this->servicios_id)
+                            ->where('eliminado', 0)
+                            ->exists();
 
-            $tabla = new Tablas();
-            $tabla->nombre = $nombre;
-            $tabla->elementos_id = $elemento->id;
-            $tabla->save();
-
-            $tablas_id = $tabla->id;
-            $camposData = json_decode($campos, true);
-
-            foreach (['formula', 'texto'] as $type) {
-                foreach ($camposData[$type] as $field) {
-                    $campo = new Campos();
-                    $campo->tablas_id = $tablas_id;
-                    $campo->nombre_columna = $field['name'];
-                    $campo->linkname = $field['linkname'];
-                    $campo->status = '1';
-                    $campo->save();
-                }
-            }
-
-            $this->totalRows = Elementos::where('eliminado', 0)->count();
-            DB::commit();
-
-            $this->dispatch('close-modal', 'modalElemento');
-            $this->dispatch('msg', 'Registro creado correctamente');
-            $this->reset(['nombre', 'campos', 'servicios_id']);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            $this->dispatch('msg', 'Error al crear el registro');
+        if ($exists) {
+            $this->addError('nombre', 'El nombre ya existe en el mismo servicio y razón social.');
+            return;
         }
+
+        $razon = new Elementos();
+        $razon->nombre = $this->nombre;
+        $razon->servicios_id = $this->servicios_id;
+        $razon->eliminado = 0;
+        $razon->save();
+
+        $this->totalRows = Elementos::where('eliminado', 0)->count();
+
+        $this->dispatch('close-modal', 'modalRazon');
+        $this->dispatch('msg', 'Registro creado correctamente');
+
+        $this->reset(['nombre', 'servicios_id']);
     }
 
     public function editar($id)
     {
-        $elemento = Elementos::findOrFail($id);
-        $this->Id = $elemento->id;
-        $this->nombre = $elemento->nombre;
-        $this->campos = $elemento->campos;
-        $this->servicios_id = $elemento->servicios_id;
+        $razon = Elementos::findOrFail($id);
+        $this->Id = $razon->id;
+        $this->nombre = $razon->nombre;
+        $this->servicios_id = $razon->servicios_id;
 
-        $this->dispatch('open-modal', 'modalElemento');
+        $this->dispatch('open-modal', 'modalRazon');
     }
 
     public function update()
     {
-        $this->validate([
-            'nombre' => 'required|max:255|unique:elementos,nombre,' . $this->Id,
-            'campos' => 'required|json|unique:elementos,campos,' . $this->Id,
+        $rules = [
+            'nombre' => 'required|max:255',
             'servicios_id' => 'required|exists:servicios,id'
-        ]);
+        ];
 
-        $elemento = Elementos::findOrFail($this->Id);
-        $elemento->nombre = $this->nombre;
-        $elemento->campos = $this->campos;
-        $elemento->servicios_id = $this->servicios_id;
+        $messages = [
+            'nombre.required' => 'El nombre es requerido',
+            'nombre.max' => 'El nombre no puede exceder los 255 caracteres',
+            'servicios_id.required' => 'El servicio es requerido',
+            'servicios_id.exists' => 'El servicio seleccionado no es válido'
+        ];
 
-        $elemento->save();
+        $this->validate($rules, $messages);
 
-        $this->dispatch('close-modal', 'modalElemento');
+        // Validación personalizada
+        $exists = Elementos::where('nombre', $this->nombre)
+                            ->where('servicios_id', $this->servicios_id)
+                            ->where('id', '!=', $this->Id)
+                            ->where('eliminado', 0)
+                            ->exists();
+
+        if ($exists) {
+            $this->addError('nombre', 'El nombre ya existe.');
+            return;
+        }
+
+        $razon = Elementos::findOrFail($this->Id);
+        $razon->nombre = $this->nombre;
+        $razon->servicios_id = $this->servicios_id;
+        $razon->save();
+
+        $this->dispatch('close-modal', 'modalRazon');
         $this->dispatch('msg', 'Registro editado correctamente');
-        $this->reset(['nombre', 'campos', 'servicios_id', 'Id']);
+
+        $this->reset(['nombre', 'servicios_id', 'Id']);
     }
 
-    #[On('destroyElemento')]
+    #[On('destroyRazon')]
     public function destroy($id)
     {
-        $elemento = Elementos::findOrFail($id);
-        $elemento->eliminado = 1;
-        $elemento->save();
+        $razon = Elementos::findOrFail($id);
+        $razon->eliminado = 1;
+        $razon->save();
 
         $this->totalRows = Elementos::where('eliminado', 0)->count();
+
         $this->dispatch('msg', 'Registro eliminado correctamente');
     }
 }
