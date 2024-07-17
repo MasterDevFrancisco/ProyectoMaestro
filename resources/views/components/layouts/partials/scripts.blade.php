@@ -26,6 +26,8 @@
         $('#modalFormato').modal('hide');
         $('#viewDocumentModal').modal('hide');
     });
+
+   
 </script>
 
 
@@ -253,8 +255,13 @@
                 .then(response => {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Campos enviados',
-                        text: 'Los campos se han enviado correctamente.',
+                        title: 'Registro guardado con éxito',
+                        text: response.data.message,
+                    }).then(() => {
+                        // Cerrar el modal
+                        window.dispatchEvent(new CustomEvent('close-modal'));
+                        // Disparar el evento de mensaje
+                        //window.dispatchEvent(new CustomEvent('msg', { detail: response.data.message }));
                     });
                 })
                 .catch(error => {

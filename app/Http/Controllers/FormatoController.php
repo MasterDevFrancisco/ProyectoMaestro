@@ -9,6 +9,7 @@ use App\Models\Campos;
 use App\Models\Formatos;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class FormatoController extends Controller
 {
@@ -63,7 +64,7 @@ class FormatoController extends Controller
             $formato->save();
 
             DB::commit();
-            return response()->json(['message' => 'Campos, tabla y formato guardados correctamente'], 200);
+            return response()->json(['message' => 'Registro guardado con éxito'], 200);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error al guardar los datos: ' . $e->getMessage()); // Agregar al log
