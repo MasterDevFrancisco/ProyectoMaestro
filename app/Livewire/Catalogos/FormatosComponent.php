@@ -41,14 +41,14 @@ class FormatosComponent extends Component
     public function submitFields(Request $request)
     {
         DB::beginTransaction();
-    
+
         try {
             // Insertar en la tabla `tablas`
             $tabla = new Tablas();
             $tabla->nombre = $request->nombre_tabla;
             $tabla->elementos_id = $request->elementos_id;
             $tabla->save();
-    
+
             // Insertar en la tabla `campos`
             foreach ($request->campos as $campo) {
                 $nuevoCampo = new Campos();
@@ -57,7 +57,7 @@ class FormatosComponent extends Component
                 $nuevoCampo->status = 1;
                 $nuevoCampo->save();
             }
-    
+
             DB::commit();
             $this->dispatch('msg', 'Campos y tabla guardados correctamente');
             $this->dispatch('close-modal', 'modalFormato');
@@ -67,7 +67,7 @@ class FormatosComponent extends Component
             $this->handleError($e);
         }
     }
-    
+
     public function render()
     {
         $formatos = Formatos::where('nombre', 'like', '%' . $this->search . '%')
@@ -298,5 +298,18 @@ class FormatosComponent extends Component
         } catch (Exception $e) {
             Log::error('Error al obtener los campos del elemento: ' . $e->getMessage());
         }
+    }
+
+    public function getListeners()
+    {
+        return [
+            'openModal' => 'openModalCargarDocumento',
+        ];
+    }
+
+    public function openModalCargarDocumento($params = null)
+    {
+        // Aquí puedes establecer cualquier lógica adicional necesaria antes de abrir el modal
+        $this->dispatch('open-modal', 'modalCargarDocumento');
     }
 }

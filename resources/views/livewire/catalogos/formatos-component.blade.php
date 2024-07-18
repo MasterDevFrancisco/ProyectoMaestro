@@ -56,11 +56,10 @@
                             </button>
                         </td>
                         <td>
-                            <button type="button"
-                                wire:click="$emit('openModal', 'modalCargarDocumento', {{ $formato->id }})"
-                                title="Cargar documento" class="btn btn-secondary btn-xs">
+                            <button type="button" wire:click="$dispatch('openModal', { id: {{ $formato->id }} })" title="Cargar documento" class="btn btn-secondary btn-xs">
                                 <i class="fas fa-upload"></i>
                             </button>
+                            
                         </td>
                     </tr>
                 @empty
@@ -132,7 +131,6 @@
             </form>
         </x-modal>
 
-        <!-- Modal para cargar documentos -->
         <x-modal modalId='modalCargarDocumento' modalTitle='Cargar Documento' modalSize='modal-md' wire:closed="closeModal">
             <form wire:submit.prevent="uploadDocument" enctype="multipart/form-data">
                 @csrf
@@ -141,8 +139,7 @@
                         <label for="documento" class="w-100 text-center">Archivo PDF</label>
                         <input wire:model='documento' type="file" id="documento" accept="application/pdf">
                         @error('documento')
-                            <div class="alert alert-danger w-100 mt-1 p-1 text-center"
-                                style="font-size: 0.875rem; line-height: 1.25;">
+                            <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
                                 {{ $message }}
                             </div>
                         @enderror
@@ -150,17 +147,14 @@
                 </div>
                 <br>
                 <center>
-                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled"
-                        wire:loading.class="loading" wire:loading.class="opacity-25">
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="loading" wire:loading.class="opacity-25">
                         <span wire:loading.remove>Guardar</span>
                         <span wire:loading>Procesando...</span>
                     </button>
                 </center>
-
                 <div class="loading-overlay" wire:loading></div>
             </form>
         </x-modal>
-
         <!-- Modal para ver el documento -->
         <x-modal modalId='viewDocumentModal' modalTitle="{{ basename($documentoUrl) }}" modalSize='modal-lg'
             wire:closed="closeModal" backdrop="static" keyboard="false">
