@@ -38,6 +38,25 @@ class FormatosComponent extends Component
     {
         $this->elementos = Elementos::where('eliminado', 0)->get();
     }
+    public function uploadDocument()
+    {
+        $this->validate([
+            'documento' => 'required|file|mimes:pdf|max:2048'
+        ]);
+
+        if ($this->documento) {
+            $nombreDoc = 'formatos/' . uniqid() . '.' . $this->documento->extension();
+            $this->documento->storeAs('public', $nombreDoc);
+
+            $formato = Formatos::findOrFail($this->Id);
+            $formato->ruta_pdf = $nombreDoc;
+            $formato->save();
+
+            $this->dispatch('close-modal', 'modalCargarDocumento');
+            $this->dispatch('msg', ['message' => 'Documento cargado correctamente']);
+        }
+    }
+
     public function submitFields(Request $request)
     {
         DB::beginTransaction();
@@ -307,9 +326,9 @@ class FormatosComponent extends Component
         ];
     }
 
-    public function openModalCargarDocumento($params = null)
-    {
-        // Aquí puedes establecer cualquier lógica adicional necesaria antes de abrir el modal
-        $this->dispatch('open-modal', 'modalCargarDocumento');
-    }
+    public function openModalCargarDocumento($id)
+{
+    $this->Id = $id;
+    $this->dispatch('open-modal', 'modalCargarDocumento');
+}
 }
