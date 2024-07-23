@@ -22,7 +22,8 @@
                     <th width="3%"></th>
                     <th width="3%"></th>
                     <th width="3%"></th>
-                    <th width="3%"></th> <!-- Nueva columna para el botón de carga -->
+                    <th width="3%"></th> <!-- Columna para el botón de carga -->
+                    <th width="3%"></th> <!-- Nueva columna para el botón "Ver campos" -->
                 </x-slot>
                 @php $counter = ($formatos->currentPage() - 1) * $formatos->perPage() + 1; @endphp <!-- Inicializo el contador con el índice correcto -->
                 @forelse($formatos as $formato)
@@ -37,7 +38,7 @@
                         </td>
                         <td>
                             <button type="button" wire:click="viewDocument({{ $formato->id }})" title="Ver documento"
-                                class="btn btn-light btn-xs" {{ $isError ? 'disabled' : '' }}>
+                                class="btn btn-light btn-xs" {{ $isError || !$formato->ruta_pdf ? 'disabled' : '' }}>
                                 <i class="fas fa-eye"></i>
                             </button>
                         </td>
@@ -59,16 +60,19 @@
                             <button type="button" wire:click="$dispatch('openModal', { id: {{ $formato->id }} })" title="Cargar documento" class="btn btn-secondary btn-xs">
                                 <i class="fas fa-upload"></i>
                             </button>
-                            
+                        </td>
+                        <td>
+                            <button type="button" wire:click="verCampos({{ $formato->id }})" title="Ver campos" class="btn btn-info btn-xs">
+                                <i class="fas fa-list"></i>
+                            </button>
                         </td>
                     </tr>
                 @empty
                     <tr class="text-center">
-                        <td colspan="7">Sin Registros</td>
+                        <td colspan="8">Sin Registros</td>
                     </tr>
                 @endforelse
             </x-table>
-
             <x-slot:cardFooter>
                 <div class="d-flex justify-content-center">
                     {{ $formatos->links('vendor.pagination.bootstrap-5') }}

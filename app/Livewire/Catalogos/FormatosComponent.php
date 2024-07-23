@@ -45,7 +45,9 @@ class FormatosComponent extends Component
         ]);
 
         if ($this->documento) {
-            $nombreDoc = 'formatos/' . uniqid() . '.' . $this->documento->extension();
+            $data = Formatos::findOrFail($this->Id);
+           
+            $nombreDoc = 'formatos/' .  $data->nombre . '.' . $this->documento->extension();
             $this->documento->storeAs('public', $nombreDoc);
 
             $formato = Formatos::findOrFail($this->Id);

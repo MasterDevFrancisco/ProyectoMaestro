@@ -11,5 +11,5 @@ class Formatos extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'ruta_pdf', 'elementos_id', 'eliminado'];
+    protected $fillable = ['nombre', 'ruta_pdf', 'formatos_id', 'eliminado'];
 }

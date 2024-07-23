@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tablas', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 255);
-            $table->foreignId('elementos_id')->constrained();
+            $table->foreignId('formatos_id')->constrained();
             $table->timestamps();
         });
     }

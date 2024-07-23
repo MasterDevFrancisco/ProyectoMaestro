@@ -17,7 +17,9 @@ class ElementosFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nombre' => $this->faker->word,
+            'eliminado' => '0',
+            'servicios_id' => \App\Models\Servicios::factory(), // O un ID válido
         ];
     }
 }
