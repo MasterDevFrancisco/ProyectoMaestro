@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
 use Smalot\PdfParser\Parser;
@@ -46,7 +47,7 @@ class FormatosComponent extends Component
 
         if ($this->documento) {
             $data = Formatos::findOrFail($this->Id);
-           
+
             $nombreDoc = 'formatos/' .  $data->nombre . '.' . $this->documento->extension();
             $this->documento->storeAs('public', $nombreDoc);
 
@@ -321,6 +322,24 @@ class FormatosComponent extends Component
         }
     }
 
+    public function verCampos($id)
+    {
+        // Obtener la tabla específica
+        $tabla = Tablas::findOrFail($id);
+
+        // Obtener el formato ID relacionado con la tabla
+        $formatoId = $tabla->formatos_id;
+
+        // Obtener los campos relacionados con el formato ID
+        $campos = Campos::where('tablas_id', $formatoId)->get();
+
+        // Iterar sobre los campos y registrarlos en el log
+        foreach ($campos as $campo) {
+            Log::info('Campo: ' . $campo->linkname);
+        }
+    }
+
+
     public function getListeners()
     {
         return [
@@ -329,8 +348,8 @@ class FormatosComponent extends Component
     }
 
     public function openModalCargarDocumento($id)
-{
-    $this->Id = $id;
-    $this->dispatch('open-modal', 'modalCargarDocumento');
-}
+    {
+        $this->Id = $id;
+        $this->dispatch('open-modal', 'modalCargarDocumento');
+    }
 }

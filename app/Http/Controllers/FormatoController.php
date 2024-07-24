@@ -38,7 +38,7 @@ class FormatoController extends Controller
             // Insertar en la tabla `tablas`
             $tabla = new Tablas();
             $tabla->nombre = $request->input('nombre_tabla');
-            $tabla->elementos_id = $request->input('elementos_id');
+            $tabla->formatos_id = $request->input('elementos_id');
             $tabla->save();
 
             // Insertar en la tabla `campos`
