@@ -325,6 +325,24 @@ class FormatosComponent extends Component
 
     public function verCampos($id)
     {
+        $formato=Formatos::findOrFail($id);
+        $formatoId = $formato->id;
+        Log::info($formatoId);
+        // Obtener la tabla específica
+        $tabla = Tablas::where('formatos_id', $formatoId)->first();
+        Log::info($tabla);
+        // Obtener los campos relacionados con la tabla
+        $campos = Campos::where('tablas_id', $tabla->id)->get();
+        
+        // Preparar los datos para el modal
+        $this->campos = $campos->pluck('linkname')->toArray(); // Asegúrate de que esto se asigna a $this->campos
+      
+        // Abrir el modal
+        $this->dispatch('open-modal', 'modalCampos'); 
+    }
+    
+    /* public function verCampos($id)
+    {
         // Obtener la tabla específica
         $tabla = Tablas::findOrFail($id);
     
@@ -343,8 +361,7 @@ class FormatosComponent extends Component
         Log::info($camposData);
         $this->dispatch('mostrarModalConCampos', ['campos' => $camposData]);
         $this->dispatch('open-modal', 'modalCampos'); // Abrir el modal
-    }
-    
+    } */
     protected $listeners = ['mostrarModalConCampos' => 'actualizarCampos'];
     
     public function actualizarCampos($data)

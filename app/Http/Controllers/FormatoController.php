@@ -35,10 +35,19 @@ class FormatoController extends Controller
                 $documento->storeAs('public', $nombreDoc);
             }
 
+
+
+            // Insertar en la tabla `formatos`
+            $formato = new Formatos();
+            $formato->nombre = $request->input('nombre_tabla');
+            $formato->ruta_pdf = $nombreDoc ?? ''; // Usa una cadena vacía si no se subió documento
+            $formato->elementos_id = $request->input('elementos_id');
+            $formato->eliminado = 0;
+            $formato->save();
             // Insertar en la tabla `tablas`
             $tabla = new Tablas();
             $tabla->nombre = $request->input('nombre_tabla');
-            $tabla->formatos_id = $request->input('elementos_id');
+            $tabla->formatos_id = $formato->id;
             $tabla->save();
 
             // Insertar en la tabla `campos`
@@ -54,14 +63,6 @@ class FormatoController extends Controller
                 $nuevoCampo->status = 1;
                 $nuevoCampo->save();
             }
-
-            // Insertar en la tabla `formatos`
-            $formato = new Formatos();
-            $formato->nombre = $request->input('nombre_tabla');
-            $formato->ruta_pdf = $nombreDoc ?? ''; // Usa una cadena vacía si no se subió documento
-            $formato->elementos_id = $request->input('elementos_id');
-            $formato->eliminado = 0;
-            $formato->save();
 
             DB::commit();
             return response()->json(['message' => 'Registro guardado con éxito'], 200);
