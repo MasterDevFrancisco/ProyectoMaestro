@@ -57,12 +57,14 @@
                             </button>
                         </td>
                         <td>
-                            <button type="button" wire:click="$dispatch('openModal', { id: {{ $formato->id }} })" title="Cargar documento" class="btn btn-secondary btn-xs">
+                            <button type="button" wire:click="$dispatch('openModal', { id: {{ $formato->id }} })"
+                                title="Cargar documento" class="btn btn-secondary btn-xs">
                                 <i class="fas fa-upload"></i>
                             </button>
                         </td>
                         <td>
-                            <button type="button" wire:click="verCampos({{ $formato->id }})" title="Ver campos" class="btn btn-info btn-xs">
+                            <button type="button" wire:click="verCampos({{ $formato->id }})" title="Ver campos"
+                                class="btn btn-info btn-xs">
                                 <i class="fas fa-list"></i>
                             </button>
                         </td>
@@ -95,7 +97,8 @@
                         @enderror
                         <br>
                         <label class="w-100 text-center">Elemento</label>
-                        <select wire:model="elementos_id" id="elementos_id" class="form-control" onchange="toggleUploadField()">
+                        <select wire:model="elementos_id" id="elementos_id" class="form-control"
+                            onchange="toggleUploadField()">
                             <option value="">Seleccione un elemento</option>
                             @foreach ($elementos as $el)
                                 <option value="{{ $el->id }}">{{ $el->nombre }}</option>
@@ -143,7 +146,8 @@
                         <label for="documento" class="w-100 text-center">Archivo PDF</label>
                         <input wire:model='documento' type="file" id="documento" accept="application/pdf">
                         @error('documento')
-                            <div class="alert alert-danger w-100 mt-1 p-1 text-center" style="font-size: 0.875rem; line-height: 1.25;">
+                            <div class="alert alert-danger w-100 mt-1 p-1 text-center"
+                                style="font-size: 0.875rem; line-height: 1.25;">
                                 {{ $message }}
                             </div>
                         @enderror
@@ -151,7 +155,8 @@
                 </div>
                 <br>
                 <center>
-                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:loading.class="loading" wire:loading.class="opacity-25">
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled"
+                        wire:loading.class="loading" wire:loading.class="opacity-25">
                         <span wire:loading.remove>Guardar</span>
                         <span wire:loading>Procesando...</span>
                     </button>
@@ -168,6 +173,31 @@
                 @endif
             </div>
         </x-modal>
+
+        <!-- Modal para mostrar campos -->
+        <div wire:ignore.self class="modal fade" id="modalCampos" tabindex="-1" role="dialog"
+            aria-labelledby="modalCamposLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalCamposLabel">Campos</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+                            @foreach ($campos as $campo)
+                                <li>{{ $campo }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     @else
         <div class="alert alert-danger">
             No tienes permiso para acceder a esta página.
