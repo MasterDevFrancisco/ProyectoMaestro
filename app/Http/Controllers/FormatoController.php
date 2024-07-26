@@ -54,7 +54,7 @@ class FormatoController extends Controller
             $campos = $request->input('campos');
             foreach ($campos as $campo) {
                 $nombreColumna = $campo;
-                $linkname = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $campo));
+                $linkname = "_".strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $campo))."_";
 
                 $nuevoCampo = new Campos();
                 $nuevoCampo->tablas_id = $tabla->id;

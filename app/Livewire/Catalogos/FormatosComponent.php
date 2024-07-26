@@ -341,27 +341,7 @@ class FormatosComponent extends Component
         $this->dispatch('open-modal', 'modalCampos'); 
     }
     
-    /* public function verCampos($id)
-    {
-        // Obtener la tabla específica
-        $tabla = Tablas::findOrFail($id);
-    
-        // Obtener el formato ID relacionado con la tabla
-        $formatoId = $tabla->formatos_id;
-    
-        // Obtener los campos relacionados con el formato ID
-        $campos = Campos::where('tablas_id', $formatoId)->get();
-    
-        // Preparar los datos para el modal
-        $camposData = $campos->map(function ($campo) {
-            return $campo->linkname;
-        })->toArray();
-    
-        // Enviar los datos al frontend usando dispatch
-        Log::info($camposData);
-        $this->dispatch('mostrarModalConCampos', ['campos' => $camposData]);
-        $this->dispatch('open-modal', 'modalCampos'); // Abrir el modal
-    } */
+
     protected $listeners = ['mostrarModalConCampos' => 'actualizarCampos'];
     
     public function actualizarCampos($data)
