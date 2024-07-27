@@ -34,11 +34,13 @@ class FormatosComponent extends Component
     public $totalRows;
     public $elementos_id;
     public $documentoUrl;
+    public $campos = [];
 
     public function mount()
     {
         $this->elementos = Elementos::where('eliminado', 0)->get();
     }
+
     public function uploadDocument()
     {
         $this->validate([
@@ -46,17 +48,49 @@ class FormatosComponent extends Component
         ]);
 
         if ($this->documento) {
-            $data = Formatos::findOrFail($this->Id);
+            if ($this->validaDocumento()) {
+                $data = Formatos::findOrFail($this->Id);
+                $nombreDoc = 'formatos/' . $data->nombre . '.' . $this->documento->extension();
+                $this->documento->storeAs('public', $nombreDoc);
 
-            $nombreDoc = 'formatos/' .  $data->nombre . '.' . $this->documento->extension();
-            $this->documento->storeAs('public', $nombreDoc);
+                $formato = Formatos::findOrFail($this->Id);
+                $formato->ruta_pdf = $nombreDoc;
+                $formato->save();
 
+                $this->dispatch('close-modal', 'modalCargarDocumento');
+                $this->dispatch('msg', ['message' => 'Documento cargado correctamente']);
+            }
+        }
+    }
+
+    private function validaDocumento()
+    {
+        try {
+            // Obtener los campos relacionados con el formato
             $formato = Formatos::findOrFail($this->Id);
-            $formato->ruta_pdf = $nombreDoc;
-            $formato->save();
+            $tabla = Tablas::where('formatos_id', $formato->id)->firstOrFail();
+            $campos = Campos::where('tablas_id', $tabla->id)->pluck('linkname')->toArray();
 
-            $this->dispatch('close-modal', 'modalCargarDocumento');
-            $this->dispatch('msg', ['message' => 'Documento cargado correctamente']);
+            // Cargar el contenido del archivo HTML
+            $htmlContent = file_get_contents($this->documento->getRealPath());
+
+            // Verificar si todos los campos están presentes
+            $missingFields = [];
+            foreach ($campos as $campo) {
+                if (stripos($htmlContent, $campo) === false) {
+                    $missingFields[] = $campo;
+                }
+            }
+
+            if (!empty($missingFields)) {
+                Log::info('Campos faltantes en el HTML: ' . implode(', ', $missingFields));
+                return false;
+            }
+
+            return true;
+        } catch (Exception $e) {
+            Log::error('Error al validar el documento: ' . $e->getMessage());
+            return false;
         }
     }
 
@@ -221,23 +255,20 @@ class FormatosComponent extends Component
     public function storeDocumento()
     {
         try {
-            $parser = new Parser();
-
-            $pdf = $parser->parseFile($this->documento->getRealPath());
-            $text = $pdf->getText();
-            $text = preg_replace('/\s+/', ' ', $text);
-            Log::info($text);
+            // Cargar el contenido del archivo HTML
+            $htmlContent = file_get_contents($this->documento->getRealPath());
+            Log::info($htmlContent);
 
             $this->logElementFields();
 
             $camposTexto = $this->imprimirColumnasSeleccionadas();
 
             foreach ($camposTexto as $palabra) {
-                if (stripos($text, $palabra) === false) {
-                    Log::info('Palabra "' . $palabra . '" no encontrada en el PDF.');
+                if (stripos($htmlContent, $palabra) === false) {
+                    Log::info('Palabra "' . $palabra . '" no encontrada en el HTML.');
                     $this->dispatch('alertPalabra', [
                         'type' => 'error',
-                        'message' => 'El archivo PDF no contiene la palabra "' . $palabra . '".'
+                        'message' => 'El archivo HTML no contiene la palabra "' . $palabra . '".'
                     ]);
                     return;
                 }
@@ -321,11 +352,10 @@ class FormatosComponent extends Component
             Log::error('Error al obtener los campos del elemento: ' . $e->getMessage());
         }
     }
-    public $campos = [];
 
     public function verCampos($id)
     {
-        $formato=Formatos::findOrFail($id);
+        $formato = Formatos::findOrFail($id);
         $formatoId = $formato->id;
         Log::info($formatoId);
         // Obtener la tabla específica
@@ -333,24 +363,20 @@ class FormatosComponent extends Component
         Log::info($tabla);
         // Obtener los campos relacionados con la tabla
         $campos = Campos::where('tablas_id', $tabla->id)->get();
-        
+
         // Preparar los datos para el modal
         $this->campos = $campos->pluck('linkname')->toArray(); // Asegúrate de que esto se asigna a $this->campos
-      
+
         // Abrir el modal
-        $this->dispatch('open-modal', 'modalCampos'); 
+        $this->dispatch('open-modal', 'modalCampos');
     }
-    
 
     protected $listeners = ['mostrarModalConCampos' => 'actualizarCampos'];
-    
+
     public function actualizarCampos($data)
     {
         $this->campos = $data['campos'];
     }
-    
-
-
 
     public function getListeners()
     {
