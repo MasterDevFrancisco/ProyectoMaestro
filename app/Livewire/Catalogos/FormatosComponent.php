@@ -42,7 +42,7 @@ class FormatosComponent extends Component
     public function uploadDocument()
     {
         $this->validate([
-            'documento' => 'required|file|mimes:pdf|max:2048'
+            'documento' => 'required|file|mimes:html|max:2048'
         ]);
 
         if ($this->documento) {

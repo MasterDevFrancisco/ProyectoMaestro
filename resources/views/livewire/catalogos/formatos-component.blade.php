@@ -144,7 +144,7 @@
                 <div class="row">
                     <div class="col">
                         <label for="documento" class="w-100 text-center">Archivo PDF</label>
-                        <input wire:model='documento' type="file" id="documento" accept="application/pdf">
+                        <input wire:model='documento' type="file" id="documento" accept="application/html">
                         @error('documento')
                             <div class="alert alert-danger w-100 mt-1 p-1 text-center"
                                 style="font-size: 0.875rem; line-height: 1.25;">
