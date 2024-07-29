@@ -83,7 +83,8 @@ class FormatosComponent extends Component
             }
 
             if (!empty($missingFields)) {
-                $this->dispatch('mostrarAlerta', $missingFields); // Emitir el array directamente
+                $missingFieldsText = implode("\n", $missingFields); // Convertir array a string con saltos de línea
+                $this->dispatch('mostrarAlerta', $missingFieldsText);
                 Log::info('Campos faltantes en el HTML: ' . implode(', ', $missingFields));
                 return false;
             }
