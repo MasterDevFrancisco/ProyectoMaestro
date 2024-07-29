@@ -83,6 +83,7 @@ class FormatosComponent extends Component
             }
 
             if (!empty($missingFields)) {
+                $this->dispatch('mostrarAlerta', $missingFields); // Emitir el array directamente
                 Log::info('Campos faltantes en el HTML: ' . implode(', ', $missingFields));
                 return false;
             }
@@ -93,6 +94,7 @@ class FormatosComponent extends Component
             return false;
         }
     }
+
 
     public function submitFields(Request $request)
     {
