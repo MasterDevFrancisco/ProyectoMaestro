@@ -75,12 +75,12 @@
                             <p>Elementos</p>
                         </a>
                     </li>
-                    <li class="nav-item ml-3">
+              {{--       <li class="nav-item ml-3">
                         <a href="{{ route('permisos') }}" class="nav-link {{ request()->routeIs('permisos') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-user"></i>
                             <p>Permisos</p>
                         </a>
-                    </li>
+                    </li> --}}
                     <li class="nav-item ml-3">
                         <a href="{{ route('formatos') }}" class="nav-link {{ request()->routeIs('formatos') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-alt"></i>

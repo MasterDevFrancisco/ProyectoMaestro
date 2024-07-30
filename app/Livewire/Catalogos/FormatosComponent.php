@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
 use Smalot\PdfParser\Parser;
@@ -38,7 +39,21 @@ class FormatosComponent extends Component
 
     public function mount()
     {
-        $this->elementos = Elementos::where('eliminado', 0)->get();
+        $user = Auth::user();
+        Log::info("Usuario en mount", ['user' => $user]);
+
+        // Verificar el rol del usuario utilizando Spatie
+        if ($user->hasRole('admin')) {
+            Log::info("El usuario es admin");
+            // Si el usuario es admin, mostrar todos los elementos
+            $this->elementos = Elementos::where('eliminado', 0)->get();
+        } else {
+            Log::info("El usuario no es admin");
+            // Si el usuario no es admin, mostrar solo los elementos que pertenecen a su razón social
+            $this->elementos = Elementos::whereHas('servicio', function ($query) use ($user) {
+                $query->where('razon_social_id', $user->razon_social_id);
+            })->where('eliminado', 0)->get();
+        }
     }
 
     public function uploadDocument()

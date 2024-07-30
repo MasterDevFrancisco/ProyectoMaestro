@@ -18,7 +18,7 @@
                 <x-slot:thead>
                     <th>ID</th>
                     <th>Nombre</th>
-                    <th>Status</th>
+                    {{-- <th>Status</th> --}}
                     <th width="3%"></th>
                     <th width="3%"></th>
                     <th width="3%"></th>
@@ -33,9 +33,9 @@
                     <tr>
                         <td>{{ $counter++ }}</td> <!-- Uso el contador actualizado -->
                         <td>{{ $formato->nombre }}</td>
-                        <td class="{{ $isError ? 'text-danger' : 'text-success' }}">
+                        {{-- <td class="{{ $isError ? 'text-danger' : 'text-success' }}">
                             {{ $isError ? $formato->ruta_html : 'Correcto' }}
-                        </td>
+                        </td> --}}
                         <td>
                             <button type="button" wire:click="viewDocument({{ $formato->id }})" title="Ver documento"
                                 class="btn btn-light btn-xs" {{ $isError || !$formato->ruta_pdf ? 'disabled' : '' }}>
