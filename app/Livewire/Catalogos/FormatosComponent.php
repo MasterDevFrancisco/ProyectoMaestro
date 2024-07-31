@@ -40,15 +40,11 @@ class FormatosComponent extends Component
     public function mount()
     {
         $user = Auth::user();
-        Log::info("Usuario en mount", ['user' => $user]);
 
         // Verificar el rol del usuario utilizando Spatie
         if ($user->hasRole('admin')) {
-            Log::info("El usuario es admin");
-            // Si el usuario es admin, mostrar todos los elementos
             $this->elementos = Elementos::where('eliminado', 0)->get();
         } else {
-            Log::info("El usuario no es admin");
             // Si el usuario no es admin, mostrar solo los elementos que pertenecen a su razón social
             $this->elementos = Elementos::whereHas('servicio', function ($query) use ($user) {
                 $query->where('razon_social_id', $user->razon_social_id);
@@ -73,7 +69,7 @@ class FormatosComponent extends Component
                 $formato->save();
 
                 $this->dispatch('close-modal', 'modalCargarDocumento');
-                $this->dispatch('msg', ['message' => 'Documento cargado correctamente']);
+                $this->dispatch('msg', 'Documento cargado correctamente');
             }
         }
     }
@@ -135,6 +131,7 @@ class FormatosComponent extends Component
             DB::commit();
             $this->dispatch('msg', 'Campos y tabla guardados correctamente');
             $this->dispatch('close-modal', 'modalFormato');
+
             $this->resetForm();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -144,13 +141,28 @@ class FormatosComponent extends Component
 
     public function render()
     {
-        $formatos = Formatos::where('nombre', 'like', '%' . $this->search . '%')
-            ->where('eliminado', 0)
-            ->orderBy('id', 'asc')
-            ->paginate(5);
+        $user = Auth::user();
+
+        if ($user->hasRole('admin')) {
+            // Si el usuario es admin, mostrar todos los formatos
+            $formatos = Formatos::where('nombre', 'like', '%' . $this->search . '%')
+                ->where('eliminado', 0)
+                ->orderBy('id', 'asc')
+                ->paginate(5);
+        } else {
+            // Si el usuario no es admin, mostrar solo los formatos relacionados con su razón social
+            $formatos = Formatos::where('nombre', 'like', '%' . $this->search . '%')
+                ->where('eliminado', 0)
+                ->whereHas('elemento.servicio', function ($query) use ($user) {
+                    $query->where('razon_social_id', $user->razon_social_id);
+                })
+                ->orderBy('id', 'asc')
+                ->paginate(5);
+        }
 
         return view('livewire.catalogos.formatos-component', ['formatos' => $formatos]);
     }
+
 
     public function logFileUpload()
     {

@@ -16,4 +16,8 @@ class Formatos extends Model
     {
         return $this->hasMany(Campos::class);
     }
+    public function elemento()
+    {
+        return $this->belongsTo(Elementos::class, 'elementos_id');
+    }
 }
