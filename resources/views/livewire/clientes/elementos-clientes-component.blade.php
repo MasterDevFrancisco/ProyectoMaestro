@@ -33,10 +33,16 @@
                             </a>
                         </td>
                         <td>
-                            <button wire:click="loadFields({{ $elemento->id }})" title="Imprimir"
-                                class="btn btn-primary btn-xs">
-                                <i class="fas fa-print"></i>
-                            </button>
+                            @if($elemento->llenado == 1)
+                                <button wire:click="loadFields({{ $elemento->id }})" title="Imprimir"
+                                    class="btn btn-primary btn-xs">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            @else
+                                <button title="Imprimir" class="btn btn-primary btn-xs" disabled>
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            @endif
                         </td>
                     </tr>
                 @empty

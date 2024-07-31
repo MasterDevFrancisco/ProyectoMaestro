@@ -132,9 +132,13 @@ class ElementosClientesComponent extends Component
                     ]);
                 }
             }
-    
+            $elemento->llenado = 1;
+            $elemento->save();
             $this->resetFormData();
             session()->flash('message', 'Datos guardados exitosamente.');
+            
+            $this->dispatch('msg', 'Registro creado correctamente');
+            $this->dispatch('close-modal', 'modalElemento');
         } else {
             Log::warning('Elemento not found for ID', ['id' => $this->elementoId]);
         }
