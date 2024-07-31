@@ -46,65 +46,100 @@ class ElementosClientesComponent extends Component
             $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
             $tablasIds = $tablas->pluck('id'); // Extraer los IDs de las tablas
     
-            // Obtener todos los campos relacionados con las tablas obtenidas
-            $getCampos = Campos::whereIn('tablas_id', $tablasIds)->get();
-            $camposTexto = [];
+            // Inicializar el array para almacenar campos y nombres de tabla
+            $this->dynamicFields = [];
     
-            foreach ($getCampos as $campo) {
-                $camposTexto[] = $campo->nombre_columna; // Agregar el campo nombre_columna a la lista
-            }
+            foreach ($tablas as $tabla) {
+                // Obtener todos los campos relacionados con la tabla actual
+                $getCampos = Campos::where('tablas_id', $tabla->id)->get();
+                $camposTexto = [];
     
-            $this->dynamicFields = $camposTexto;
-            foreach ($this->dynamicFields as $field) {
-                $this->formData[$field] = ''; // Inicializa los campos en formData
+                foreach ($getCampos as $campo) {
+                    $camposTexto[$campo->linkname] = $campo->nombre_columna; // Agregar el campo linkname y nombre_columna a la lista
+                }
+    
+                // Almacenar el nombre de la tabla y los campos en dynamicFields
+                $this->dynamicFields[$tabla->nombre] = $camposTexto;
+    
+                // Inicializa los campos en formData
+                foreach ($camposTexto as $linkname => $nombre) {
+                    $this->formData[$linkname] = '';
+                }
             }
         }
     }
     
-
     public function submitFields()
     {
         Log::info('submitFields called');
         $elemento = $this->loadElemento($this->elementoId);
         Log::info('Elemento loaded', ['elemento' => $elemento]);
-
+    
         if ($elemento) {
-            $data = Tablas::where('formatos_id', $elemento->elemento->id)->firstOrFail();
-            $id = $data->id; // Extraer el campo id
-
-            $getCampos = Campos::where('tablas_id', $id)->get(); // Obtener los resultados
+            // Obtener todos los formatos relacionados con el elemento seleccionado
+            $formatos = Formatos::where('elementos_id', $elemento->elemento->id)->get();
+            $formatosIds = $formatos->pluck('id'); // Extraer los IDs de los formatos
+    
+            // Obtener todas las tablas relacionadas con los formatos obtenidos
+            $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
+            Log::info('Tablas found', ['tablas' => $tablas]);
+    
             $camposTexto = [];
-
-            foreach ($getCampos as $campo) {
-                $camposTexto[] = $campo->linkname; // Agregar el campo linkname a la lista
-            }
-
-            foreach ($camposTexto as $field) {
-                Log::info('Processing field', ['field' => $field]);
-
-                if (isset($this->formData[$field])) {
-                    $campo = Campos::where('linkname', $field)
-                        ->where('tablas_id', $elemento->elemento->id)
-                        ->first();
-                    Log::info('Campo found', ['campo' => $field]);
-
-                    if ($campo) {
-                        Data::create([
-                            'rowID' => uniqid(),
-                            'valor' => $this->formData[$field],
-                            'campos_id' => $campo->id,
-                            'users_id' => Auth::id(),
-                        ]);
-                        Log::info('Data inserted', ['rowID' => uniqid(), 'valor' => $this->formData[$field], 'campos_id' => $campo->id, 'users_id' => Auth::id()]);
-                    }
+    
+            // Recopilar todos los campos que se van a validar
+            foreach ($tablas as $tabla) {
+                $getCampos = Campos::where('tablas_id', $tabla->id)->get();
+                Log::info('Campos found for table', ['table' => $tabla->nombre, 'campos' => $getCampos]);
+    
+                foreach ($getCampos as $campo) {
+                    $camposTexto[$campo->linkname] = $campo->nombre_columna; // Usar un array asociativo
                 }
             }
+    
+            // Validar que todos los campos estén llenos
+            foreach ($camposTexto as $linkname => $nombre) {
+                if (empty($this->formData[$linkname])) {
+                    Log::warning('Field is empty', ['field' => $linkname]);
+                    session()->flash('error', "El campo '{$nombre}' no puede estar vacío.");
+                    return; // Salir si hay campos vacíos
+                }
+            }
+    
+            Log::info('All fields are filled, proceeding to insert data.');
+    
+            // Procesar la inserción de datos en la tabla Data
+            foreach ($camposTexto as $linkname => $nombre) {
+                Log::info('Processing field', ['field' => $linkname]);
+    
+                // Buscar el campo correspondiente en la tabla Campos
+                $campo = Campos::where('linkname', $linkname)
+                    ->whereIn('tablas_id', $tablas->pluck('id')) // Usar el ID de todas las tablas
+                    ->first();
+                Log::info('Campo found', ['campo' => $campo]);
+    
+                if ($campo) {
+                    Data::create([
+                        'rowID' => uniqid(),
+                        'valor' => $this->formData[$linkname],
+                        'campos_id' => $campo->id,
+                        'users_id' => Auth::id(),
+                    ]);
+                    Log::info('Data inserted', [
+                        'rowID' => uniqid(), 
+                        'valor' => $this->formData[$linkname], 
+                        'campos_id' => $campo->id, 
+                        'users_id' => Auth::id()
+                    ]);
+                }
+            }
+    
+            $this->resetFormData();
+            session()->flash('message', 'Datos guardados exitosamente.');
+        } else {
+            Log::warning('Elemento not found for ID', ['id' => $this->elementoId]);
         }
-
-        $this->resetFormData();
-        session()->flash('message', 'Datos guardados exitosamente.');
     }
-
+    
     private function resetFormData()
     {
         $this->formData = [];

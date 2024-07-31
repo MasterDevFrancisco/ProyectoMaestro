@@ -4,7 +4,8 @@
             <x-slot:cardTools>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="d-flex justify-content-center flex-grow-1">
-                        <input type="text" wire:model.live='search' class="form-control" placeholder="Elemento" style="width: 250px;">
+                        <input type="text" wire:model.live='search' class="form-control" placeholder="Elemento"
+                            style="width: 250px;">
                     </div>
                 </div>
             </x-slot>
@@ -26,12 +27,14 @@
                         <td>{{ $elemento->elemento->servicio->nombre ?? 'No asignado' }}</td>
                         <td>{{ $elemento->usuario->name ?? 'No asignado' }}</td>
                         <td>
-                            <a href="#" wire:click="loadFields({{ $elemento->id }})" title="Llenar elemento" class="btn btn-info btn-xs" data-toggle="modal" data-target="#modalElemento">
+                            <a href="#" wire:click="loadFields({{ $elemento->id }})" title="Llenar elemento"
+                                class="btn btn-info btn-xs" data-toggle="modal" data-target="#modalElemento">
                                 <i class="fas fa-pen"></i>
                             </a>
                         </td>
                         <td>
-                            <button wire:click="loadFields({{ $elemento->id }})" title="Imprimir" class="btn btn-primary btn-xs">
+                            <button wire:click="loadFields({{ $elemento->id }})" title="Imprimir"
+                                class="btn btn-primary btn-xs">
                                 <i class="fas fa-print"></i>
                             </button>
                         </td>
@@ -49,7 +52,8 @@
             </x-slot>
         </x-card>
 
-        <div wire:ignore.self class="modal fade" id="modalElemento" tabindex="-1" role="dialog" aria-labelledby="modalElementoLabel" aria-hidden="true">
+        <div wire:ignore.self class="modal fade" id="modalElemento" tabindex="-1" role="dialog"
+            aria-labelledby="modalElementoLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -59,14 +63,21 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        @foreach ($dynamicFields as $field)
-                            <div class="form-group">
-                                <label for="{{ $field }}" class="text-center d-block">{{ $field }}</label>
-                                <input type="text" wire:model="formData.{{ $field }}" class="form-control" id="{{ $field }}" name="{{ $field }}">
+                        @foreach ($dynamicFields as $tableName => $fields)
+                            <div class="p-3 mb-3" style="background-color: #f8f9fa; border-radius: 5px;">
+                                <center><b><h4 class="mt-3" style="color: #343a40;">{{ $tableName }}</h4></b></center>
+                                @foreach ($fields as $linkname => $nombre)
+                                    <div class="form-group">
+                                        <label for="{{ $linkname }}" class="text-center d-block" style="color: #343a40;">{{ $nombre }}</label>
+                                        <input type="text" wire:model="formData.{{ $linkname }}" class="form-control" id="{{ $linkname }}" name="{{ $linkname }}">
+                                    </div>
+                                @endforeach
                             </div>
                         @endforeach
                     </div>
                     
+
+
                     <center>
                         <div class="d-flex justify-content-center mt-3">
                             <button class="btn btn-success" wire:click="submitFields">Enviar</button>
@@ -76,11 +87,10 @@
                 </div>
             </div>
         </div>
-        
     @else
         <div class="alert alert-danger">
             No tienes permiso para acceder a esta página.
         </div>
     @endhasanyrole
-    
+
 </div>
