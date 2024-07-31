@@ -298,7 +298,7 @@
    document.addEventListener('DOMContentLoaded', function () {
     Livewire.on('mostrarAlerta', missingFields => {
         Swal.fire({
-            text: 'Campos faltantes en el HTML: ' + missingFields,
+            text: 'Campos faltantes : ' + missingFields,
             icon: 'error',
             title: 'Error',
         });
