@@ -76,7 +76,10 @@ class ElementosClientesComponent extends Component
         Log::info('Elemento loaded', ['elemento' => $elemento]);
 
         if ($elemento) {
-            $formatos = Formatos::where('elementos_id', $elemento->elemento->id)->get();
+            // Filtra los formatos por elementos_id y eliminado=0
+            $formatos = Formatos::where('elementos_id', $elemento->elemento->id)
+                ->where('eliminado', 0)
+                ->get();
             $formatosIds = $formatos->pluck('id');
             $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
             Log::info('Tablas found', ['tablas' => $tablas]);
@@ -143,7 +146,6 @@ class ElementosClientesComponent extends Component
             Log::warning('Elemento not found for ID', ['id' => $this->elementoId]);
         }
     }
-
 
     private function resetFormData()
     {
