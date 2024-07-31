@@ -23,5 +23,6 @@ class Elementos extends Model
     {
         return $this->hasMany(UsuariosElemento::class, 'elemento_id');
     }
+    
 }
 

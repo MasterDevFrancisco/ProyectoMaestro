@@ -20,4 +20,5 @@ class Formatos extends Model
     {
         return $this->belongsTo(Elementos::class, 'elementos_id');
     }
+    
 }

@@ -11,4 +11,6 @@ class Campos extends Model
     use HasFactory;
 
     protected $fillable = ['tablas_id', 'nombre_columna', 'linkname', 'status'];
+
+    
 }
