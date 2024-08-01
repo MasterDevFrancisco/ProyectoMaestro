@@ -34,7 +34,7 @@
                         </td>
                         <td>
                             @if($elemento->llenado == 1)
-                                <button wire:click="loadFields({{ $elemento->id }})" title="Imprimir"
+                                <button wire:click="getDocumentos({{ $elemento->id }})" title="Imprimir"
                                     class="btn btn-primary btn-xs">
                                     <i class="fas fa-print"></i>
                                 </button>
@@ -82,8 +82,6 @@
                         @endforeach
                     </div>
                     
-
-
                     <center>
                         <div class="d-flex justify-content-center mt-3">
                             <button class="btn btn-success" wire:click="submitFields">Enviar</button>
@@ -98,6 +96,4 @@
             No tienes permiso para acceder a esta página.
         </div>
     @endhasanyrole
-
 </div>
-    

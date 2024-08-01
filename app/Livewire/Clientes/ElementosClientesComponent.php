@@ -30,6 +30,27 @@ class ElementosClientesComponent extends Component
         return UsuariosElemento::find($id);
     }
 
+    public function getDocumentos($id)
+    {
+        // Obtener el UsuariosElemento
+        $usuarioElemento = UsuariosElemento::find($id);
+        if (!$usuarioElemento) {
+            Log::warning('UsuarioElemento not found for ID', ['id' => $id]);
+            return;
+        }
+
+        // Obtener el elemento_id
+        $elementoId = $usuarioElemento->elemento_id;
+        Log::info('Elemento ID retrieved', ['elemento_id' => $elementoId]);
+
+        // Filtrar en la tabla Formatos por elemento_id y obtener ruta_pdf
+        $formatos = Formatos::where('elementos_id', $elementoId)->get(['ruta_pdf']);
+
+        // Registrar los valores de ruta_pdf en el log
+        foreach ($formatos as $formato) {
+            Log::info('Ruta PDF', ['ruta_pdf' => $formato->ruta_pdf]);
+        }
+    }
     public function loadFields($id)
     {
         $this->elementoId = $id;
