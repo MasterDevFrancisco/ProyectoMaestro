@@ -13,6 +13,9 @@ use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[Title("Mis Elementos")]
 class ElementosClientesComponent extends Component
@@ -32,25 +35,90 @@ class ElementosClientesComponent extends Component
 
     public function getDocumentos($id)
     {
-        // Obtener el UsuariosElemento
-        $usuarioElemento = UsuariosElemento::find($id);
-        if (!$usuarioElemento) {
-            Log::warning('UsuarioElemento not found for ID', ['id' => $id]);
-            return;
-        }
+        $elemento = UsuariosElemento::findOrFail($id);
+        $formatos = Formatos::where('elementos_id', $elemento->elemento_id)->get();
 
-        // Obtener el elemento_id
-        $elementoId = $usuarioElemento->elemento_id;
-        Log::info('Elemento ID retrieved', ['elemento_id' => $elementoId]);
-
-        // Filtrar en la tabla Formatos por elemento_id y obtener ruta_pdf
-        $formatos = Formatos::where('elementos_id', $elementoId)->get(['ruta_pdf']);
-
-        // Registrar los valores de ruta_pdf en el log
         foreach ($formatos as $formato) {
-            Log::info('Ruta PDF', ['ruta_pdf' => $formato->ruta_pdf]);
+            $this->validaDocumento($formato->ruta_pdf, $formato->id);
         }
     }
+
+    private function validaDocumento($ruta_pdf, $formatoId)
+{
+    try {
+        // Obtener los campos relacionados con el formato
+        $formato = Formatos::findOrFail($formatoId);
+        $tabla = Tablas::where('formatos_id', $formato->id)->first();
+
+        if (!$tabla) {
+            Log::error('No se encontró la tabla para el formato.', ['formato_id' => $formatoId]);
+            return false;
+        }
+
+        $campos = Campos::where('tablas_id', $tabla->id)->get();
+
+        // Comprobar si el archivo existe
+        $filePath = public_path('storage/public/' . $ruta_pdf);
+        if (!file_exists($filePath)) {
+            Log::error('El archivo no existe.', ['file' => $filePath]);
+            return false;
+        }
+
+        // Cargar el contenido del archivo HTML
+        $htmlContent = file_get_contents($filePath);
+
+        // Verificar si hay campos faltantes
+        $missingFields = [];
+        foreach ($campos as $campo) {
+            if (stripos($htmlContent, $campo->linkname) === false) {
+                $missingFields[] = $campo->linkname;
+            }
+        }
+
+        if (!empty($missingFields)) {
+            $missingFieldsText = implode("\n", $missingFields);
+            $this->dispatch('mostrarAlerta', $missingFieldsText);
+            Log::info('Campos faltantes en el HTML: ' . implode(', ', $missingFields));
+            return false;
+        }
+
+        // Sustituir los campos en el contenido HTML con los valores de la tabla "data"
+        foreach ($campos as $campo) {
+            $dataEntry = Data::where('campos_id', $campo->id)->first();
+            $valorCampo = $dataEntry ? $dataEntry->valor : '';
+            $htmlContent = str_replace($campo->linkname, $valorCampo, $htmlContent);
+        }
+
+        // Guardar el contenido HTML en un archivo temporal
+        $tempFilePath = public_path('storage/public/temp_documento.html');
+        file_put_contents($tempFilePath, $htmlContent);
+
+        // Redirigir a la nueva pestaña
+        return redirect()->to(asset('storage/public/temp_documento.html'));
+
+    } catch (\Exception $e) {
+        Log::error('Error al validar el documento: ' . $e->getMessage());
+        return false;
+    }
+}
+
+    private function generatePdf($htmlContent)
+    {
+        // Establecer opciones para Dompdf
+        $options = new Options();
+        $options->set('isRemoteEnabled', true); // Habilitar el uso de recursos externos
+        $options->set('defaultFont', 'Arial'); // Puedes ajustar la fuente predeterminada
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($htmlContent);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Enviar el PDF al navegador para su descarga o impresión
+        return $dompdf->stream('documento.pdf', ['Attachment' => false]);
+    }
+
+
     public function loadFields($id)
     {
         $this->elementoId = $id;
@@ -177,18 +245,20 @@ class ElementosClientesComponent extends Component
     {
         $user = Auth::user();
         if ($user->hasRole('cliente')) {
-            $elementos = UsuariosElemento::with(['usuario', 'elemento.servicio'])
-                ->where('eliminado', 0)
+            $elementos = UsuariosElemento::with(['usuario', 'elemento', 'elemento.servicio'])
                 ->where('usuario_id', $user->id)
-                ->whereHas('elemento', function ($query) {
-                    $query->where('nombre', 'like', '%' . $this->search . '%');
+                ->when($this->search, function ($query) {
+                    $query->whereHas('elemento', function ($query) {
+                        $query->where('nombre', 'like', '%' . $this->search . '%');
+                    });
                 })
                 ->paginate(5);
         } else {
-            $elementos = UsuariosElemento::with(['usuario', 'elemento.servicio'])
-                ->where('eliminado', 0)
-                ->whereHas('elemento', function ($query) {
-                    $query->where('nombre', 'like', '%' . $this->search . '%');
+            $elementos = UsuariosElemento::with(['usuario', 'elemento', 'elemento.servicio'])
+                ->when($this->search, function ($query) {
+                    $query->whereHas('elemento', function ($query) {
+                        $query->where('nombre', 'like', '%' . $this->search . '%');
+                    });
                 })
                 ->paginate(5);
         }
