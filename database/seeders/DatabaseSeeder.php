@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
             ['nombre' => 'Elemento SGM 1', 'eliminado' => '0', 'servicios_id' => '3'],
             ['nombre' => 'Elemento SGM 2', 'eliminado' => '0', 'servicios_id' => '3'],
         ];
-
+/* 
         $tablasData = [
             ['nombre' => 'Tabla 1', 'formatos_id' => '1'],
             ['nombre' => 'Tabla 2', 'formatos_id' => '2'],
@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
             ['rowID' => '2', 'valor' => 'Valor 2', 'campos_id' => '2', 'users_id' => '1'],
             ['rowID' => '3', 'valor' => 'Valor 3', 'campos_id' => '3', 'users_id' => '2'],
             ['rowID' => '4', 'valor' => 'Valor 4', 'campos_id' => '4', 'users_id' => '2'],
-        ];
+        ]; */
 
         $coordinadores = [
             ['name' => 'Coordinador SGM', 'email' => 'coordinador@sgm.com', 'password' => bcrypt('password123'), 'razon_social_id' => '1'],
@@ -69,12 +69,12 @@ class DatabaseSeeder extends Seeder
         ];
 
         // Datos de Formatos
-        $formatosData = [
+        /* $formatosData = [
             ['nombre' => 'Formato 1', 'ruta_pdf' => '', 'eliminado' => '0', 'elementos_id' => '1'],
             ['nombre' => 'Formato 2', 'ruta_pdf' => '', 'eliminado' => '0', 'elementos_id' => '2'],
             ['nombre' => 'Formato 3', 'ruta_pdf' => '', 'eliminado' => '0', 'elementos_id' => '3'],
             ['nombre' => 'Formato 4', 'ruta_pdf' => '', 'eliminado' => '0', 'elementos_id' => '4'],
-        ];
+        ]; */
 
         // Crear datos
         RazonSocial::insert($razonesSociales);
@@ -86,11 +86,11 @@ class DatabaseSeeder extends Seeder
 
         Servicios::insert($serviciosData);
         Elementos::insert($elementosData);
-        Formatos::insert($formatosData);
+        /* Formatos::insert($formatosData);
         Tablas::insert($tablasData);
         Campos::insert($camposData);
         Data::insert($dataEntries);
-       
+        */
 
         $admin = User::create([
             'name' => 'Admin User',
