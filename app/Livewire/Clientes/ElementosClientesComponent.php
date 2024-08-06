@@ -44,63 +44,62 @@ class ElementosClientesComponent extends Component
     }
 
     private function validaDocumento($ruta_pdf, $formatoId)
-{
-    try {
-        // Obtener los campos relacionados con el formato
-        $formato = Formatos::findOrFail($formatoId);
-        $tabla = Tablas::where('formatos_id', $formato->id)->first();
+    {
+        try {
+            // Obtener los campos relacionados con el formato
+            $formato = Formatos::findOrFail($formatoId);
+            $tabla = Tablas::where('formatos_id', $formato->id)->first();
 
-        if (!$tabla) {
-            Log::error('No se encontró la tabla para el formato.', ['formato_id' => $formatoId]);
-            return false;
-        }
-
-        $campos = Campos::where('tablas_id', $tabla->id)->get();
-
-        // Comprobar si el archivo existe
-        $filePath = public_path('storage/public/' . $ruta_pdf);
-        if (!file_exists($filePath)) {
-            Log::error('El archivo no existe.', ['file' => $filePath]);
-            return false;
-        }
-
-        // Cargar el contenido del archivo HTML
-        $htmlContent = file_get_contents($filePath);
-
-        // Verificar si hay campos faltantes
-        $missingFields = [];
-        foreach ($campos as $campo) {
-            if (stripos($htmlContent, $campo->linkname) === false) {
-                $missingFields[] = $campo->linkname;
+            if (!$tabla) {
+                Log::error('No se encontró la tabla para el formato.', ['formato_id' => $formatoId]);
+                return false;
             }
-        }
 
-        if (!empty($missingFields)) {
-            $missingFieldsText = implode("\n", $missingFields);
-            $this->dispatch('mostrarAlerta', $missingFieldsText);
-            Log::info('Campos faltantes en el HTML: ' . implode(', ', $missingFields));
+            $campos = Campos::where('tablas_id', $tabla->id)->get();
+
+            // Comprobar si el archivo existe
+            $filePath = public_path('storage/public/' . $ruta_pdf);
+            if (!file_exists($filePath)) {
+                Log::error('El archivo no existe.', ['file' => $filePath]);
+                return false;
+            }
+
+            // Cargar el contenido del archivo HTML
+            $htmlContent = file_get_contents($filePath);
+
+            // Verificar si hay campos faltantes
+            $missingFields = [];
+            foreach ($campos as $campo) {
+                if (stripos($htmlContent, $campo->linkname) === false) {
+                    $missingFields[] = $campo->linkname;
+                }
+            }
+
+            if (!empty($missingFields)) {
+                $missingFieldsText = implode("\n", $missingFields);
+                $this->dispatch('mostrarAlerta', $missingFieldsText);
+                Log::info('Campos faltantes en el HTML: ' . implode(', ', $missingFields));
+                return false;
+            }
+
+            // Sustituir los campos en el contenido HTML con los valores de la tabla "data"
+            foreach ($campos as $campo) {
+                $dataEntry = Data::where('campos_id', $campo->id)->first();
+                $valorCampo = $dataEntry ? $dataEntry->valor : '';
+                $htmlContent = str_replace($campo->linkname, $valorCampo, $htmlContent);
+            }
+
+            // Guardar el contenido HTML en un archivo temporal
+            $tempFilePath = public_path('storage/public/temp_documento.html');
+            file_put_contents($tempFilePath, $htmlContent);
+
+            // Redirigir a la nueva pestaña
+            return redirect()->to(asset('storage/public/temp_documento.html'));
+        } catch (\Exception $e) {
+            Log::error('Error al validar el documento: ' . $e->getMessage());
             return false;
         }
-
-        // Sustituir los campos en el contenido HTML con los valores de la tabla "data"
-        foreach ($campos as $campo) {
-            $dataEntry = Data::where('campos_id', $campo->id)->first();
-            $valorCampo = $dataEntry ? $dataEntry->valor : '';
-            $htmlContent = str_replace($campo->linkname, $valorCampo, $htmlContent);
-        }
-
-        // Guardar el contenido HTML en un archivo temporal
-        $tempFilePath = public_path('storage/public/temp_documento.html');
-        file_put_contents($tempFilePath, $htmlContent);
-
-        // Redirigir a la nueva pestaña
-        return redirect()->to(asset('storage/public/temp_documento.html'));
-
-    } catch (\Exception $e) {
-        Log::error('Error al validar el documento: ' . $e->getMessage());
-        return false;
     }
-}
 
     private function generatePdf($htmlContent)
     {
@@ -159,50 +158,55 @@ class ElementosClientesComponent extends Component
     }
 
     public function submitFields()
-    {
-        Log::info('submitFields called');
-        $elemento = $this->loadElemento($this->elementoId);
-        Log::info('Elemento loaded', ['elemento' => $elemento]);
+{
+    Log::info('submitFields called');
+    $elemento = $this->loadElemento($this->elementoId);
+    Log::info('Elemento loaded', ['elemento' => $elemento]);
 
-        if ($elemento) {
-            // Filtra los formatos por elementos_id y eliminado=0
-            $formatos = Formatos::where('elementos_id', $elemento->elemento->id)
-                ->where('eliminado', 0)
-                ->get();
-            $formatosIds = $formatos->pluck('id');
-            $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
-            Log::info('Tablas found', ['tablas' => $tablas]);
+    if ($elemento) {
+        $formatos = Formatos::where('elementos_id', $elemento->elemento->id)
+            ->where('eliminado', 0)
+            ->get();
+        $formatosIds = $formatos->pluck('id');
+        $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
+        Log::info('Tablas found', ['tablas' => $tablas]);
 
-            $camposTexto = [];
+        $camposTexto = [];
 
-            foreach ($tablas as $tabla) {
-                $getCampos = Campos::where('tablas_id', $tabla->id)->get();
-                Log::info('Campos found for table', ['table' => $tabla->nombre, 'campos' => $getCampos]);
+        foreach ($tablas as $tabla) {
+            $getCampos = Campos::where('tablas_id', $tabla->id)->get();
+            Log::info('Campos found for table', ['table' => $tabla->nombre, 'campos' => $getCampos]);
 
-                foreach ($getCampos as $campo) {
-                    $camposTexto[$campo->linkname] = $campo->nombre_columna;
-                }
+            foreach ($getCampos as $campo) {
+                $camposTexto[$tabla->nombre][$campo->linkname] = $campo->nombre_columna;
             }
+        }
 
-            $missingFields = [];
+        $missingFields = [];
+        $camposConValores = [];
 
-            foreach ($camposTexto as $linkname => $nombre) {
+        foreach ($camposTexto as $tablaNombre => $fields) {
+            foreach ($fields as $linkname => $nombre) {
                 if (empty($this->formData[$linkname])) {
                     Log::warning('Field is empty', ['field' => $linkname]);
                     $missingFields[] = $nombre;
+                } else {
+                    $camposConValores[$tablaNombre][$linkname] = $this->formData[$linkname];
                 }
             }
+        }
 
-            if (!empty($missingFields)) {
-                $missingFieldsStr = implode(",", $missingFields);
-                session()->flash('error', "Los siguientes campos no pueden estar vacíos: {$missingFieldsStr}");
-                $this->dispatch('mostrarAlerta', $missingFieldsStr);
-                return;
-            }
+        if (!empty($missingFields)) {
+            $missingFieldsStr = implode(",", $missingFields);
+            session()->flash('error', "Los siguientes campos no pueden estar vacíos: {$missingFieldsStr}");
+            $this->dispatch('mostrarAlerta', $missingFieldsStr);
+            return;
+        }
 
-            Log::info('All fields are filled, proceeding to insert data.');
+        Log::info('All fields are filled, proceeding to insert data.', ['fields' => $camposConValores]);
 
-            foreach ($camposTexto as $linkname => $nombre) {
+        foreach ($camposTexto as $tablaNombre => $fields) {
+            foreach ($fields as $linkname => $nombre) {
                 Log::info('Processing field', ['field' => $linkname]);
                 $campo = Campos::where('linkname', $linkname)
                     ->whereIn('tablas_id', $tablas->pluck('id'))
@@ -224,17 +228,38 @@ class ElementosClientesComponent extends Component
                     ]);
                 }
             }
-            $elemento->llenado = 1;
-            $elemento->save();
-            $this->resetFormData();
-            session()->flash('message', 'Datos guardados exitosamente.');
-
-            $this->dispatch('msg', 'Registro creado correctamente');
-            $this->dispatch('close-modal', 'modalElemento');
-        } else {
-            Log::warning('Elemento not found for ID', ['id' => $this->elementoId]);
         }
+
+        $elemento->llenado = 1;
+        Log::info('Processing fields', ['fields' => $camposConValores]);
+        $elemento->save();
+        $this->resetFormData();
+        session()->flash('message', 'Datos guardados exitosamente.');
+
+        $this->dispatch('msg', 'Registro creado correctamente');
+        $this->dispatch('close-modal', 'modalElemento');
+
+        // Llamar a la función de Python mediante una solicitud HTTP
+        $url = 'http://localhost:5000/your-endpoint';
+        $data = json_encode($camposConValores);
+        
+        $options = [
+            'http' => [
+                'header'  => "Content-type: application/json\r\n",
+                'method'  => 'POST',
+                'content' => $data,
+            ],
+        ];
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        if ($result === FALSE) {
+            Log::error('Error calling Python function');
+        }
+    } else {
+        Log::warning('Elemento not found for ID', ['id' => $this->elementoId]);
     }
+}
+
 
     private function resetFormData()
     {
