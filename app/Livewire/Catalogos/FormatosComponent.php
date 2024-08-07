@@ -62,7 +62,13 @@ class FormatosComponent extends Component
         if ($this->documento) {
             if ($this->validaDocumento()) {
                 $data = Formatos::findOrFail($this->Id);
-                $nombreDoc = 'formatos/' . $data->nombre . '.' . $this->documento->extension();
+                
+                $nombre_sin_espacios = str_replace(' ', '_', $data->nombre); // Reemplaza espacios con guiones bajos
+                $nombre_limpio = preg_replace('/[^a-zA-Z0-9_]/', '', $nombre_sin_espacios); // Elimina caracteres especiales
+                $nombre_final = strtolower($nombre_limpio); // Convierte a minúsculas
+
+                $nombreDoc = 'formatos/' . $nombre_final . '.' . $this->documento->extension();
+
                 $this->documento->storeAs('public', $nombreDoc);
 
                 $formato = Formatos::findOrFail($this->Id);
@@ -106,7 +112,7 @@ class FormatosComponent extends Component
             // Verificar el resultado
             if (isset($responseBody['campos_faltantes']) && !empty($responseBody['campos_faltantes'])) {
                 // Manejar campos faltantes
-                $this->dispatch('mostrarAlerta',implode(', ', $responseBody['campos_faltantes']));
+                $this->dispatch('mostrarAlerta', implode(', ', $responseBody['campos_faltantes']));
                 return false;
             } else {
                 // Todos los campos están presentes
