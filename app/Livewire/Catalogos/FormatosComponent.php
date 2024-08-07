@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
@@ -55,7 +56,7 @@ class FormatosComponent extends Component
     public function uploadDocument()
     {
         $this->validate([
-            'documento' => 'required|file|mimes:html|max:2048'
+            'documento' => 'required|file|mimes:docx|max:2048'
         ]);
 
         if ($this->documento) {
@@ -83,25 +84,35 @@ class FormatosComponent extends Component
             $campos = Campos::where('tablas_id', $tabla->id)->pluck('linkname')->toArray();
 
             // Cargar el contenido del archivo HTML
-            $htmlContent = file_get_contents($this->documento->getRealPath());
+            $docxContent = file_get_contents($this->documento->getRealPath());
 
-            // Verificar si todos los campos están presentes
-            $missingFields = [];
-            foreach ($campos as $campo) {
-                if (stripos($htmlContent, $campo) === false) {
-                    $missingFields[] = $campo;
-                }
-            }
+            // Crear un cliente Guzzle
+            $client = new Client();
 
-            if (!empty($missingFields)) {
-                $missingFieldsText = implode("\n", $missingFields); // Convertir array a string con saltos de línea
-                $this->dispatch('mostrarAlerta', $missingFieldsText);
-                Log::info('Campos faltantes en el HTML: ' . implode(', ', $missingFields));
+            // Realizar la solicitud POST al endpoint
+            Log::info($this->documento->getRealPath());
+            Log::info($campos);
+            $response = $client->post('http://localhost:5000/valida-campos', [
+                'json' => [
+                    'file_path' => $this->documento->getRealPath(), // Enviar la ruta del archivo
+                    'campos' => $campos
+                ]
+            ]);
+
+
+            // Obtener la respuesta
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+
+            // Verificar el resultado
+            if (isset($responseBody['campos_faltantes']) && !empty($responseBody['campos_faltantes'])) {
+                // Manejar campos faltantes
+                $this->dispatch('mostrarAlerta',implode(', ', $responseBody['campos_faltantes']));
                 return false;
+            } else {
+                // Todos los campos están presentes
+                return true;
             }
-
-            return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error al validar el documento: ' . $e->getMessage());
             return false;
         }

@@ -158,108 +158,117 @@ class ElementosClientesComponent extends Component
     }
 
     public function submitFields()
-{
-    Log::info('submitFields called');
-    $elemento = $this->loadElemento($this->elementoId);
-    Log::info('Elemento loaded', ['elemento' => $elemento]);
+    {
+        //Log::info('submitFields called');
+        $elemento = $this->loadElemento($this->elementoId);
+        //Log::info('Elemento loaded', ['elemento' => $elemento]);
 
-    if ($elemento) {
-        $formatos = Formatos::where('elementos_id', $elemento->elemento->id)
-            ->where('eliminado', 0)
-            ->get();
-        $formatosIds = $formatos->pluck('id');
-        $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
-        Log::info('Tablas found', ['tablas' => $tablas]);
+        if ($elemento) {
+            $formatos = Formatos::where('elementos_id', $elemento->elemento->id)
+                ->where('eliminado', 0)
+                ->get();
+            $formatosIds = $formatos->pluck('id');
+            $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
 
-        $camposTexto = [];
+            //Log::info('Tablas found', ['tablas' => $tablas]);
 
-        foreach ($tablas as $tabla) {
-            $getCampos = Campos::where('tablas_id', $tabla->id)->get();
-            Log::info('Campos found for table', ['table' => $tabla->nombre, 'campos' => $getCampos]);
+            $camposTexto = [];
+            $rutaPdf = null;
 
-            foreach ($getCampos as $campo) {
-                $camposTexto[$tabla->nombre][$campo->linkname] = $campo->nombre_columna;
-            }
-        }
+            foreach ($tablas as $tabla) {
+                $getCampos = Campos::where('tablas_id', $tabla->id)->get();
+                //Log::info('Campos found for table', ['table' => $tabla->nombre, 'campos' => $getCampos]);
 
-        $missingFields = [];
-        $camposConValores = [];
-
-        foreach ($camposTexto as $tablaNombre => $fields) {
-            foreach ($fields as $linkname => $nombre) {
-                if (empty($this->formData[$linkname])) {
-                    Log::warning('Field is empty', ['field' => $linkname]);
-                    $missingFields[] = $nombre;
-                } else {
-                    $camposConValores[$tablaNombre][$linkname] = $this->formData[$linkname];
+                foreach ($getCampos as $campo) {
+                    $camposTexto[$tabla->nombre][$campo->linkname] = $campo->nombre_columna;
                 }
             }
-        }
 
-        if (!empty($missingFields)) {
-            $missingFieldsStr = implode(",", $missingFields);
-            session()->flash('error', "Los siguientes campos no pueden estar vacíos: {$missingFieldsStr}");
-            $this->dispatch('mostrarAlerta', $missingFieldsStr);
-            return;
-        }
+            if ($formatos->isNotEmpty()) {
+                $rutaPdf = $formatos->first()->ruta_pdf;
+            }
 
-        Log::info('All fields are filled, proceeding to insert data.', ['fields' => $camposConValores]);
+            $missingFields = [];
+            $camposConValores = [];
 
-        foreach ($camposTexto as $tablaNombre => $fields) {
-            foreach ($fields as $linkname => $nombre) {
-                Log::info('Processing field', ['field' => $linkname]);
-                $campo = Campos::where('linkname', $linkname)
-                    ->whereIn('tablas_id', $tablas->pluck('id'))
-                    ->first();
-                Log::info('Campo found', ['campo' => $campo]);
+            foreach ($camposTexto as $tablaNombre => $fields) {
+                foreach ($fields as $linkname => $nombre) {
+                    if (empty($this->formData[$linkname])) {
+                        //Log::warning('Field is empty', ['field' => $linkname]);
+                        $missingFields[] = $nombre;
+                    } else {
+                        $camposConValores[$rutaPdf][$linkname] = $this->formData[$linkname];
+                    }
+                }
+            }
 
-                if ($campo) {
-                    Data::create([
-                        'rowID' => uniqid(),
-                        'valor' => $this->formData[$linkname],
-                        'campos_id' => $campo->id,
-                        'users_id' => Auth::id(),
-                    ]);
-                    Log::info('Data inserted', [
+            if (!empty($missingFields)) {
+                $missingFieldsStr = implode(",", $missingFields);
+                session()->flash('error', "Los siguientes campos no pueden estar vacíos: {$missingFieldsStr}");
+                $this->dispatch('mostrarAlerta', $missingFieldsStr);
+                return;
+            }
+
+            /* Log::info('All fields are filled, proceeding to insert data.', [
+            'ruta_pdf' => $rutaPdf,
+            'fields' => $camposConValores
+        ]); */
+
+            foreach ($camposTexto as $tablaNombre => $fields) {
+                foreach ($fields as $linkname => $nombre) {
+                    //Log::info('Processing field', ['field' => $linkname]);
+                    $campo = Campos::where('linkname', $linkname)
+                        ->whereIn('tablas_id', $tablas->pluck('id'))
+                        ->first();
+                    //Log::info('Campo found', ['campo' => $campo]);
+
+                    if ($campo) {
+                        Data::create([
+                            'rowID' => uniqid(),
+                            'valor' => $this->formData[$linkname],
+                            'campos_id' => $campo->id,
+                            'users_id' => Auth::id(),
+                        ]);
+                        /* Log::info('Data inserted', [
                         'rowID' => uniqid(),
                         'valor' => $this->formData[$linkname],
                         'campos_id' => $campo->id,
                         'users_id' => Auth::id()
-                    ]);
+                    ]); */
+                    }
                 }
             }
-        }
 
-        $elemento->llenado = 1;
-        Log::info('Processing fields', ['fields' => $camposConValores]);
-        $elemento->save();
-        $this->resetFormData();
-        session()->flash('message', 'Datos guardados exitosamente.');
+            $elemento->llenado = 1;
+            //Log::info('Processing fields', ['fields' => $camposConValores]);
+            $elemento->save();
+            $this->resetFormData();
+            session()->flash('message', 'Datos guardados exitosamente.');
 
-        $this->dispatch('msg', 'Registro creado correctamente');
-        $this->dispatch('close-modal', 'modalElemento');
+            $this->dispatch('msg', 'Registro creado correctamente');
+            $this->dispatch('close-modal', 'modalElemento');
 
-        // Llamar a la función de Python mediante una solicitud HTTP
-        $url = 'http://localhost:5000/your-endpoint';
-        $data = json_encode($camposConValores);
-        
-        $options = [
-            'http' => [
-                'header'  => "Content-type: application/json\r\n",
-                'method'  => 'POST',
-                'content' => $data,
-            ],
-        ];
+            // Llamar a la función de Python mediante una solicitud HTTP
+            $url = 'http://localhost:5000/your-endpoint';
+            $data = json_encode($camposConValores);
+            Log::info($data);
+            $options = [
+                'http' => [
+                    'header'  => "Content-type: application/json\r\n",
+                    'method'  => 'POST',
+                    'content' => $data,
+                ],
+            ];
+            /*
         $context  = stream_context_create($options);
         $result = file_get_contents($url, false, $context);
         if ($result === FALSE) {
             Log::error('Error calling Python function');
+        } */
+        } else {
+            Log::warning('Elemento not found for ID', ['id' => $this->elementoId]);
         }
-    } else {
-        Log::warning('Elemento not found for ID', ['id' => $this->elementoId]);
     }
-}
-
 
     private function resetFormData()
     {
