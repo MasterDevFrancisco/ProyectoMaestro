@@ -25,7 +25,7 @@ def process_modified_file(input_docx):
     os.remove(output_docx)
     os.remove(input_docx)
     
-    return output_pdf  # Return the filename of the generated PDF
+    return unique_id  # Return the unique ID used in the generated filenames
 
 @app.route('/replace-text', methods=['POST'])
 def replace_text_in_docx():
@@ -49,10 +49,10 @@ def replace_text_in_docx():
             document.SaveToFile(modified_doc_path, FileFormat.Docx2016)
             document.Close()
             
-            # Procesar el archivo modificado
-            process_modified_file(modified_doc_path)
+            # Procesar el archivo modificado y obtener el ID
+            unique_id = process_modified_file(modified_doc_path)
 
-        return jsonify({"message": "Text replacement and processing completed successfully."}), 200
+        return jsonify({"message": "Text replacement and processing completed successfully.", "unique_id": unique_id}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
