@@ -4,21 +4,28 @@ from spire.doc import Document, FileFormat
 from docx import Document as DocxDocument
 import docx2pdf
 import os
+import uuid
 
 app = Flask(__name__)
 
 def process_modified_file(input_docx):
-    output_docx = 'output.docx'
-    output_pdf = 'output.pdf'
+    unique_id = str(uuid.uuid4())
+    output_docx = f'output_{unique_id}.docx'
+    output_pdf = f'output_{unique_id}.pdf'
+    
     document = DocxDocument(input_docx)
     target_string = "Evaluation Warning: The document was created with Spire.Doc for Python."
     for paragraph in document.paragraphs:
         if target_string in paragraph.text:
             paragraph.text = paragraph.text.replace(target_string, "")
+    
     document.save(output_docx)
     docx2pdf.convert(output_docx, output_pdf)
+    
     os.remove(output_docx)
     os.remove(input_docx)
+    
+    return output_pdf  # Return the filename of the generated PDF
 
 @app.route('/replace-text', methods=['POST'])
 def replace_text_in_docx():
