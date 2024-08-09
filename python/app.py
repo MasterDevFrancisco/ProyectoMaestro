@@ -1,40 +1,54 @@
 from flask import Flask, request, jsonify
+import json
 from spire.doc import Document, FileFormat
-import subprocess
+from docx import Document as DocxDocument
+import docx2pdf
+import os
 
 app = Flask(__name__)
 
-@app.route('/your-endpoint', methods=['POST'])
-def handle_data():
-    data = request.json
-    print(data)
-    process_data(data)
-    
-    # Ejecutar el script adicional
-    result = subprocess.run(['python', 'segunda.py'], capture_output=True, text=True)
-    
-    if result.returncode == 0:
-        return jsonify({'status': 'success', 'script_output': result.stdout}), 200
-    else:
-        return jsonify({'status': 'failure', 'error': result.stderr}), 500
+def process_modified_file(input_docx):
+    output_docx = 'output.docx'
+    output_pdf = 'output.pdf'
+    document = DocxDocument(input_docx)
+    target_string = "Evaluation Warning: The document was created with Spire.Doc for Python."
+    for paragraph in document.paragraphs:
+        if target_string in paragraph.text:
+            paragraph.text = paragraph.text.replace(target_string, "")
+    document.save(output_docx)
+    docx2pdf.convert(output_docx, output_pdf)
+    os.remove(output_docx)
+    os.remove(input_docx)
 
-def process_data(data):
-    # Crear un objeto Document
-    document = Document()
-    # Cargar un documento Word docx o doc
-    document.LoadFromFile("test.docx")
-    # document.LoadFromFile("Template1.doc")
+@app.route('/replace-text', methods=['POST'])
+def replace_text_in_docx():
+    try:
+        # Recibir los datos JSON desde la solicitud
+        json_data = request.get_json()
 
-    # Iterar sobre las tablas y sus campos
-    for table, fields in data.items():
-        replacements = fields
-        # Buscar y reemplazar cada texto
-        for old_text, new_text in replacements.items():
-            document.Replace(old_text, new_text, False, False)
+        # Recorrer cada documento y sus reemplazos en el JSON
+        for doc_path, replacements in json_data.items():
+            # Cargar el documento
+            document = Document()
+            document.LoadFromFile(doc_path)
+            
+            # Reemplazar texto en el documento
+            for search_text, replace_text in replacements.items():
+                # Reemplazar todas las instancias de 'search_text' con 'replace_text'
+                document.Replace(search_text, replace_text, False, False)
+            
+            # Guardar el documento con los cambios
+            modified_doc_path = "Reemplazado_" + doc_path.split("\\")[-1]
+            document.SaveToFile(modified_doc_path, FileFormat.Docx2016)
+            document.Close()
+            
+            # Procesar el archivo modificado
+            process_modified_file(modified_doc_path)
 
-    # Guardar el documento resultante
-    document.SaveToFile("ReplaceAllInstances.docx", FileFormat.Docx2016)
-    document.Close()
+        return jsonify({"message": "Text replacement and processing completed successfully."}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/valida-campos', methods=['POST'])
 def valida_campos():

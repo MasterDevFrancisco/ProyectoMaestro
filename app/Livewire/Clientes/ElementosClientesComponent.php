@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use GuzzleHttp\Client;
 
 #[Title("Mis Elementos")]
 class ElementosClientesComponent extends Component
@@ -159,9 +160,9 @@ class ElementosClientesComponent extends Component
 
     public function submitFields()
     {
-        //Log::info('submitFields called');
+        // Log::info('submitFields called');
         $elemento = $this->loadElemento($this->elementoId);
-        //Log::info('Elemento loaded', ['elemento' => $elemento]);
+        // Log::info('Elemento loaded', ['elemento' => $elemento]);
 
         if ($elemento) {
             $formatos = Formatos::where('elementos_id', $elemento->elemento->id)
@@ -170,14 +171,14 @@ class ElementosClientesComponent extends Component
             $formatosIds = $formatos->pluck('id');
             $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
 
-            //Log::info('Tablas found', ['tablas' => $tablas]);
+            // Log::info('Tablas found', ['tablas' => $tablas]);
 
             $camposTexto = [];
             $rutaPdf = null;
 
             foreach ($tablas as $tabla) {
                 $getCampos = Campos::where('tablas_id', $tabla->id)->get();
-                //Log::info('Campos found for table', ['table' => $tabla->nombre, 'campos' => $getCampos]);
+                // Log::info('Campos found for table', ['table' => $tabla->nombre, 'campos' => $getCampos]);
 
                 foreach ($getCampos as $campo) {
                     $camposTexto[$tabla->nombre][$campo->linkname] = $campo->nombre_columna;
@@ -194,7 +195,7 @@ class ElementosClientesComponent extends Component
             foreach ($camposTexto as $tablaNombre => $fields) {
                 foreach ($fields as $linkname => $nombre) {
                     if (empty($this->formData[$linkname])) {
-                        //Log::warning('Field is empty', ['field' => $linkname]);
+                        // Log::warning('Field is empty', ['field' => $linkname]);
                         $missingFields[] = $nombre;
                     } else {
                         $camposConValores[$rutaPdf][$linkname] = $this->formData[$linkname];
@@ -210,17 +211,17 @@ class ElementosClientesComponent extends Component
             }
 
             /* Log::info('All fields are filled, proceeding to insert data.', [
-            'ruta_pdf' => $rutaPdf,
-            'fields' => $camposConValores
+        'ruta_pdf' => $rutaPdf,
+        'fields' => $camposConValores
         ]); */
 
             foreach ($camposTexto as $tablaNombre => $fields) {
                 foreach ($fields as $linkname => $nombre) {
-                    //Log::info('Processing field', ['field' => $linkname]);
+                    // Log::info('Processing field', ['field' => $linkname]);
                     $campo = Campos::where('linkname', $linkname)
                         ->whereIn('tablas_id', $tablas->pluck('id'))
                         ->first();
-                    //Log::info('Campo found', ['campo' => $campo]);
+                    // Log::info('Campo found', ['campo' => $campo]);
 
                     if ($campo) {
                         Data::create([
@@ -230,17 +231,17 @@ class ElementosClientesComponent extends Component
                             'users_id' => Auth::id(),
                         ]);
                         /* Log::info('Data inserted', [
-                        'rowID' => uniqid(),
-                        'valor' => $this->formData[$linkname],
-                        'campos_id' => $campo->id,
-                        'users_id' => Auth::id()
-                    ]); */
+                    'rowID' => uniqid(),
+                    'valor' => $this->formData[$linkname],
+                    'campos_id' => $campo->id,
+                    'users_id' => Auth::id()
+                ]); */
                     }
                 }
             }
 
             $elemento->llenado = 1;
-            //Log::info('Processing fields', ['fields' => $camposConValores]);
+            // Log::info('Processing fields', ['fields' => $camposConValores]);
             $elemento->save();
             $this->resetFormData();
             session()->flash('message', 'Datos guardados exitosamente.');
@@ -249,24 +250,32 @@ class ElementosClientesComponent extends Component
             $this->dispatch('close-modal', 'modalElemento');
 
             // Llamar a la función de Python mediante una solicitud HTTP
-            $url = 'http://localhost:5000/your-endpoint';
+
             $data = json_encode($camposConValores);
-            Log::info($data);
-            $options = [
-                'http' => [
-                    'header'  => "Content-type: application/json\r\n",
-                    'method'  => 'POST',
-                    'content' => $data,
-                ],
-            ];
-            /*
-        $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
-        if ($result === FALSE) {
-            Log::error('Error calling Python function');
-        } */
-        } else {
-            Log::warning('Elemento not found for ID', ['id' => $this->elementoId]);
+
+            // Crear un cliente HTTP
+            $client = new Client();
+
+            try {
+                // Enviar la solicitud POST al endpoint Flask
+                $response = $client->post('http://127.0.0.1:5000/replace-text', [
+                    'headers' => ['Content-Type' => 'application/json'],
+                    'body' => $data,
+                ]);
+
+                // Procesar la respuesta del servidor Flask
+                $responseBody = json_decode($response->getBody(), true);
+
+                if ($response->getStatusCode() === 200) {
+                    // Si la solicitud fue exitosa, puedes manejar la respuesta aquí
+                    session()->flash('message', 'Datos guardados y documento procesado exitosamente.');
+                } else {
+                    session()->flash('error', 'Hubo un problema al procesar el documento.');
+                }
+            } catch (\Exception $e) {
+                // Manejar errores de la solicitud
+                session()->flash('error', 'Error al conectarse con el servicio Flask: ' . $e->getMessage());
+            }
         }
     }
 

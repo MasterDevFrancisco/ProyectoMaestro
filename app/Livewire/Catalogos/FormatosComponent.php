@@ -62,17 +62,19 @@ class FormatosComponent extends Component
         if ($this->documento) {
             if ($this->validaDocumento()) {
                 $data = Formatos::findOrFail($this->Id);
-                
+
                 $nombre_sin_espacios = str_replace(' ', '_', $data->nombre); // Reemplaza espacios con guiones bajos
                 $nombre_limpio = preg_replace('/[^a-zA-Z0-9_]/', '', $nombre_sin_espacios); // Elimina caracteres especiales
                 $nombre_final = strtolower($nombre_limpio); // Convierte a minúsculas
 
-                $nombreDoc = 'formatos/' . $nombre_final . '.' . $this->documento->extension();
+                $almacenDoc = 'formatos/' . $nombre_final . '.' . $this->documento->extension();
+                $this->documento->storeAs('public', $almacenDoc);
 
-                $this->documento->storeAs('public', $nombreDoc);
-
+                // Almacena la ruta completa en la base de datos con barras invertidas
                 $formato = Formatos::findOrFail($this->Id);
-                $formato->ruta_pdf = $nombreDoc;
+                $ruta_completa = public_path('storage/public/' . $almacenDoc);
+                $ruta_con_backslashes = str_replace('/', '\\', $ruta_completa);
+                $formato->ruta_pdf = $ruta_con_backslashes;
                 $formato->save();
 
                 $this->dispatch('close-modal', 'modalCargarDocumento');
@@ -80,6 +82,9 @@ class FormatosComponent extends Component
             }
         }
     }
+
+
+
 
     private function validaDocumento()
     {
