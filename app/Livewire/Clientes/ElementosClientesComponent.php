@@ -262,19 +262,22 @@ class ElementosClientesComponent extends Component
                     'headers' => ['Content-Type' => 'application/json'],
                     'body' => $data,
                 ]);
-        
+
                 // Procesar la respuesta del servidor Flask
                 $responseBody = json_decode($response->getBody(), true);
-        
+
                 if ($response->getStatusCode() === 200) {
-                    // Loguear el ID único generado por Flask
+                    // Capturar el ID único generado por Flask
                     $uniqueId = $responseBody['unique_id'] ?? 'N/A';
+
+                    // Construir la ruta completa del archivo PDF
                     $filePath = "C:\\laragon\\www\\ProyectoMaestro\\python\\{$uniqueId}.pdf";
 
                     // Registrar en el log la ruta completa
                     Log::info('Documento procesado exitosamente con la ruta:', ['file_path' => $filePath]);
-        
-                    session()->flash('message', 'Datos guardados y documento procesado exitosamente.');
+
+                    // Descargar automáticamente el archivo PDF
+                    return response()->download($filePath);
                 } else {
                     session()->flash('error', 'Hubo un problema al procesar el documento.');
                 }
