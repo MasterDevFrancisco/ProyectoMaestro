@@ -271,7 +271,7 @@ class ElementosClientesComponent extends Component
                     $uniqueId = $responseBody['unique_id'] ?? 'N/A';
 
                     // Construir la ruta completa del archivo PDF
-                    $filePath = "C:\\laragon\\www\\ProyectoMaestro\\python\\{$uniqueId}.pdf";
+                    $filePath = "C:\\laragon\\www\\ProyectoMaestro\\public\\storage\\public\\pdf\\{$uniqueId}.pdf";
 
                     // Registrar en el log la ruta completa
                     Log::info('Documento procesado exitosamente con la ruta:', ['file_path' => $filePath]);

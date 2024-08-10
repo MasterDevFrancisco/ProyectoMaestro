@@ -10,8 +10,8 @@ app = Flask(__name__)
 
 def process_modified_file(input_docx):
     unique_id = str(uuid.uuid4())
-    output_docx = f'output_{unique_id}.docx'
-    output_pdf = f'output_{unique_id}.pdf'
+    output_docx = f'{unique_id}.docx'
+    output_pdf = f'{unique_id}.pdf'
     
     document = DocxDocument(input_docx)
     target_string = "Evaluation Warning: The document was created with Spire.Doc for Python."
