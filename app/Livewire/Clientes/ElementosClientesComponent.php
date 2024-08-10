@@ -160,9 +160,7 @@ class ElementosClientesComponent extends Component
 
     public function submitFields()
     {
-        // Log::info('submitFields called');
         $elemento = $this->loadElemento($this->elementoId);
-        // Log::info('Elemento loaded', ['elemento' => $elemento]);
 
         if ($elemento) {
             $formatos = Formatos::where('elementos_id', $elemento->elemento->id)
@@ -171,34 +169,32 @@ class ElementosClientesComponent extends Component
             $formatosIds = $formatos->pluck('id');
             $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
 
-            // Log::info('Tablas found', ['tablas' => $tablas]);
-
             $camposTexto = [];
-            $rutaPdf = null;
 
             foreach ($tablas as $tabla) {
                 $getCampos = Campos::where('tablas_id', $tabla->id)->get();
-                // Log::info('Campos found for table', ['table' => $tabla->nombre, 'campos' => $getCampos]);
 
                 foreach ($getCampos as $campo) {
                     $camposTexto[$tabla->nombre][$campo->linkname] = $campo->nombre_columna;
                 }
             }
 
-            if ($formatos->isNotEmpty()) {
-                $rutaPdf = $formatos->first()->ruta_pdf;
-            }
-
             $missingFields = [];
             $camposConValores = [];
 
-            foreach ($camposTexto as $tablaNombre => $fields) {
-                foreach ($fields as $linkname => $nombre) {
-                    if (empty($this->formData[$linkname])) {
-                        // Log::warning('Field is empty', ['field' => $linkname]);
-                        $missingFields[] = $nombre;
-                    } else {
-                        $camposConValores[$rutaPdf][$linkname] = $this->formData[$linkname];
+            foreach ($formatos as $formato) {
+                $rutaPdf = $formato->ruta_pdf;
+                $camposConValores[$rutaPdf] = []; // Inicializar el array para este formato específico
+
+                foreach ($tablas as $tabla) {
+                    if ($tabla->formatos_id == $formato->id) { // Verificar si la tabla pertenece al formato actual
+                        foreach ($camposTexto[$tabla->nombre] as $linkname => $nombre) {
+                            if (empty($this->formData[$linkname])) {
+                                $missingFields[] = $nombre;
+                            } else {
+                                $camposConValores[$rutaPdf][$linkname] = $this->formData[$linkname];
+                            }
+                        }
                     }
                 }
             }
@@ -210,81 +206,77 @@ class ElementosClientesComponent extends Component
                 return;
             }
 
-            /* Log::info('All fields are filled, proceeding to insert data.', [
-        'ruta_pdf' => $rutaPdf,
-        'fields' => $camposConValores
-        ]); */
+            $resultados = [];
+            $client = new Client();
+            Log::info($camposConValores);
 
-            foreach ($camposTexto as $tablaNombre => $fields) {
-                foreach ($fields as $linkname => $nombre) {
-                    // Log::info('Processing field', ['field' => $linkname]);
-                    $campo = Campos::where('linkname', $linkname)
-                        ->whereIn('tablas_id', $tablas->pluck('id'))
-                        ->first();
-                    // Log::info('Campo found', ['campo' => $campo]);
+            foreach ($camposConValores as $rutaPdf => $reemplazos) {
+                $json_data = json_encode([$rutaPdf => $reemplazos]);
+                Log::info("Enviando datos a la API:", ['data' => $json_data]);
 
-                    if ($campo) {
-                        Data::create([
-                            'rowID' => uniqid(),
-                            'valor' => $this->formData[$linkname],
-                            'campos_id' => $campo->id,
-                            'users_id' => Auth::id(),
-                        ]);
-                        /* Log::info('Data inserted', [
-                    'rowID' => uniqid(),
-                    'valor' => $this->formData[$linkname],
-                    'campos_id' => $campo->id,
-                    'users_id' => Auth::id()
-                ]); */
+                try {
+                    // Enviar la solicitud POST al endpoint Flask
+                    $response = $client->post('http://127.0.0.1:5000/replace-text', [
+                        'headers' => ['Content-Type' => 'application/json'],
+                        'body' => $json_data,
+                        'timeout' => 300, // Tiempo de espera más largo
+                        'connect_timeout' => 300, // Tiempo de espera de conexión más largo
+                    ]);
+
+                    // Procesar la respuesta del servidor Flask
+                    $responseBody = json_decode($response->getBody(), true);
+
+                    if ($response->getStatusCode() === 200) {
+                        // Capturar el ID único generado por Flask
+                        $uniqueId = $responseBody['unique_id'] ?? 'N/A';
+
+                        // Construir la ruta completa del archivo PDF
+                        $filePath = "C:\\laragon\\www\\ProyectoMaestro\\public\\storage\\public\\pdf\\{$uniqueId}.pdf";
+
+                        // Registrar en el log la ruta completa
+                        Log::info('Documento procesado exitosamente con la ruta:', ['file_path' => $filePath]);
+
+                        // Guardar la ruta del archivo PDF procesado en los resultados
+                        $resultados[$filePath] = $uniqueId;
+                    } else {
+                        session()->flash('error', 'Hubo un problema al procesar el documento.');
                     }
+                } catch (\Exception $e) {
+                    // Manejar errores de la solicitud
+                    session()->flash('error', 'Error al conectarse con el servicio Flask: ' . $e->getMessage());
                 }
             }
 
+            // Crear un archivo ZIP para los PDFs generados
+            $zipFilePath = "C:\\laragon\\www\\ProyectoMaestro\\public\\storage\\public\\pdf\\archivos_generados.zip";
+            $zip = new \ZipArchive();
+            if ($zip->open($zipFilePath, \ZipArchive::CREATE) === TRUE) {
+                $totalArchivos = count($resultados);
+                $i = 1;
+                foreach ($resultados as $filePath => $uniqueId) {
+                    if (file_exists($filePath)) {
+                        Log::info("Archivo {$i} de {$totalArchivos} agregado al ZIP:", ['file_path' => $filePath]);
+                        $zip->addFile($filePath, basename($filePath));
+                        $i++;
+                    }
+                }
+                $zip->close();
+            } else {
+                session()->flash('error', 'No se pudo crear el archivo ZIP.');
+                return;
+            }
+
+            // Descargar el archivo ZIP
+            return response()->download($zipFilePath)->deleteFileAfterSend(true);
+
+            // Limpiar datos del formulario
             $elemento->llenado = 1;
-            // Log::info('Processing fields', ['fields' => $camposConValores]);
             $elemento->save();
             $this->resetFormData();
             session()->flash('message', 'Datos guardados exitosamente.');
 
             $this->dispatch('msg', 'Registro creado correctamente');
             $this->dispatch('close-modal', 'modalElemento');
-
-            // Llamar a la función de Python mediante una solicitud HTTP
-
-            $data = json_encode($camposConValores);
-
-            // Crear un cliente HTTP
-            $client = new Client();
-
-            try {
-                // Enviar la solicitud POST al endpoint Flask
-                $response = $client->post('http://127.0.0.1:5000/replace-text', [
-                    'headers' => ['Content-Type' => 'application/json'],
-                    'body' => $data,
-                ]);
-
-                // Procesar la respuesta del servidor Flask
-                $responseBody = json_decode($response->getBody(), true);
-
-                if ($response->getStatusCode() === 200) {
-                    // Capturar el ID único generado por Flask
-                    $uniqueId = $responseBody['unique_id'] ?? 'N/A';
-
-                    // Construir la ruta completa del archivo PDF
-                    $filePath = "C:\\laragon\\www\\ProyectoMaestro\\public\\storage\\public\\pdf\\{$uniqueId}.pdf";
-
-                    // Registrar en el log la ruta completa
-                    Log::info('Documento procesado exitosamente con la ruta:', ['file_path' => $filePath]);
-
-                    // Descargar automáticamente el archivo PDF
-                    return response()->download($filePath);
-                } else {
-                    session()->flash('error', 'Hubo un problema al procesar el documento.');
-                }
-            } catch (\Exception $e) {
-                // Manejar errores de la solicitud
-                session()->flash('error', 'Error al conectarse con el servicio Flask: ' . $e->getMessage());
-            }
         }
     }
 
