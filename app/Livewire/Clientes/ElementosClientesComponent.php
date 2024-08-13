@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Clientes;
 
+use App\Jobs\ProcessDocumentJob;
 use App\Models\UsuariosElemento;
 use App\Models\Campos;
 use App\Models\Data;
@@ -161,124 +162,33 @@ class ElementosClientesComponent extends Component
     public function submitFields()
     {
         $elemento = $this->loadElemento($this->elementoId);
-
+    
         if ($elemento) {
-            $formatos = Formatos::where('elementos_id', $elemento->elemento->id)
-                ->where('eliminado', 0)
-                ->get();
-            $formatosIds = $formatos->pluck('id');
-            $tablas = Tablas::whereIn('formatos_id', $formatosIds)->get();
-
-            $camposTexto = [];
-
-            foreach ($tablas as $tabla) {
-                $getCampos = Campos::where('tablas_id', $tabla->id)->get();
-
-                foreach ($getCampos as $campo) {
-                    $camposTexto[$tabla->nombre][$campo->linkname] = $campo->nombre_columna;
-                }
-            }
-
-            $missingFields = [];
-            $camposConValores = [];
-
-            foreach ($formatos as $formato) {
-                $rutaPdf = $formato->ruta_pdf;
-                $camposConValores[$rutaPdf] = []; // Inicializar el array para este formato específico
-
-                foreach ($tablas as $tabla) {
-                    if ($tabla->formatos_id == $formato->id) { // Verificar si la tabla pertenece al formato actual
-                        foreach ($camposTexto[$tabla->nombre] as $linkname => $nombre) {
-                            if (empty($this->formData[$linkname])) {
-                                $missingFields[] = $nombre;
-                            } else {
-                                $camposConValores[$rutaPdf][$linkname] = $this->formData[$linkname];
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (!empty($missingFields)) {
-                $missingFieldsStr = implode(",", $missingFields);
-                session()->flash('error', "Los siguientes campos no pueden estar vacíos: {$missingFieldsStr}");
-                $this->dispatch('mostrarAlerta', $missingFieldsStr);
-                return;
-            }
-
-            $resultados = [];
-            $client = new Client();
-            Log::info($camposConValores);
-
-            foreach ($camposConValores as $rutaPdf => $reemplazos) {
-                $json_data = json_encode([$rutaPdf => $reemplazos]);
-                Log::info("Enviando datos a la API:", ['data' => $json_data]);
-
-                try {
-                    // Enviar la solicitud POST al endpoint Flask
-                    $response = $client->post('http://127.0.0.1:5000/replace-text', [
-                        'headers' => ['Content-Type' => 'application/json'],
-                        'body' => $json_data,
-                        'timeout' => 300, // Tiempo de espera más largo
-                        'connect_timeout' => 300, // Tiempo de espera de conexión más largo
-                    ]);
-
-                    // Procesar la respuesta del servidor Flask
-                    $responseBody = json_decode($response->getBody(), true);
-
-                    if ($response->getStatusCode() === 200) {
-                        // Capturar el ID único generado por Flask
-                        $uniqueId = $responseBody['unique_id'] ?? 'N/A';
-
-                        // Construir la ruta completa del archivo PDF
-                        $filePath = "C:\\laragon\\www\\ProyectoMaestro\\public\\storage\\public\\pdf\\{$uniqueId}.pdf";
-
-                        // Registrar en el log la ruta completa
-                        Log::info('Documento procesado exitosamente con la ruta:', ['file_path' => $filePath]);
-
-                        // Guardar la ruta del archivo PDF procesado en los resultados
-                        $resultados[$filePath] = $uniqueId;
-                    } else {
-                        session()->flash('error', 'Hubo un problema al procesar el documento.');
-                    }
-                } catch (\Exception $e) {
-                    // Manejar errores de la solicitud
-                    session()->flash('error', 'Error al conectarse con el servicio Flask: ' . $e->getMessage());
-                }
-            }
-
-            // Crear un archivo ZIP para los PDFs generados
-            $zipFilePath = "C:\\laragon\\www\\ProyectoMaestro\\public\\storage\\public\\pdf\\archivos_generados.zip";
-            $zip = new \ZipArchive();
-            if ($zip->open($zipFilePath, \ZipArchive::CREATE) === TRUE) {
-                $totalArchivos = count($resultados);
-                $i = 1;
-                foreach ($resultados as $filePath => $uniqueId) {
-                    if (file_exists($filePath)) {
-                        Log::info("Archivo {$i} de {$totalArchivos} agregado al ZIP:", ['file_path' => $filePath]);
-                        $zip->addFile($filePath, basename($filePath));
-                        $i++;
-                    }
-                }
-                $zip->close();
-            } else {
-                session()->flash('error', 'No se pudo crear el archivo ZIP.');
-                return;
-            }
-
-            // Descargar el archivo ZIP
-            return response()->download($zipFilePath)->deleteFileAfterSend(true);
-
-            // Limpiar datos del formulario
+            // Mostrar preloader con SweetAlert
+            $this->dispatch('swal:loading', [
+                'title' => 'Procesando...',
+                'text' => 'Por favor espera mientras se procesa la información',
+            ]);
+    
+            // Despachar el trabajo al queue
+            ProcessDocumentJob::dispatch($this->elementoId, $this->formData);
+            Log::info("Trabajo de procesamiento de documentos despachado");
+    
+            // Limpieza y mensajes
             $elemento->llenado = 1;
             $elemento->save();
             $this->resetFormData();
-            session()->flash('message', 'Datos guardados exitosamente.');
-
-            $this->dispatch('msg', 'Registro creado correctamente');
-            $this->dispatch('close-modal', 'modalElemento');
+    
+            session()->flash('message', 'Datos enviados para procesamiento.');
+    
+            // Emitir evento para cerrar el preloader y mostrar mensaje de éxito
+            $this->dispatch('swal:success', [
+                'title' => 'Éxito',
+                'text' => 'Registro enviado para procesamiento',
+                'modalId' => 'modalElemento',
+            ]);
         }
-    }
+    }    
 
     private function resetFormData()
     {

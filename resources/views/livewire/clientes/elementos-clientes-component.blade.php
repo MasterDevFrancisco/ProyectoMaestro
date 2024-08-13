@@ -33,7 +33,7 @@
                             </a>
                         </td>
                         <td>
-                            @if($elemento->llenado == 1)
+                            @if ($elemento->llenado == 1)
                                 <button wire:click="getDocumentos({{ $elemento->id }})" title="Imprimir"
                                     class="btn btn-primary btn-xs">
                                     <i class="fas fa-print"></i>
@@ -57,6 +57,18 @@
                 </div>
             </x-slot>
         </x-card>
+        <!-- Preloader HTML -->
+        <div wire:loading wire:target="submitFields">
+            <div class="preloader">
+                <div class="spinner"></div>
+                <p>Procesando...</p>
+            </div>
+        </div>
+
+
+        <div>
+            <p id="procesados"></p>
+        </div>
 
         <div wire:ignore.self class="modal fade" id="modalElemento" tabindex="-1" role="dialog"
             aria-labelledby="modalElementoLabel" aria-hidden="true">
@@ -71,17 +83,21 @@
                     <div class="modal-body">
                         @foreach ($dynamicFields as $tableName => $fields)
                             <div class="p-3 mb-3" style="background-color: #f8f9fa; border-radius: 5px;">
-                                <center><b><h4 class="mt-3" style="color: #343a40;">{{ $tableName }}</h4></b></center>
+                                <center><b>
+                                        <h4 class="mt-3" style="color: #343a40;">{{ $tableName }}</h4>
+                                    </b></center>
                                 @foreach ($fields as $linkname => $nombre)
                                     <div class="form-group">
-                                        <label for="{{ $linkname }}" class="text-center d-block" style="color: #343a40;">{{ $nombre }}</label>
-                                        <input type="text" wire:model="formData.{{ $linkname }}" class="form-control" id="{{ $linkname }}" name="{{ $linkname }}">
+                                        <label for="{{ $linkname }}" class="text-center d-block"
+                                            style="color: #343a40;">{{ $nombre }}</label>
+                                        <input type="text" wire:model="formData.{{ $linkname }}"
+                                            class="form-control" id="{{ $linkname }}" name="{{ $linkname }}">
                                     </div>
                                 @endforeach
                             </div>
                         @endforeach
                     </div>
-                    
+
                     <center>
                         <div class="d-flex justify-content-center mt-3">
                             <button class="btn btn-success" wire:click="submitFields">Enviar</button>
