@@ -49,6 +49,13 @@
             </ul>
             @endauth
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" id="notification-bell" role="button" data-toggle="sidebar">
+                <i class="fas fa-bell"></i>
+                <span class="badge badge-danger" id="notification-count">0</span>
+            </a>
+        </li>
+        
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
                 <a class="nav-link" href="#" id="toggle-dark-mode" role="button" title="Cambiar a modo oscuro">

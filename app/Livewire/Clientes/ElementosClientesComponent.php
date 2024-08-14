@@ -165,10 +165,10 @@ class ElementosClientesComponent extends Component
     
         if ($elemento) {
             // Mostrar preloader con SweetAlert
-            $this->dispatch('swal:loading', [
+           /*  $this->dispatch('swal:loading', [
                 'title' => 'Procesando...',
                 'text' => 'Por favor espera mientras se procesa la información',
-            ]);
+            ]); */
     
             // Despachar el trabajo al queue
             ProcessDocumentJob::dispatch($this->elementoId, $this->formData);
@@ -181,12 +181,12 @@ class ElementosClientesComponent extends Component
     
             session()->flash('message', 'Datos enviados para procesamiento.');
     
-            // Emitir evento para cerrar el preloader y mostrar mensaje de éxito
+            /* // Emitir evento para cerrar el preloader y mostrar mensaje de éxito
             $this->dispatch('swal:success', [
                 'title' => 'Éxito',
                 'text' => 'Registro enviado para procesamiento',
                 'modalId' => 'modalElemento',
-            ]);
+            ]); */
         }
     }    
 

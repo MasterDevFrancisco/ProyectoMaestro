@@ -57,19 +57,7 @@
                 </div>
             </x-slot>
         </x-card>
-        <!-- Preloader HTML -->
-        <div wire:loading wire:target="submitFields">
-            <div class="preloader">
-                <div class="spinner"></div>
-                <p>Procesando...</p>
-            </div>
-        </div>
-
-
-        <div>
-            <p id="procesados"></p>
-        </div>
-
+       
         <div wire:ignore.self class="modal fade" id="modalElemento" tabindex="-1" role="dialog"
             aria-labelledby="modalElementoLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">

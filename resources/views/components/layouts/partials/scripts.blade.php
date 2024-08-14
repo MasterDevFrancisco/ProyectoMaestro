@@ -26,8 +26,6 @@
         $('#modalFormato').modal('hide');
         $('#viewDocumentModal').modal('hide');
     });
-
-   
 </script>
 
 
@@ -281,7 +279,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.draggable-field').forEach(button => {
             button.addEventListener('dblclick', function(event) {
-                event.preventDefault();  // Evitar el comportamiento predeterminado del botón
+                event.preventDefault(); // Evitar el comportamiento predeterminado del botón
                 const type = this.dataset.type;
                 addField(type, type);
             });
@@ -295,14 +293,23 @@
 </script>
 
 <script>
-   document.addEventListener('DOMContentLoaded', function () {
-    Livewire.on('mostrarAlerta', missingFields => {
-        Swal.fire({
-            text: 'Campos faltantes : ' + missingFields,
-            icon: 'error',
-            title: 'Error',
+    document.addEventListener('DOMContentLoaded', function() {
+        Livewire.on('mostrarAlerta', missingFields => {
+            Swal.fire({
+                text: 'Campos faltantes : ' + missingFields,
+                icon: 'error',
+                title: 'Error',
+            });
         });
     });
-});
+</script>
 
+<script>
+    document.getElementById('notification-bell').addEventListener('click', function() {
+        document.getElementById('notification-sidebar').classList.toggle('open');
+    });
+
+    function closeSidebar() {
+        document.getElementById('notification-sidebar').classList.remove('open');
+    }
 </script>

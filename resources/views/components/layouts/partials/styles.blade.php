@@ -134,8 +134,34 @@
     .custom-navbar .dropdown-item:hover {
         color: #cccccc !important;
     }
-    .transparent-bg {
-    background-color: transparent;
-}
 
+    .transparent-bg {
+        background-color: transparent;
+    }
+</style>
+
+<style>
+    .notification-sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 100%;
+        background-color: #f4f4f4;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+    }
+
+    .notification-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+    }
 </style>

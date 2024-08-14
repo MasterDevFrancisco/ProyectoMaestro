@@ -14,6 +14,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\ZipCreatedNotification;
+use Illuminate\Support\Facades\Notification;
 use ZipArchive;
 
 class ProcessDocumentJob implements ShouldQueue
@@ -129,7 +131,9 @@ class ProcessDocumentJob implements ShouldQueue
                 Log::error('No se pudo crear el archivo ZIP.');
                 return;
             }
-
+            $user = auth()->user(); // O cualquier otro usuario al que quieras notificar
+            Notification::send($user, new ZipCreatedNotification($zipFilePath));
+        
             // Registrar éxito y finalizar
             Log::info('Archivo ZIP creado exitosamente en la ruta:', ['zip_file_path' => $zipFilePath]);
         } else {
