@@ -7,6 +7,7 @@ use App\Models\Campos;
 use App\Models\Data;
 use App\Models\Elementos;
 use App\Models\Tablas;
+use App\Models\User;
 use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,15 +25,18 @@ class ProcessDocumentJob implements ShouldQueue
 
     protected $elementoId;
     protected $formData;
+    protected $userId;
 
-    public function __construct($elementoId, $formData)
+    public function __construct($elementoId, $formData, $userId)
     {
         $this->elementoId = $elementoId;
         $this->formData = $formData;
+        $this->userId = $userId;
     }
 
     public function handle(): void
     {
+        $user = User::find($this->userId);
         $elemento = $this->loadElemento($this->elementoId);
         Log::info($elemento);
         if ($elemento) {
@@ -131,7 +135,7 @@ class ProcessDocumentJob implements ShouldQueue
                 Log::error('No se pudo crear el archivo ZIP.');
                 return;
             }
-            $user = auth()->user(); // O cualquier otro usuario al que quieras notificar
+    
             Notification::send($user, new ZipCreatedNotification($zipFilePath));
         
             // Registrar éxito y finalizar

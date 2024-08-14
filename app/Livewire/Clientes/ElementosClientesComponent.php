@@ -171,7 +171,7 @@ class ElementosClientesComponent extends Component
             ]); */
     
             // Despachar el trabajo al queue
-            ProcessDocumentJob::dispatch($this->elementoId, $this->formData);
+            ProcessDocumentJob::dispatch($this->elementoId, $this->formData,auth()->id());
             Log::info("Trabajo de procesamiento de documentos despachado");
     
             // Limpieza y mensajes
