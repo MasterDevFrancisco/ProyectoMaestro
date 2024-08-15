@@ -152,16 +152,69 @@
         transform: translateX(100%);
         transition: transform 0.3s ease;
         z-index: 1000;
+        overflow-y: auto;
+        /* Permite el desplazamiento si hay muchas notificaciones */
     }
 
     .notification-sidebar.open {
         transform: translateX(0);
     }
 
-    .close-btn {
+    
+
+    #notification-list {
+        padding: 20px;
+    }
+
+    .notification-card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .notification-card .notification-message {
+        margin: 0 0 10px;
+        color: black;
+    }
+
+    .notification-card .notification-footer {
+        text-align: center;
+    }
+
+    .notification-close {
+        position: absolute;
+        top: 1px;
+        right: 1px;
         background: none;
         border: none;
-        font-size: 24px;
+        font-size: 35px;
+        color: #888;
         cursor: pointer;
+        z-index: 1;
+    }
+
+    .notification-close:hover {
+        color: #ff0000;
+    }
+
+    .notification-download {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .notification-download:hover {
+        background-color: #0056b3;
+    }
+    .notification-header{
+        color: black;
+        font-size: 12px;
     }
 </style>

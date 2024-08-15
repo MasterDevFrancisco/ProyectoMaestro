@@ -303,13 +303,36 @@
         });
     });
 </script>
-
 <script>
+    function closeSidebar() {
+        document.getElementById('notification-sidebar').classList.remove('open');
+    }
+
+    function removeNotification(button, event) {
+        event.stopPropagation();  // Prevent the click from propagating to the document
+        const notificationCard = button.closest('.notification-card');
+        if (notificationCard) {
+            notificationCard.remove();
+        }
+    }
+
+    function handleClickOutside(event) {
+        const sidebar = document.getElementById('notification-sidebar');
+        const bell = document.getElementById('notification-bell');
+        
+        // Check if the click is inside the sidebar or on the bell button
+        const clickedInsideSidebar = sidebar.contains(event.target);
+        const clickedOnBellButton = event.target === bell;
+
+        if (sidebar.classList.contains('open') && !clickedInsideSidebar && !clickedOnBellButton) {
+            closeSidebar();
+        }
+    }
+
     document.getElementById('notification-bell').addEventListener('click', function() {
         document.getElementById('notification-sidebar').classList.toggle('open');
     });
 
-    function closeSidebar() {
-        document.getElementById('notification-sidebar').classList.remove('open');
-    }
+    // Add event listener to the document to detect clicks outside the sidebar
+    document.addEventListener('click', handleClickOutside);
 </script>

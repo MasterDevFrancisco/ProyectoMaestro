@@ -24,6 +24,7 @@ class ZipCreatedNotification extends Notification
         return [
             'message' => 'Archivo ZIP creado exitosamente.',
             'file_path' => $this->zipFilePath,
+            'created_at' => now()->format('Y-m-d H:i:s'), // Formatea la fecha y hora según sea necesario
         ];
     }
 }

@@ -41,11 +41,10 @@
             <!-- /.sidebar -->
 
             <div id="notification-sidebar" class="notification-sidebar">
-                <button class="close-btn" onclick="closeSidebar()">&times;</button>
+     
                 <div id="notification-list">
                     <!-- Notifications will be loaded here -->
                     @livewire('notifications')
-
                 </div>
             </div>
             
