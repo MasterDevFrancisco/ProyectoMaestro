@@ -1,5 +1,4 @@
 <div>
-    <br>
     @foreach ($notifications as $notification)
         <div class="notification-card">
             <button class="notification-close" onclick="removeNotification(this, event)">&times;</button>
