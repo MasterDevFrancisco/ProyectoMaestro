@@ -336,3 +336,18 @@
     // Add event listener to the document to detect clicks outside the sidebar
     document.addEventListener('click', handleClickOutside);
 </script>
+
+<script>
+    document.addEventListener('closeModal', function () {
+        $('#modalElemento').modal('hide');
+    });
+
+    document.addEventListener('showSuccessAlert', function () {
+        Swal.fire({
+            title: 'Elemento en proceso',
+            text: 'Su elemento está siendo procesado, esté al pendiente de las notificaciones para descargarlo.',
+            icon: 'success',
+            confirmButtonText: 'Aceptar'
+        });
+    });
+</script>

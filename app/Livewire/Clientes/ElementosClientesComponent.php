@@ -162,33 +162,24 @@ class ElementosClientesComponent extends Component
     public function submitFields()
     {
         $elemento = $this->loadElemento($this->elementoId);
-    
+
         if ($elemento) {
-            // Mostrar preloader con SweetAlert
-           /*  $this->dispatch('swal:loading', [
-                'title' => 'Procesando...',
-                'text' => 'Por favor espera mientras se procesa la información',
-            ]); */
-    
             // Despachar el trabajo al queue
-            ProcessDocumentJob::dispatch($this->elementoId, $this->formData,auth()->id());
+            ProcessDocumentJob::dispatch($this->elementoId, $this->formData, auth()->id());
             Log::info("Trabajo de procesamiento de documentos despachado");
-    
+
             // Limpieza y mensajes
             $elemento->llenado = 1;
             $elemento->save();
             $this->resetFormData();
-    
-            session()->flash('message', 'Datos enviados para procesamiento.');
-    
-            /* // Emitir evento para cerrar el preloader y mostrar mensaje de éxito
-            $this->dispatch('swal:success', [
-                'title' => 'Éxito',
-                'text' => 'Registro enviado para procesamiento',
-                'modalId' => 'modalElemento',
-            ]); */
+
+            // Emitir el evento para cerrar el modal
+            $this->dispatch('closeModal');
+            $this->dispatch('showSuccessAlert');
         }
-    }    
+    }
+
+
 
     private function resetFormData()
     {
