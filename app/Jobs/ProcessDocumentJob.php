@@ -17,6 +17,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\ZipCreatedNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
 use ZipArchive;
 
 class ProcessDocumentJob implements ShouldQueue
@@ -90,6 +92,15 @@ class ProcessDocumentJob implements ShouldQueue
             $resultados = [];
             $client = new Client();
 
+            // Generar un UUID único
+            $uuid = Str::uuid()->toString();
+
+            // Crear la carpeta con el UUID
+            $carpetaPath = public_path("storage/public/pdf/{$uuid}");
+            if (!File::exists($carpetaPath)) {
+                File::makeDirectory($carpetaPath, 0755, true);
+            }
+
             // Enviar datos a la API y procesar la respuesta
             foreach ($camposConValores as $rutaPdf => $reemplazos) {
                 $json_data = json_encode([$rutaPdf => $reemplazos]);
@@ -99,6 +110,7 @@ class ProcessDocumentJob implements ShouldQueue
                     $response = $client->post('http://127.0.0.1:5000/replace-text', [
                         'headers' => ['Content-Type' => 'application/json'],
                         'body' => $json_data,
+                        'query' => ['uuid' => $uuid], // Enviar UUID como parámetro de consulta
                         'timeout' => 300,
                         'connect_timeout' => 300,
                     ]);
@@ -106,10 +118,10 @@ class ProcessDocumentJob implements ShouldQueue
                     $responseBody = json_decode($response->getBody(), true);
 
                     if ($response->getStatusCode() === 200) {
-                        $uniqueId = $responseBody['unique_id'] ?? 'N/A';
-                        $filePath = "C:\\laragon\\www\\ProyectoMaestro\\public\\storage\\public\\pdf\\{$uniqueId}.pdf";
+                        $outputPdf = $responseBody['unique_id'] ?? 'N/A'; // Asegúrate de que 'unique_id' esté en la respuesta
+                        $filePath = "{$carpetaPath}/{$outputPdf}.pdf"; // Asumiendo que el PDF tiene el nombre igual al UUID
                         Log::info('Documento procesado exitosamente con la ruta:', ['file_path' => $filePath]);
-                        $resultados[$filePath] = $uniqueId;
+                        $resultados[$filePath] = $outputPdf;
                     } else {
                         Log::error('Hubo un problema al procesar el documento.');
                     }
@@ -120,14 +132,17 @@ class ProcessDocumentJob implements ShouldQueue
 
             // Crear un archivo ZIP con los PDFs generados usando el nombre del elemento
             $nombreZip = str_replace(' ', '_', $elemento->nombre) . '.zip';
-            $zipFilePath = public_path("storage/public/pdf/{$nombreZip}");
-            Log::info($zipFilePath);
+            $zipFilePath = "{$carpetaPath}/{$nombreZip}";
+
+            // Aquí agregarías la lógica para crear el archivo ZIP y almacenarlo en $zipFilePath
+
+            Log::info("Archivo ZIP creado en: {$zipFilePath}");
 
             $zip = new ZipArchive();
             if ($zip->open($zipFilePath, ZipArchive::CREATE) === TRUE) {
                 $totalArchivos = count($resultados);
                 $i = 1;
-                foreach ($resultados as $filePath => $uniqueId) {
+                foreach ($resultados as $filePath => $outputPdf) {
                     if (file_exists($filePath)) {
                         Log::info("Archivo {$i} de {$totalArchivos} agregado al ZIP:", ['file_path' => $filePath]);
                         $zip->addFile($filePath, basename($filePath));
@@ -141,7 +156,7 @@ class ProcessDocumentJob implements ShouldQueue
             }
 
             // Convertir la ruta del ZIP en una URL accesible
-            $zipUrl = asset("storage/public/pdf/{$nombreZip}");
+            $zipUrl = asset("storage/public/pdf/{$uuid}/{$nombreZip}");
 
             // Enviar la notificación con la URL del ZIP
             Notification::send($user, new ZipCreatedNotification($zipUrl));
@@ -152,6 +167,7 @@ class ProcessDocumentJob implements ShouldQueue
             Log::error("No se encontró el elemento con ID: {$this->elementoId}");
         }
     }
+
 
 
     protected function loadElemento($elementoId)
