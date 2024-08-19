@@ -133,7 +133,8 @@ class ProcessDocumentJob implements ShouldQueue
             // Crear un archivo ZIP con los PDFs generados usando el nombre del elemento
             $nombreZip = str_replace(' ', '_', $elemento->nombre) . '.zip';
             $zipFilePath = "{$carpetaPath}/{$nombreZip}";
-
+            Log::info("Resultados");
+            Log::info($resultados);
             // Aquí agregarías la lógica para crear el archivo ZIP y almacenarlo en $zipFilePath
 
             Log::info("Archivo ZIP creado en: {$zipFilePath}");

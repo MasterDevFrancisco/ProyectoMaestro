@@ -8,10 +8,9 @@ import uuid
 
 app = Flask(__name__)
 
-def process_modified_file(input_docx, output_dir):
-    unique_id = str(uuid.uuid4())
-    output_docx = os.path.join(output_dir, f'{unique_id}.docx')
-    output_pdf = os.path.join(output_dir, f'{unique_id}.pdf')
+def process_modified_file(input_docx, output_dir, base_name):
+    output_docx = os.path.join(output_dir, f'{base_name}.docx')
+    output_pdf = os.path.join(output_dir, f'{base_name}.pdf')
     
     document = DocxDocument(input_docx)
     target_string = "Evaluation Warning: The document was created with Spire.Doc for Python."
@@ -25,8 +24,7 @@ def process_modified_file(input_docx, output_dir):
     os.remove(output_docx)
     os.remove(input_docx)
     
-    return unique_id  # Return the unique ID used in the generated filenames
-
+    return base_name  # Return the base name used in the generated filenames
 
 @app.route('/replace-text', methods=['POST'])
 def replace_text_in_docx():
@@ -43,6 +41,7 @@ def replace_text_in_docx():
         # Recorrer cada documento y sus reemplazos en el JSON
         for doc_path, replacements in json_data.items():
             # Crear la ruta del archivo modificado en el directorio del UUID
+            base_name = os.path.basename(doc_path).replace('.docx', '')
             modified_doc_path = os.path.join(output_dir, "Reemplazado_" + os.path.basename(doc_path))
 
             # Cargar el documento
@@ -57,14 +56,13 @@ def replace_text_in_docx():
             document.SaveToFile(modified_doc_path, FileFormat.Docx2016)
             document.Close()
             
-            # Procesar el archivo modificado y obtener el ID
-            unique_id = process_modified_file(modified_doc_path, output_dir)
+            # Procesar el archivo modificado y obtener el nombre base
+            base_name = process_modified_file(modified_doc_path, output_dir, base_name)
 
-        return jsonify({"message": "Text replacement and processing completed successfully.", "unique_id": unique_id}), 200
+        return jsonify({"message": "Text replacement and processing completed successfully.", "unique_id": base_name}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/valida-campos', methods=['POST'])
 def valida_campos():
