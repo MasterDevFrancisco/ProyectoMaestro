@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire\Catalogos;
 
 use App\Models\RazonSocial;
@@ -7,8 +6,7 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\WithFileUploads; // Importar el trait
-
+use Livewire\WithFileUploads;
 
 #[Title('Razon Social')]
 class RazonSocialComponent extends Component
@@ -53,9 +51,7 @@ class RazonSocialComponent extends Component
 
     public function create()
     {
-        $this->Id = 0;
-        $this->reset(['razon_social', 'nombre_corto', 'selectedColors']);
-        $this->resetErrorBag();
+        $this->resetForm();
         $this->dispatch('open-modal', 'modalRazon');
     }
 
@@ -82,19 +78,18 @@ class RazonSocialComponent extends Component
 
         $this->validate($rules, $messages);
 
+        // Crear y guardar el registro
         $razon = new RazonSocial();
         $razon->nombre_corto = $this->nombre_corto;
         $razon->razon_social = $this->razon_social;
         $razon->eliminado = 0;
-        $razon->colors = json_encode($this->selectedColors); // Guardar colores seleccionados como JSON
+        $razon->colors = json_encode($this->selectedColors);
 
-        // Manejo de archivo logo
+        // Manejo de archivos
         if ($this->logo) {
             $logoPath = $this->logo->store('logos', 'public');
             $razon->logo = $logoPath;
         }
-
-        // Manejo de archivo fondo
         if ($this->fondo) {
             $fondoPath = $this->fondo->store('fondos', 'public');
             $razon->fondo = $fondoPath;
@@ -102,9 +97,13 @@ class RazonSocialComponent extends Component
 
         $razon->save();
         $this->totalRows = RazonSocial::where('eliminado', 0)->count();
+
+        // Cierre del modal y notificación
         $this->dispatch('close-modal', 'modalRazon');
         $this->dispatch('msg', 'Registro creado correctamente');
-        $this->reset(['nombre_corto', 'razon_social', 'selectedColors']);
+
+        // Resetear el formulario
+        $this->resetForm();
     }
 
     public function editar($id)
@@ -113,7 +112,11 @@ class RazonSocialComponent extends Component
         $this->Id = $razon->id;
         $this->razon_social = $razon->razon_social;
         $this->nombre_corto = $razon->nombre_corto;
-        $this->selectedColors = json_decode($razon->colors, true); // Cargar colores seleccionados
+        $this->selectedColors = json_decode($razon->colors, true) ?: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF']; // Cargar colores seleccionados
+
+        // Asegúrate de cargar también los archivos si es necesario
+        $this->logo = $razon->logo;
+        $this->fondo = $razon->fondo;
 
         $this->dispatch('open-modal', 'modalRazon');
     }
@@ -141,29 +144,30 @@ class RazonSocialComponent extends Component
 
         $this->validate($rules, $messages);
 
-
+        // Actualizar el registro
         $razon = RazonSocial::findOrFail($this->Id);
         $razon->razon_social = $this->razon_social;
         $razon->nombre_corto = $this->nombre_corto;
-        $razon->colors = json_encode($this->selectedColors); // Actualizar colores seleccionados
-    
-        // Manejo de archivo logo
+        $razon->colors = json_encode($this->selectedColors);
+
+        // Manejo de archivos
         if ($this->logo) {
             $logoPath = $this->logo->store('logos', 'public');
             $razon->logo = $logoPath;
         }
-    
-        // Manejo de archivo fondo
         if ($this->fondo) {
             $fondoPath = $this->fondo->store('fondos', 'public');
             $razon->fondo = $fondoPath;
         }
-    
+
         $razon->save();
 
+        // Cierre del modal y notificación
         $this->dispatch('close-modal', 'modalRazon');
         $this->dispatch('msg', 'Registro editado correctamente');
-        $this->reset(['nombre_corto', 'razon_social', 'selectedColors', 'logo', 'fondo', 'Id']);
+
+        // Resetear el formulario
+        $this->resetForm();
     }
 
     #[On('destroyRazon')]
@@ -175,5 +179,15 @@ class RazonSocialComponent extends Component
 
         $this->totalRows = RazonSocial::where('eliminado', 0)->count();
         $this->dispatch('msg', 'Registro eliminado correctamente');
+    }
+
+    private function resetForm()
+    {
+        $this->nombre_corto = "";
+        $this->razon_social = "";
+        $this->selectedColors = ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'];
+        $this->logo = null;
+        $this->fondo = null;
+        $this->Id = 0;
     }
 }
