@@ -43,7 +43,14 @@
 <!-- Atrapar los errores -->
 
 <script>
-    
+    function error() {
+        Swal.fire({
+            title: 'Error',
+            text: 'Algo salió mal contacte a programación.',
+            icon: 'error',
+            customClass: 'animated tada'
+        });
+    }
 
     function success(message) {
         Swal.fire({

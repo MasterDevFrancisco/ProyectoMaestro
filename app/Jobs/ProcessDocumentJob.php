@@ -157,7 +157,7 @@ class ProcessDocumentJob implements ShouldQueue
                 return;
             }
 
-            // Convertir la ruta del ZIP en una URL accesible
+            // Convertir la ruta  del ZIP en una URL accesible
             $zipUrl = asset("storage/public/pdf/{$uuid}/{$nombreZip}");
 
             // Enviar la notificación con la URL del ZIP
