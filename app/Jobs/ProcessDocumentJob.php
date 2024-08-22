@@ -19,6 +19,7 @@ use App\Notifications\ZipCreatedNotification;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Livewire\Livewire;
 use ZipArchive;
 
 class ProcessDocumentJob implements ShouldQueue
@@ -162,6 +163,7 @@ class ProcessDocumentJob implements ShouldQueue
             // Enviar la notificación con la URL del ZIP
             Notification::send($user, new ZipCreatedNotification($zipUrl));
 
+            /* Livewire::dispatch('notificationUpdated'); */
             // Registrar éxito y finalizar
             Log::info('Archivo ZIP creado exitosamente en la ruta:', ['zip_file_path' => $zipUrl]);
         } else {

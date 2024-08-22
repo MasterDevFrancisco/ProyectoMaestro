@@ -52,7 +52,9 @@
         <li class="nav-item">
             <a class="nav-link" href="#" id="notification-bell" role="button" data-toggle="sidebar">
                 <i class="fas fa-bell"></i>
-                <span class="badge badge-danger" id="notification-count">0</span>
+                <span class="badge badge-danger" id="notification-count">
+                    @livewire('notification-count') <!-- Muestra el conteo de notificaciones -->
+                </span>
             </a>
         </li>
         
