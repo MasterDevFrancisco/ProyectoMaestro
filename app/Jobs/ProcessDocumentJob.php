@@ -170,9 +170,6 @@ class ProcessDocumentJob implements ShouldQueue
             Log::error("No se encontró el elemento con ID: {$this->elementoId}");
         }
     }
-
-
-
     protected function loadElemento($elementoId)
     {
 

@@ -309,7 +309,7 @@
     }
 
     function removeNotification(button, event) {
-        event.stopPropagation();  // Prevent the click from propagating to the document
+        event.stopPropagation(); // Prevent the click from propagating to the document
         const notificationCard = button.closest('.notification-card');
         if (notificationCard) {
             notificationCard.remove();
@@ -319,7 +319,7 @@
     function handleClickOutside(event) {
         const sidebar = document.getElementById('notification-sidebar');
         const bell = document.getElementById('notification-bell');
-        
+
         // Check if the click is inside the sidebar or on the bell button
         const clickedInsideSidebar = sidebar.contains(event.target);
         const clickedOnBellButton = event.target === bell;
@@ -338,11 +338,11 @@
 </script>
 
 <script>
-    document.addEventListener('closeModal', function () {
+    document.addEventListener('closeModal', function() {
         $('#modalElemento').modal('hide');
     });
 
-    document.addEventListener('showSuccessAlert', function () {
+    document.addEventListener('showSuccessAlert', function() {
         Swal.fire({
             title: 'Elemento en proceso',
             text: 'Su elemento está siendo procesado, esté al pendiente de las notificaciones para descargarlo.',
@@ -351,3 +351,5 @@
         });
     });
 </script>
+
+<script src="https://jscolor.com/release/2.0/jscolor.js"></script>

@@ -16,9 +16,13 @@ return new class extends Migration
             $table->string('razon_social');
             $table->string('nombre_corto');
             $table->integer('eliminado');
+            $table->json('colors')->nullable(); // Añadido para almacenar los colores seleccionados
+            $table->string('logo')->nullable(); // Añadido para almacenar la ruta del logo
+            $table->string('fondo')->nullable(); // Añadido para almacenar la ruta del fondo
             $table->timestamps();
         });
     }
+    
 
     /**
      * Reverse the migrations.
