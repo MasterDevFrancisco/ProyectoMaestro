@@ -6,7 +6,7 @@
     <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <!-- Visible para todos los usuarios autenticados -->
-            <li class="nav-item">
+            <li class="nav-item has-treeview">
                 <a href="{{ route('inicio') }}" class="nav-link {{ request()->routeIs('inicio') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-store"></i>
                     <p>Inicio</p>

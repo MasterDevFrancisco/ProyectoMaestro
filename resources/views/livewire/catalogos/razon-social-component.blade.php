@@ -1,8 +1,8 @@
-<div class="scroll-container">
+<div class="scroll-container ">
     @role('admin')
         <x-card>
-            <x-slot:cardTools>
-                <div class="d-flex justify-content-between align-items-center mb-3">
+            <x-slot:cardTools >
+                <div class="d-flex justify-content-between align-items-center mb-3 ">
                     <div class="d-flex justify-content-center flex-grow-1">
                         <input type="text" wire:model.live='search' class="form-control"
                             placeholder="Razon Social / Nombre Corto" style="width: 250px;">
@@ -15,7 +15,7 @@
             </x-slot>
 
             <x-table>
-                <x-slot:thead>
+                <x-slot:thead >
                     <th>ID</th>
                     <th>Razon Social</th>
                     <th>Nombre Corto</th>

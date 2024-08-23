@@ -72,33 +72,7 @@
     });
 </script>
 
-{{-- Modo nocturno --}}
 
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        const toggleDarkMode = document.getElementById('toggle-dark-mode');
-        const darkModeIcon = document.getElementById('dark-mode-icon');
-
-        // Check the saved preference and apply it
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.body.classList.toggle('dark-mode', savedTheme === 'dark');
-            darkModeIcon.classList.toggle('fa-moon', savedTheme === 'light');
-            darkModeIcon.classList.toggle('fa-sun', savedTheme === 'dark');
-            toggleDarkMode.title = savedTheme === 'dark' ? 'Cambiar a modo día' : 'Cambiar a modo oscuro';
-        }
-
-        // Toggle dark mode and save preference
-        toggleDarkMode.addEventListener('click', () => {
-            const isDarkMode = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-
-            darkModeIcon.classList.toggle('fa-moon', !isDarkMode);
-            darkModeIcon.classList.toggle('fa-sun', isDarkMode);
-            toggleDarkMode.title = isDarkMode ? 'Cambiar a modo día' : 'Cambiar a modo oscuro';
-        });
-    });
-</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

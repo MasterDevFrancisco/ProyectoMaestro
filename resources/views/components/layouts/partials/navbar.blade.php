@@ -59,11 +59,7 @@
         </li>
         
         <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="#" id="toggle-dark-mode" role="button" title="Cambiar a modo oscuro">
-                    <i class="fas fa-moon" id="dark-mode-icon"></i>
-                </a>
-            </li>
+         
             <li class="nav-item">
                 <a class="nav-link" data-widget="fullscreen" href="#" role="button" title="Pantalla completa">
                     <i class="fas fa-expand-arrows-alt"></i>

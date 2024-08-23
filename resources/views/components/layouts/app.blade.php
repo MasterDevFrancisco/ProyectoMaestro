@@ -15,7 +15,7 @@
     
 </head>
 
-<body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
     <div class="wrapper">
 
         <!-- Preloader -->
@@ -53,7 +53,7 @@
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
-            @include('components.layouts.partials.conten-header')
+           {{--  @include('components.layouts.partials.conten-header') --}}
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
