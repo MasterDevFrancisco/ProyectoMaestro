@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire\Catalogos;
 
 use App\Models\RazonSocial;
@@ -23,7 +24,13 @@ class RazonSocialComponent extends Component
     public $Id = 0;
 
     // Propiedades para los colores seleccionados
-    public $selectedColors = ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF']; // Inicializa con colores blancos
+    public $selectedColors = [
+        'iconos' => '#FFFFFF',
+        'colecciones' => '#FFFFFF',
+        'seleccion' => '#FFFFFF',
+        'encabezados' => '#FFFFFF',
+        'tablas' => '#FFFFFF'
+    ];
 
     public function render()
     {
@@ -107,68 +114,83 @@ class RazonSocialComponent extends Component
     }
 
     public function editar($id)
-    {
-        $razon = RazonSocial::findOrFail($id);
-        $this->Id = $razon->id;
-        $this->razon_social = $razon->razon_social;
-        $this->nombre_corto = $razon->nombre_corto;
-        $this->selectedColors = json_decode($razon->colors, true) ?: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF']; // Cargar colores seleccionados
+{
+    $razon = RazonSocial::findOrFail($id);
+    $this->Id = $razon->id;
+    $this->razon_social = $razon->razon_social;
+    $this->nombre_corto = $razon->nombre_corto;
 
-        // Asegúrate de cargar también los archivos si es necesario
-        $this->logo = $razon->logo;
-        $this->fondo = $razon->fondo;
+    // Cargar los colores desde la base de datos
+    $colors = json_decode($razon->colors, true);
+    $this->selectedColors = array_merge([
+        'iconos' => '#FFFFFF',
+        'colecciones' => '#FFFFFF',
+        'seleccion' => '#FFFFFF',
+        'encabezados' => '#FFFFFF',
+        'tablas' => '#FFFFFF'
+    ], $colors ?? []);
 
-        $this->dispatch('open-modal', 'modalRazon');
+    // Cargar la ruta de los archivos como datos pero no asignar a las propiedades de archivo
+    $this->logoPath = $razon->logo;
+    $this->fondoPath = $razon->fondo;
+
+    $this->dispatch('open-modal', 'modalRazon');
+}
+
+public function update()
+{
+    $rules = [
+        'nombre_corto' => 'required|max:255|unique:razon_socials,nombre_corto,' . $this->Id,
+        'razon_social' => 'required|max:255|unique:razon_socials,razon_social,' . $this->Id,
+        'selectedColors' => 'array|max:5',
+        'selectedColors.*' => 'required|regex:/^#[0-9A-Fa-f]{6}$/'
+    ];
+
+    $messages = [
+        'nombre_corto.required' => 'El nombre es requerido',
+        'nombre_corto.max' => 'El nombre no puede exceder los 255 caracteres',
+        'nombre_corto.unique' => 'Esta razón social ya existe',
+        'razon_social.required' => 'La razón social es requerida',
+        'razon_social.max' => 'La razón social no puede exceder los 255 caracteres',
+        'razon_social.unique' => 'Esta razón social ya existe',
+        'selectedColors.array' => 'Los colores seleccionados deben ser un arreglo',
+        'selectedColors.max' => 'Puedes seleccionar hasta 5 colores',
+        'selectedColors.*.regex' => 'Uno o más colores no son válidos'
+    ];
+
+    $this->validate($rules, $messages);
+
+    // Actualizar el registro
+    $razon = RazonSocial::findOrFail($this->Id);
+    $razon->razon_social = $this->razon_social;
+    $razon->nombre_corto = $this->nombre_corto;
+    $razon->colors = json_encode($this->selectedColors);
+
+    // Manejo de archivos
+    if ($this->logo instanceof \Livewire\TemporaryUploadedFile) {
+        $logoPath = $this->logo->store('logos', 'public');
+        $razon->logo = $logoPath;
+    } elseif (isset($this->logoPath)) {
+        $razon->logo = $this->logoPath; // Mantener el archivo existente si no se carga uno nuevo
     }
 
-    public function update()
-    {
-        $rules = [
-            'nombre_corto' => 'required|max:255|unique:razon_socials,nombre_corto,' . $this->Id,
-            'razon_social' => 'required|max:255|unique:razon_socials,razon_social,' . $this->Id,
-            'selectedColors' => 'array|max:5',
-            'selectedColors.*' => 'required|regex:/^#[0-9A-Fa-f]{6}$/'
-        ];
-
-        $messages = [
-            'nombre_corto.required' => 'El nombre es requerido',
-            'nombre_corto.max' => 'El nombre no puede exceder los 255 caracteres',
-            'nombre_corto.unique' => 'Esta razón social ya existe',
-            'razon_social.required' => 'La razón social es requerida',
-            'razon_social.max' => 'La razón social no puede exceder los 255 caracteres',
-            'razon_social.unique' => 'Esta razón social ya existe',
-            'selectedColors.array' => 'Los colores seleccionados deben ser un arreglo',
-            'selectedColors.max' => 'Puedes seleccionar hasta 5 colores',
-            'selectedColors.*.regex' => 'Uno o más colores no son válidos'
-        ];
-
-        $this->validate($rules, $messages);
-
-        // Actualizar el registro
-        $razon = RazonSocial::findOrFail($this->Id);
-        $razon->razon_social = $this->razon_social;
-        $razon->nombre_corto = $this->nombre_corto;
-        $razon->colors = json_encode($this->selectedColors);
-
-        // Manejo de archivos
-        if ($this->logo) {
-            $logoPath = $this->logo->store('logos', 'public');
-            $razon->logo = $logoPath;
-        }
-        if ($this->fondo) {
-            $fondoPath = $this->fondo->store('fondos', 'public');
-            $razon->fondo = $fondoPath;
-        }
-
-        $razon->save();
-
-        // Cierre del modal y notificación
-        $this->dispatch('close-modal', 'modalRazon');
-        $this->dispatch('msg', 'Registro editado correctamente');
-
-        // Resetear el formulario
-        $this->resetForm();
+    if ($this->fondo instanceof \Livewire\TemporaryUploadedFile) {
+        $fondoPath = $this->fondo->store('fondos', 'public');
+        $razon->fondo = $fondoPath;
+    } elseif (isset($this->fondoPath)) {
+        $razon->fondo = $this->fondoPath; // Mantener el archivo existente si no se carga uno nuevo
     }
+
+    $razon->save();
+
+    // Cierre del modal y notificación
+    $this->dispatch('close-modal', 'modalRazon');
+    $this->dispatch('msg', 'Registro editado correctamente');
+
+    // Resetear el formulario
+    $this->resetForm();
+}
+
 
     #[On('destroyRazon')]
     public function destroy($id)
@@ -185,7 +207,13 @@ class RazonSocialComponent extends Component
     {
         $this->nombre_corto = "";
         $this->razon_social = "";
-        $this->selectedColors = ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'];
+        $this->selectedColors = [
+            'iconos' => '#FFFFFF',
+            'colecciones' => '#FFFFFF',
+            'seleccion' => '#FFFFFF',
+            'encabezados' => '#FFFFFF',
+            'tablas' => '#FFFFFF'
+        ];
         $this->logo = null;
         $this->fondo = null;
         $this->Id = 0;

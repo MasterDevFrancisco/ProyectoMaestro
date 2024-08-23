@@ -78,31 +78,42 @@
                         <label class="w-100 text-center">Seleccione la paleta de colores</label>
                         <div class="row">
                             <div class="col-12">
-                                <center><h5>Iconos</h5></center>
-                                <input type="text" class="jscolor form-control" wire:model="selectedColors.0"
-                                    value="{{ $selectedColors[0] ?? '#FFFFFF' }}" data-jscolor="{}">
+                                <center>
+                                    <h5>Iconos</h5>
+                                </center>
+                                <input type="text" class="jscolor form-control" wire:model="selectedColors.iconos"
+                                    value="{{ $selectedColors['iconos'] }}" data-jscolor="{}">
                             </div>
                             <div class="col-12 mt-2">
-                                <center><h5>Colecciones</h5></center>
-                                <input type="text" class="jscolor form-control" wire:model="selectedColors.1"
-                                    value="{{ $selectedColors[1] ?? '#FFFFFF' }}" data-jscolor="{}">
+                                <center>
+                                    <h5>Colecciones</h5>
+                                </center>
+                                <input type="text" class="jscolor form-control" wire:model="selectedColors.colecciones"
+                                    value="{{ $selectedColors['colecciones'] }}" data-jscolor="{}">
                             </div>
                             <div class="col-12 mt-2">
-                                <center><h5>Selección</h5></center>
-                                <input type="text" class="jscolor form-control" wire:model="selectedColors.2"
-                                    value="{{ $selectedColors[2] ?? '#FFFFFF' }}" data-jscolor="{}">
+                                <center>
+                                    <h5>Selección</h5>
+                                </center>
+                                <input type="text" class="jscolor form-control" wire:model="selectedColors.seleccion"
+                                    value="{{ $selectedColors['seleccion'] }}" data-jscolor="{}">
                             </div>
                             <div class="col-12 mt-2">
-                                <center><h5>Encabezados</h5></center>
-                                <input type="text" class="jscolor form-control" wire:model="selectedColors.3"
-                                    value="{{ $selectedColors[3] ?? '#FFFFFF' }}" data-jscolor="{}">
+                                <center>
+                                    <h5>Encabezados</h5>
+                                </center>
+                                <input type="text" class="jscolor form-control" wire:model="selectedColors.encabezados"
+                                    value="{{ $selectedColors['encabezados'] }}" data-jscolor="{}">
                             </div>
                             <div class="col-12 mt-2">
-                                <center><h5>Tablas</h5></center>
-                                <input type="text" class="jscolor form-control" wire:model="selectedColors.4"
-                                    value="{{ $selectedColors[4] ?? '#FFFFFF' }}" data-jscolor="{}">
+                                <center>
+                                    <h5>Tablas</h5>
+                                </center>
+                                <input type="text" class="jscolor form-control" wire:model="selectedColors.tablas"
+                                    value="{{ $selectedColors['tablas'] }}" data-jscolor="{}">
                             </div>
                         </div>
+
                         @error('selectedColors')
                             <div class="alert alert-danger w-100 mt-1 p-1 text-center">
                                 {{ $message }}
