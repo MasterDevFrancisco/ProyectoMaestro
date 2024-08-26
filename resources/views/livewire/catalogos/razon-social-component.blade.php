@@ -1,27 +1,28 @@
 <div class="scroll-container ">
     @role('admin')
         <x-card>
-            <x-slot:cardTools >
+            <x-slot:cardTools>
                 <div class="d-flex justify-content-between align-items-center mb-3 ">
                     <div class="d-flex justify-content-center flex-grow-1">
                         <input type="text" wire:model.live='search' class="form-control"
                             placeholder="Razon Social / Nombre Corto" style="width: 250px;">
                     </div>
 
-                    <a href="#" class="btn btn-success ml-3" wire:click='create'>
+                    <a href="#" class="btn btn-edit ml-3" wire:click='create'>
                         <i class="fas fa-plus-circle"></i>
                     </a>
                 </div>
             </x-slot>
 
             <x-table>
-                <x-slot:thead >
+                <x-slot:thead class="custom-header">
                     <th>ID</th>
                     <th>Razon Social</th>
                     <th>Nombre Corto</th>
                     <th width="3%"></th>
                     <th width="3%"></th>
-                </x-slot>
+                </x-slot:thead>
+
                 @php $counter = ($razones->currentPage() - 1) * $razones->perPage() + 1; @endphp <!-- Inicializo el contador con el índice correcto -->
                 @forelse($razones as $razon)
                     <tr>
@@ -30,14 +31,14 @@
                         <td>{{ $razon->nombre_corto }}</td>
                         <td>
                             <a href="#" wire:click='editar({{ $razon->id }})' title="Editar"
-                                class="btn btn-primary btn-xs">
+                                class="btn btn-edit btn-xs">
                                 <i class="fas fa-pen"></i>
                             </a>
                         </td>
                         <td>
                             <a href="#"
                                 wire:click="$dispatch('delete', {id: {{ $razon->id }}, eventName: 'destroyRazon'})"
-                                title="Marcar como eliminado" class="btn btn-danger btn-xs">
+                                title="Eliminar" class="btn btn-delete btn-xs">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </td>

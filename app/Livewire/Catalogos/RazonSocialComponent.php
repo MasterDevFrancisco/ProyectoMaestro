@@ -15,6 +15,7 @@ class RazonSocialComponent extends Component
     use WithPagination, WithFileUploads;
 
     public $totalRows = 0;
+    
     public $paginationTheme = 'bootstrap';
     public $search = '';
     public $logo;

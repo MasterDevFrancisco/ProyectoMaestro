@@ -99,25 +99,6 @@
         color: #006600;
     }
 </style>
-{{-- //Modo nocturno
-<style>
-    /* Estilos para el modo luz */
-    body {
-        background-color: #f8f9fa;
-        /* ejemplo de color de fondo claro */
-        color: #343a40;
-        /* ejemplo de color de texto oscuro */
-    }
-
-    /* Estilos para el modo oscuro */
-    body.dark-mode {
-        background-color: #343a40;
-        /* ejemplo de color de fondo oscuro */
-        color: #f8f9fa;
-        /* ejemplo de color de texto claro */
-    }
-</style>
-{{-- Login --}} 
 
 <style>
     .custom-navbar {
@@ -289,7 +270,7 @@
     /* Estilo cuando una subcategoría está seleccionada o al pasar el ratón */
     .sidebar .nav-treeview .nav-link:hover,
     .sidebar .nav-treeview .nav-link.active {
-        background-color: #96b3a4 !important;
+        background-color: #8AB4A5 !important;
         /* Color de fondo al estar activo o seleccionado */
         color: #fff !important;
         /* Texto blanco para contraste */
@@ -300,7 +281,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #96b3a4 !important;
+        background-color: #8AB4A5 !important;
         /* Mantiene el color deseado */
         text-align: center;
         /* Asegura que cualquier texto se centre también */
@@ -361,5 +342,37 @@
         background-color: #ffffff;
     }
 
+    .custom-header th {
+        background-color: #305679 !important;
+        color: white !important;
+        /* Asegura que el texto sea legible */
+    }
 
+    /* Cambiar color de fondo del encabezado */
+    .table thead.thead-dark th {
+        background-color: #305679 !important;
+        color: white !important;
+        /* Asegurar legibilidad del texto */
+    }
+
+    /* Cambiar color de las filas intercaladas */
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #365679 !important;
+        color: white;
+        /* Asegurar legibilidad del texto */
+    }
+
+    /* Botón de editar */
+    .btn-edit {
+        background-color: #95b421 !important;
+        border-color: #95b421 !important;
+        color: white !important;
+    }
+
+    /* Botón de eliminar */
+    .btn-delete {
+        background-color: #e10b17 !important;
+        border-color: #e10b17 !important;
+        color: white !important;
+    }
 </style>
