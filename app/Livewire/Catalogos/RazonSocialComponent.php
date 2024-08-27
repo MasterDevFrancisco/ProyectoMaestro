@@ -6,6 +6,7 @@ use App\Models\RazonSocial;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 
@@ -15,7 +16,7 @@ class RazonSocialComponent extends Component
     use WithPagination, WithFileUploads;
 
     public $totalRows = 0;
-    
+public $fondoPath,$logoPath;
     public $paginationTheme = 'bootstrap';
     public $search = '';
     public $logo;
@@ -115,82 +116,82 @@ class RazonSocialComponent extends Component
     }
 
     public function editar($id)
-{
-    $razon = RazonSocial::findOrFail($id);
-    $this->Id = $razon->id;
-    $this->razon_social = $razon->razon_social;
-    $this->nombre_corto = $razon->nombre_corto;
+    {
+        $razon = RazonSocial::findOrFail($id);
+        $this->Id = $razon->id;
+        $this->razon_social = $razon->razon_social;
+        $this->nombre_corto = $razon->nombre_corto;
 
-    // Cargar los colores desde la base de datos
-    $colors = json_decode($razon->colors, true);
-    $this->selectedColors = array_merge([
-        'iconos' => '#FFFFFF',
-        'colecciones' => '#FFFFFF',
-        'seleccion' => '#FFFFFF',
-        'encabezados' => '#FFFFFF',
-        'tablas' => '#FFFFFF'
-    ], $colors ?? []);
+        // Cargar los colores desde la base de datos
+        $colors = json_decode($razon->colors, true);
+        $this->selectedColors = array_merge([
+            'iconos' => '#FFFFFF',
+            'colecciones' => '#FFFFFF',
+            'seleccion' => '#FFFFFF',
+            'encabezados' => '#FFFFFF',
+            'tablas' => '#FFFFFF'
+        ], $colors ?? []);
 
-    // Cargar la ruta de los archivos como datos pero no asignar a las propiedades de archivo
-    $this->logoPath = $razon->logo;
-    $this->fondoPath = $razon->fondo;
+        // Asignar las rutas de los archivos existentes para mantenerlos si no se suben nuevos archivos
+        $this->logoPath = $razon->logo;
+        $this->fondoPath = $razon->fondo;
 
-    $this->dispatch('open-modal', 'modalRazon');
-}
-
-public function update()
-{
-    $rules = [
-        'nombre_corto' => 'required|max:255|unique:razon_socials,nombre_corto,' . $this->Id,
-        'razon_social' => 'required|max:255|unique:razon_socials,razon_social,' . $this->Id,
-        'selectedColors' => 'array|max:5',
-        'selectedColors.*' => 'required|regex:/^#[0-9A-Fa-f]{6}$/'
-    ];
-
-    $messages = [
-        'nombre_corto.required' => 'El nombre es requerido',
-        'nombre_corto.max' => 'El nombre no puede exceder los 255 caracteres',
-        'nombre_corto.unique' => 'Esta razón social ya existe',
-        'razon_social.required' => 'La razón social es requerida',
-        'razon_social.max' => 'La razón social no puede exceder los 255 caracteres',
-        'razon_social.unique' => 'Esta razón social ya existe',
-        'selectedColors.array' => 'Los colores seleccionados deben ser un arreglo',
-        'selectedColors.max' => 'Puedes seleccionar hasta 5 colores',
-        'selectedColors.*.regex' => 'Uno o más colores no son válidos'
-    ];
-
-    $this->validate($rules, $messages);
-
-    // Actualizar el registro
-    $razon = RazonSocial::findOrFail($this->Id);
-    $razon->razon_social = $this->razon_social;
-    $razon->nombre_corto = $this->nombre_corto;
-    $razon->colors = json_encode($this->selectedColors);
-
-    // Manejo de archivos
-    if ($this->logo instanceof \Livewire\TemporaryUploadedFile) {
-        $logoPath = $this->logo->store('logos', 'public');
-        $razon->logo = $logoPath;
-    } elseif (isset($this->logoPath)) {
-        $razon->logo = $this->logoPath; // Mantener el archivo existente si no se carga uno nuevo
+        $this->dispatch('open-modal', 'modalRazon');
     }
 
-    if ($this->fondo instanceof \Livewire\TemporaryUploadedFile) {
-        $fondoPath = $this->fondo->store('fondos', 'public');
-        $razon->fondo = $fondoPath;
-    } elseif (isset($this->fondoPath)) {
-        $razon->fondo = $this->fondoPath; // Mantener el archivo existente si no se carga uno nuevo
+    public function update()
+    {
+        $rules = [
+            'nombre_corto' => 'required|max:255|unique:razon_socials,nombre_corto,' . $this->Id,
+            'razon_social' => 'required|max:255|unique:razon_socials,razon_social,' . $this->Id,
+            'selectedColors' => 'array|max:5',
+            'selectedColors.*' => 'required|regex:/^#[0-9A-Fa-f]{6}$/'
+        ];
+
+        $messages = [
+            'nombre_corto.required' => 'El nombre es requerido',
+            'nombre_corto.max' => 'El nombre no puede exceder los 255 caracteres',
+            'nombre_corto.unique' => 'Esta razón social ya existe',
+            'razon_social.required' => 'La razón social es requerida',
+            'razon_social.max' => 'La razón social no puede exceder los 255 caracteres',
+            'razon_social.unique' => 'Esta razón social ya existe',
+            'selectedColors.array' => 'Los colores seleccionados deben ser un arreglo',
+            'selectedColors.max' => 'Puedes seleccionar hasta 5 colores',
+            'selectedColors.*.regex' => 'Uno o más colores no son válidos'
+        ];
+
+        $this->validate($rules, $messages);
+
+        // Actualizar el registro
+        $razon = RazonSocial::findOrFail($this->Id);
+        $razon->razon_social = $this->razon_social;
+        $razon->nombre_corto = $this->nombre_corto;
+        $razon->colors = json_encode($this->selectedColors);
+
+        // Manejo de archivos
+        if ($this->logo instanceof TemporaryUploadedFile) {
+            $logoPath = $this->logo->store('logos', 'public');
+            $razon->logo = $logoPath;
+        } else {
+            $razon->logo = $this->logoPath; // Mantener el archivo existente si no se carga uno nuevo
+        }
+
+        if ($this->fondo instanceof TemporaryUploadedFile) {
+            $fondoPath = $this->fondo->store('fondos', 'public');
+            $razon->fondo = $fondoPath;
+        } else {
+            $razon->fondo = $this->fondoPath; // Mantener el archivo existente si no se carga uno nuevo
+        }
+
+        $razon->save();
+
+        // Cierre del modal y notificación
+        $this->dispatch('close-modal', 'modalRazon');
+        $this->dispatch('msg', 'Registro editado correctamente');
+
+        // Resetear el formulario
+        $this->resetForm();
     }
-
-    $razon->save();
-
-    // Cierre del modal y notificación
-    $this->dispatch('close-modal', 'modalRazon');
-    $this->dispatch('msg', 'Registro editado correctamente');
-
-    // Resetear el formulario
-    $this->resetForm();
-}
 
 
     #[On('destroyRazon')]

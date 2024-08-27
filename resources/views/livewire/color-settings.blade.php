@@ -44,14 +44,14 @@
 
         /* Estilo para las secciones principales del sidebar */
         .sidebar .nav-item.has-treeview>a.nav-link {
-            background-color: {{$colecciones}} !important;
+            background-color: {{ $colecciones }} !important;
             color: #fff !important;
         }
 
         /* Color de fondo al pasar el ratón o estar activo en secciones principales */
         .sidebar .nav-item.has-treeview>a.nav-link:hover,
         .sidebar .nav-item.has-treeview>a.nav-link.active {
-            background-color: {{$seleccionColeccion}} !important;
+            background-color: {{ $seleccionColeccion }} !important;
             color: #fff !important;
         }
 
@@ -67,7 +67,7 @@
         /* Estilo cuando una subcategoría está seleccionada o al pasar el ratón */
         .sidebar .nav-treeview .nav-link:hover,
         .sidebar .nav-treeview .nav-link.active {
-            background-color: {{$seleccion}} !important;
+            background-color: {{ $seleccion }} !important;
             /* Color de fondo al estar activo o seleccionado */
             color: #fff !important;
             /* Texto blanco para contraste */
@@ -78,25 +78,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: {{$encabezados}} !important;
+            background-color: {{ $encabezados }} !important;
             /* Mantiene el color deseado */
             text-align: center;
             /* Asegura que cualquier texto se centre también */
         }
-
-        .brand-link .brand-image {
-            opacity: 0.8;
-            /* Mantiene la opacidad de la imagen */
-            max-width: 100%;
-            /* Ajusta el tamaño si es necesario */
-            height: auto;
-            /* Mantiene la proporción de la imagen */
+        .brand-image {
+            content: url('{{ asset('storage/' . $logo) }}');
+            opacity: 1;
         }
-
-
         /* Estilo para la barra de navegación */
         .main-header.navbar {
-            background-color: {{$encabezados}};
+            background-color: {{ $encabezados }};
             /* Color de fondo */
         }
 
@@ -140,21 +133,21 @@
         }
 
         .custom-header th {
-            background-color: {{$encabezados}} !important;
+            background-color: {{ $encabezados }} !important;
             color: white !important;
             /* Asegura que el texto sea legible */
         }
 
         /* Cambiar color de fondo del encabezado */
         .table thead.thead-dark th {
-            background-color:{{$encabezados}} !important;
+            background-color: {{ $encabezados }} !important;
             color: white !important;
             /* Asegurar legibilidad del texto */
         }
 
         /* Cambiar color de las filas intercaladas */
         .table-striped tbody tr:nth-of-type(odd) {
-            background-color: #365679 !important;
+            background-color: {{ $encabezados }} !important;
             color: white;
             /* Asegurar legibilidad del texto */
         }
@@ -165,16 +158,46 @@
             border-color: #95b421 !important;
             color: white !important;
         }
+
         .btn-success {
             background-color: #95b421 !important;
             border-color: #95b421 !important;
             color: white !important;
         }
+
         /* Botón de eliminar */
         .btn-danger {
             background-color: #e10b17 !important;
             border-color: #e10b17 !important;
             color: white !important;
+        }
+
+        .animation__wobble {
+            width: 300px;
+            /* Ajusta el tamaño según sea necesario */
+            height: 300px;
+            background-image: url({{ asset('storage/' . $logo) }});
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            animation: wobble 1s infinite;
+            /* Preserva la animación que estabas utilizando */
+        }
+
+        .content {
+            background-image: url('{{ asset('storage/' . $fondo) }}');
+            background-size: cover;
+            /* La imagen cubrirá todo el contenedor */
+            background-repeat: no-repeat;
+            /* Evita que la imagen se repita */
+            background-position: center center;
+            /* Centra la imagen */
+            background-attachment: fixed;
+            /* Hace que la imagen permanezca fija al hacer scroll (opcional) */
+            width: 100%;
+            /* Asegura que el contenedor tenga el ancho completo */
+            height: 100vh;
+            /* El contenedor tendrá la altura completa de la ventana */
         }
     </style>
 

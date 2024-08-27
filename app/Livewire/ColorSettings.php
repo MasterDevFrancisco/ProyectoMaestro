@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\RazonSocial;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class ColorSettings extends Component
@@ -10,6 +11,7 @@ class ColorSettings extends Component
     public $iconos, $tablas, $seleccion, $colecciones, $encabezados;
     public $seleccionColeccion;
 
+    public $logo,$fondo;
     public function mount()
     {
         // Obtener el ID de razon_social desde el usuario logueado
@@ -31,6 +33,9 @@ class ColorSettings extends Component
             $this->seleccionColeccion = $this->darkenColor($colors['seleccion'],50);
             $this->colecciones = $colors['colecciones'] ?? '#65e845';
             $this->encabezados = $colors['encabezados'] ?? '#65e845';
+            $this->logo=$razonSocial->logo;
+            Log::info($razonSocial->logo);
+            $this->fondo=$razonSocial->fondo;
         } else {
             // Asignar un color por defecto si no se encuentra la razón social o no existe el campo "colors"
             $this->iconos = '#65e845';

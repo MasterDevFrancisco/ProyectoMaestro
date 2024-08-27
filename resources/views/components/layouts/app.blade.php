@@ -20,8 +20,9 @@
         <livewire:color-settings />
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__wobble" src="dist/img/Logotipo-blanco-CMX-360-2.webp" alt="AdminLTELogo">
+            <div class="animation__wobble"></div>
         </div>
+        
 
         <!-- Navbar -->
         @include('components.layouts.partials.navbar')
@@ -32,7 +33,7 @@
             <!-- Brand Logo -->
             <a href="/inicio" class="brand-link">
                 <img src="dist/img/Logotipo-blanco-CMX-360-2.webp" alt="AdminLTE Logo" class="brand-image "
-                    style="opacity: .8">
+                    style="opacity: 100">
                 {{-- <span class="brand-text font-weight-light">Proyecto Maestro</span> --}}
             </a>
 
