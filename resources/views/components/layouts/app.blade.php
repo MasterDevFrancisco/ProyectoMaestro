@@ -12,15 +12,15 @@
     <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @livewireStyles
-    
+
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
     <div class="wrapper">
-
+        <livewire:color-settings />
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__wobble" src="dist/img/Logotipo-blanco-CMX-360-2.webp" alt="AdminLTELogo" >
+            <img class="animation__wobble" src="dist/img/Logotipo-blanco-CMX-360-2.webp" alt="AdminLTELogo">
         </div>
 
         <!-- Navbar -->
@@ -41,19 +41,19 @@
             <!-- /.sidebar -->
 
             <div id="notification-sidebar" class="notification-sidebar">
-     
+
                 <div id="notification-list">
                     <!-- Notifications will be loaded here -->
                     @livewire('notifications')
                 </div>
             </div>
-            
+
         </aside>
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
-           {{--  @include('components.layouts.partials.conten-header') --}}
+            {{--  @include('components.layouts.partials.conten-header') --}}
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
