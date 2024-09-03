@@ -9,9 +9,9 @@ use Livewire\Component;
 class ColorSettings extends Component
 {
     public $iconos, $tablas, $seleccion, $colecciones, $encabezados;
-    public $seleccionColeccion;
+    public $seleccionColeccion, $tablasClaro;
 
-    public $logo,$fondo;
+    public $logo, $fondo;
     public function mount()
     {
         // Obtener el ID de razon_social desde el usuario logueado
@@ -30,12 +30,16 @@ class ColorSettings extends Component
             $this->iconos = $colors['iconos'] ?? '#65e845'; // Valor por defecto si no existe en el JSON
             $this->tablas = $colors['tablas'] ?? '#65e845';
             $this->seleccion = $colors['seleccion'] ?? '#65e845';
-            $this->seleccionColeccion = $this->darkenColor($colors['seleccion'],50);
+            $this->seleccionColeccion = $this->darkenColor($colors['seleccion'], 50);
+            $this->tablasClaro = isset($colors['encabezados'])
+                ? $this->lightenColor($colors['encabezados'], 40)
+                : '#65e845'; // Color por defecto si no existe
+
             $this->colecciones = $colors['colecciones'] ?? '#65e845';
             $this->encabezados = $colors['encabezados'] ?? '#65e845';
-            $this->logo=$razonSocial->logo;
-            Log::info($razonSocial->logo);
-            $this->fondo=$razonSocial->fondo;
+            $this->logo = $razonSocial->logo;
+            Log::info($this->tablasClaro);
+            $this->fondo = $razonSocial->fondo;
         } else {
             // Asignar un color por defecto si no se encuentra la razón social o no existe el campo "colors"
             $this->iconos = '#65e845';
@@ -59,6 +63,26 @@ class ColorSettings extends Component
         $r = max(0, min(255, $r - ($r * $percent / 100)));
         $g = max(0, min(255, $g - ($g * $percent / 100)));
         $b = max(0, min(255, $b - ($b * $percent / 100)));
+
+        // Convertir de vuelta a un valor hexadecimal y asegurarse de que tenga 2 caracteres
+        $newColor = sprintf("#%02x%02x%02x", $r, $g, $b);
+
+        return $newColor;
+    }
+    function lightenColor($hex, $percent)
+    {
+        // Remover el símbolo '#' si existe
+        $hex = str_replace('#', '', $hex);
+
+        // Convertir los valores hexadecimales a RGB
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        // Calcular el nuevo color, incrementando los valores RGB por el porcentaje especificado
+        $r = min(255, $r + ($r * $percent / 100));
+        $g = min(255, $g + ($g * $percent / 100));
+        $b = min(255, $b + ($b * $percent / 100));
 
         // Convertir de vuelta a un valor hexadecimal y asegurarse de que tenga 2 caracteres
         $newColor = sprintf("#%02x%02x%02x", $r, $g, $b);

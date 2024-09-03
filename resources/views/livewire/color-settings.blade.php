@@ -83,10 +83,13 @@
             text-align: center;
             /* Asegura que cualquier texto se centre también */
         }
+
         .brand-image {
             content: url('{{ asset('storage/' . $logo) }}');
             opacity: 1;
+            filter: brightness(0) invert(1);
         }
+
         /* Estilo para la barra de navegación */
         .main-header.navbar {
             background-color: {{ $encabezados }};
@@ -147,7 +150,7 @@
 
         /* Cambiar color de las filas intercaladas */
         .table-striped tbody tr:nth-of-type(odd) {
-            background-color: {{ $encabezados }} !important;
+            background-color: {{ $tablasClaro }} !important;
             color: white;
             /* Asegurar legibilidad del texto */
         }
