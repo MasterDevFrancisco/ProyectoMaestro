@@ -83,9 +83,6 @@ class FormatosComponent extends Component
         }
     }
 
-
-
-
     private function validaDocumento()
     {
         try {
@@ -184,7 +181,6 @@ class FormatosComponent extends Component
 
         return view('livewire.catalogos.formatos-component', ['formatos' => $formatos]);
     }
-
 
     public function logFileUpload()
     {

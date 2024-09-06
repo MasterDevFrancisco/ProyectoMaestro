@@ -5,7 +5,7 @@ namespace App\Livewire\Home;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Title('Titulo Inicio')]
+#[Title('Inicio')]
 class Inicio extends Component
 {
     public function render()

@@ -27,26 +27,26 @@ class ColorSettings extends Component
             $colors = json_decode($razonSocial->colors, true);
 
             // Asignar los valores a las propiedades
-            $this->iconos = $colors['iconos'] ?? '#65e845'; // Valor por defecto si no existe en el JSON
-            $this->tablas = $colors['tablas'] ?? '#65e845';
-            $this->seleccion = $colors['seleccion'] ?? '#65e845';
+            $this->iconos = $colors['iconos'] ?? '#010E2E'; // Valor por defecto si no existe en el JSON
+            $this->tablas = $colors['tablas'] ?? '#010E2E';
+            $this->seleccion = $colors['seleccion'] ?? '#B8B8B8';
             $this->seleccionColeccion = $this->darkenColor($colors['seleccion'], 50);
             $this->tablasClaro = isset($colors['encabezados'])
                 ? $this->lightenColor($colors['encabezados'], 40)
-                : '#65e845'; // Color por defecto si no existe
+                : '#010E2E'; // Color por defecto si no existe
 
-            $this->colecciones = $colors['colecciones'] ?? '#65e845';
-            $this->encabezados = $colors['encabezados'] ?? '#65e845';
+            $this->colecciones = $colors['colecciones'] ?? '#010E2E';
+            $this->encabezados = $colors['encabezados'] ?? '#010E2E';
             $this->logo = $razonSocial->logo;
             Log::info($this->tablasClaro);
             $this->fondo = $razonSocial->fondo;
         } else {
             // Asignar un color por defecto si no se encuentra la razón social o no existe el campo "colors"
-            $this->iconos = '#65e845';
-            $this->tablas = '#65e845';
-            $this->seleccion = '#65e845';
-            $this->colecciones = '#65e845';
-            $this->encabezados = '#65e845';
+            $this->iconos = '#010E2E';
+            $this->tablas = '#010E2E';
+            $this->seleccion = '#B8B8B8';
+            $this->colecciones = '#010E2E';
+            $this->encabezados = '#010E2E';
         }
     }
     function darkenColor($hex, $percent)

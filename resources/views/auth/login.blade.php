@@ -6,10 +6,10 @@
             <div class="col-md-6">
                 <div class="card shadow-sm">
                     <div class="card-header text-center"
-                        style="background-color: #000000; color: white; border: 2px solid #29a2ff;">
+                        style="background-color: #2A2A2A; color: white; border: 2px solid #2A2A2A;">
                         {{ __('Iniciar Sesión') }}</div>
 
-                    <div class="card-body" style="border: 2px solid #29a2ff; padding: 20px;">
+                    <div class="card-body" style="border: 2px solid #2A2A2A; padding: 20px;">
                         <form method="POST" action="{{ route('login') }}">
                             @csrf
 

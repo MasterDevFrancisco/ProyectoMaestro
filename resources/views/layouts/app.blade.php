@@ -26,7 +26,7 @@
             /* Centrar la imagen */
             background-repeat: no-repeat;
             /* No repetir la imagen */
-            height: 93vh;
+            height: 100vh;
             /* Altura de toda la ventana */
             width: 100%;
         }
@@ -35,26 +35,23 @@
 
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: #000000;">
+        {{-- <nav class="navbar navbar-expand-md navbar-light shadow-sm" style="background-color: #000000;">
             <div class="container">
-                <center><a class="navbar-brand" href="{{ url('/') }}" style="color: #ffffff;">
-                        TothAccess
-                    </a></center>
+                
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
+                    <span class="navbar-toggler-icon">test</span>
                 </button>
 
 
             </div>
         </nav>
-
+ --}}
 
         <main class="background-image">
             @yield('content')
         </main>
-
 
     </div>
 </body>
