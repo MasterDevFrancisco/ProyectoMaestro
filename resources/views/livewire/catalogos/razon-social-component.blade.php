@@ -10,7 +10,7 @@
                             placeholder="Razon Social / Nombre Corto" style="width: 250px;">
                     </div>
 
-                    <a href="#" class="btn btn-edit ml-3" wire:click='create'>
+                    <a href="#" class="btn btn-success ml-3" wire:click='create'>
                         <i class="fas fa-plus-circle"></i>
                     </a>
                 </div>
@@ -33,14 +33,14 @@
                         <td>{{ $razon->nombre_corto }}</td>
                         <td>
                             <a href="#" wire:click='editar({{ $razon->id }})' title="Editar"
-                                class="btn btn-edit btn-xs">
+                                class="btn btn-success btn-xs">
                                 <i class="fas fa-pen"></i>
                             </a>
                         </td>
                         <td>
                             <a href="#"
                                 wire:click="$dispatch('delete', {id: {{ $razon->id }}, eventName: 'destroyRazon'})"
-                                title="Eliminar" class="btn btn-delete btn-xs">
+                                title="Eliminar" class="btn btn-danger btn-xs">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </td>
