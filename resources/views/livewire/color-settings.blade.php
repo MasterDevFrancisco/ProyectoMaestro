@@ -180,6 +180,8 @@
             /* Ajusta el tamaño según sea necesario */
             height: 300px;
             background-image: url({{ asset('storage/' . $logo) }});
+            \Log::info('Logo path: ' . asset('storage/' . $logo));
+
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;

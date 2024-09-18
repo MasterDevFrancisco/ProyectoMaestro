@@ -38,7 +38,7 @@ class ColorSettings extends Component
             $this->colecciones = $colors['colecciones'] ?? '#010E2E';
             $this->encabezados = $colors['encabezados'] ?? '#010E2E';
             $this->logo = $razonSocial->logo;
-            Log::info($this->tablasClaro);
+            Log::info(asset('storage/' . $this->logo));
             $this->fondo = $razonSocial->fondo;
         } else {
             // Asignar un color por defecto si no se encuentra la razón social o no existe el campo "colors"
